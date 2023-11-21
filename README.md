@@ -1,8 +1,8 @@
-# demo-chatbot-python
+# whatsapp-demo-chatbot-python
 
 ![](https://img.shields.io/badge/license-CC%20BY--ND%204.0-green)
 
-- [Документация на русском языке](https://github.com/green-api/demo-chatbot-python/blob/main/README_RU.md).
+- [Документация на русском языке](https://github.com/green-api/whatsapp-demo-chatbot-python/blob/main/README_RU.md).
 
 Simple chatbot created with python based on API service [green-api.com](https://green-api.com/en/).
 The chatbot provides a demonstration of APIs available for users - sending messages of texts, images, locations, files, and contacts.
@@ -30,11 +30,11 @@ The returning statement should contain the version of python installed on your m
 ```
 Python 3.N.N
 ```
-After ensuring that environment is set up, copy the project on your local machine by downloading the zip file from [demo-chatbot-python](https://github.com/green-api/demo-chatbot-python) and unpacking it.
+After ensuring that environment is set up, copy the project on your local machine by downloading the zip file from [whatsapp-demo-chatbot-python](https://github.com/green-api/whatsapp-demo-chatbot-python) and unpacking it.
 
 Or if one's familiar with distributed version control system s/he can clone the project by running:
 ```
-git clone https://github.com/green-api/demo-chatbot-python.git
+git clone https://github.com/green-api/whatsapp-demo-chatbot-python.git
 ```
 Open the directory containing the project and call the cmd / bash from the current directory. To do this one must add `cmd` to the path and type in `Enter`.
 
@@ -297,3 +297,10 @@ notification.api.sending.sendContact(
         "firstName": notification.event["senderData"]["senderName"],
     },
 ```
+
+
+## License
+
+Licensed under [Creative Commons Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)](https://creativecommons.org/licenses/by-nd/4.0/) terms. 
+
+Please see file [LICENSE](https://github.com/green-api/whatsapp-demo-chatbot-python/blob/main/LICENCE).

@@ -1,8 +1,8 @@
-# demo-chatbot-python
+# whatsapp-demo-chatbot-python
 
 ![](https://img.shields.io/badge/license-CC%20BY--ND%204.0-green)
 
-- [Documentation in English](https://github.com/green-api/demo-chatbot-python/blob/main/README.md).
+- [Documentation in English](https://github.com/green-api/whatsapp-demo-chatbot-python/blob/main/README.md).
 
 Пример чатбота написанного на python с использованием API сервиса для Whatsapp [green-api.com](https://green-api.com/en/).
 Чатбот наглядно демонстрирует использование API для отправки текстовых сообщений, файлов, картинок, локаций и контактов.
@@ -30,11 +30,11 @@ python --version
 ```
 Python 3.N.N
 ```
-После того, как вы убедились, что среда python установлена на ваш компьютер, надо скачать зип-файл проекта [demo-chatbot-python](https://github.com/green-api/demo-chatbot-python) и распаковать его.
+После того, как вы убедились, что среда python установлена на ваш компьютер, надо скачать зип-файл проекта [whatsapp-demo-chatbot-python](https://github.com/green-api/whatsapp-demo-chatbot-python) и распаковать его.
 
 Если же вы знакомы с git, то скопировать проект можно следующим запросом:
 ```
-git clone https://github.com/green-api/demo-chatbot-python.git
+git clone https://github.com/green-api/whatsapp-demo-chatbot-python.git
 ```
 Далее, откройте папку с чатботом и вызовите командную строку. Для этого надо перейти в адресную строку проводника, ввести `cmd` и нажать `Enter`.
 
@@ -299,3 +299,10 @@ notification.api.sending.sendContact(
         "firstName": notification.event["senderData"]["senderName"],
     },
 ```
+
+
+## Лицензия
+
+Лицензировано на условиях [Creative Commons Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)](https://creativecommons.org/licenses/by-nd/4.0/).
+
+[LICENSE](https://github.com/green-api/whatsapp-demo-chatbot-python/blob/main/LICENCE).
