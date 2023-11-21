@@ -26,7 +26,7 @@ send_location_message:
   ru: "Следующая геолокация будет отправлена методом SendLocation. Это адрес офиса GREEN-API!\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
   eng: "The following location to be sent via SendLocation method. That is our GREEN-API office!\n\nIf you want to know how the method works, follow the link\n"
 not_recognized_message:
-  ru: "Извините, я не совсем вас понял, напишите *меню*, что посмотреть возможные опции"
+  ru: "Извините, я не совсем вас понял, напишите *меню*, чтобы посмотреть возможные опции"
   eng: "Sorry, I cannot understand what you are talking about, type in *menu* to see the available options"
 links:
   ru:

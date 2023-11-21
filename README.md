@@ -53,7 +53,7 @@ To use the chatbot on Whatsapp account one must sign up to [personal cabinet](ht
 idInstance
 apiTokenInstance
 ```
-After obtaining the mentioned parameters, one has to open the `bot.py` file and fill up the account's parameters with `idInstance` and `apiTokenInstance` values correspondingly in the 11th line. 
+After obtaining the mentioned parameters, one has to open the `bot.py` file and fill up the account's parameters with `idInstance` and `apiTokenInstance` values correspondingly in the 17th line. 
 Initialization is essential to synchronize with one's Whatsapp account:
 ```python
 id_instance = ''
@@ -91,7 +91,7 @@ To stop the chatbot hover the cmd / bash from the current directory and click `C
 ## Setup
 The chatbot has default values for links to send files and images, but users can change them to their liking. 
 
-To do that, provide one link to the pdf/any other format file and one to jpg. Links can lead to cloud storage or open source. In the 75th line in the bot.py file:
+To do that, provide one link to the pdf/any other format file and one to jpg. Links can lead to cloud storage or open source. In the 81th line in the bot.py file:
 ```python
 elif message == "2":
     notification.api.sending.sendFileByUrl(
@@ -115,7 +115,7 @@ elif message == "2":
                 f'{data["links"][user.language]["send_file_documentation"]}',
     )
 ```
-In the same fashion fill the link and the name for the jpg image in the 83th line
+In the same fashion fill the link and the name for the jpg image in the 89th line
 ```python
 elif message == "3":
     notification.api.sending.sendFileByUrl(
@@ -137,12 +137,12 @@ Let's try to send a message to chatbot!
 Any message will invoke the bot to start a conversation.
 As bot provides the service on two languages - English and Russian - even before welcoming a user, a choice of language is encouraged:
 ```
-[1] - English
-[2] - Русский
+1 - English
+2 - Русский
 ```
 Then, one must answer with either 1 or 2 to set up a language of conversation. Type in, for example, 2 to choose English. The welcome message alongside menu pops up in the dialogue:
 ```
-Welcome the to the Green-api chatbot, user! Green-api provides the following kinds of message services. Type in a number to see how the corresponding method works
+Welcome the to the GREEN-API chatbot, user! GREEN-API provides the following kinds of message services. Type in a number to see how the corresponding method works
 
 1. Text message 📩
 2. File 📋
@@ -150,7 +150,7 @@ Welcome the to the Green-api chatbot, user! Green-api provides the following kin
 4. Contact 📱
 5. Location 🌎
 
-To restart the conversation type [stop]
+To restart the conversation type stop
 ```
 By typing in item number in menu, the chatbot answers by using specific API assigned for the task and attaches a link for a detailed information page. 
 
@@ -163,11 +163,11 @@ https://green-api.com/en/docs/api/sending/SendMessage/
 ```
 By sending anything other from digits 1-5, the chatbot will answer gracefully:
 ```
-Sorry, I cannot understand what you are talking about, type [menu] to see the available options
+Sorry, I cannot understand what you are talking about, type menu to see the available options
 ```
 One also can send a message 'menu' to call back to menu to see the available options. Lastly, by sending 'stop', the user will forcefully stop the conversation and chatbot will send goodbye message:
 ```
-Thank you for using the Green-api chatbot, user!
+Thank you for using the GREEN-API chatbot, user!
 ```
 
 
@@ -177,11 +177,11 @@ It imports the chatbot library, on which the chatbot is based:
 ```python
 from whatsapp_chatbot_python import GreenAPIBot, Notification
 ```
-There is initialization of chatbot on 14th line:
+There is initialization of chatbot on 20th line:
 ```python
 bot = GreenAPIBot(id_instance, api_token_instance)
 ```
-Then, there is router on 20th line that listens to notifications that is invoked everytime the text message is sent to the chatbot:
+Then, there is router on 26th line that listens to notifications that is invoked everytime the text message is sent to the chatbot:
 ```python
 @bot.router.message(type_message=filters.TEXT_TYPES)
 def message_handler(notification: Notification) -> None:
@@ -214,7 +214,7 @@ if not user.authorized:
 ```
 The ```notification.answer()``` is the function of the chatbot library, it takes the parameters of user and sends a text message to the assigned user. The ```data['select_language']``` is the text we prepared for the chatbots answers, which is:
 ```
-"[1] - English\n[2] - Русский"
+"1 - English\n2 - Русский"
 ```
 So, then the user sends either 1 or 2 to set up English or Russian as the text of conversation.
 

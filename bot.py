@@ -6,8 +6,14 @@ from yaml import safe_load
 from user import User
 
 
-# These parameters are available in the personal cabinet, copy and paste them in the corresponding fields
+# These parameters are available in the personal cabinet https://console.green-api.com/, copy and paste them in the corresponding fields
 # Do not get rid of quotation marks
+
+# Example of filling personal data:
+
+# id_instance = '1101123456'
+# api_token_instance = 'abcdefghjklmn1234567890oprstuwxyz'
+
 id_instance = ''
 api_token_instance = ''
 
