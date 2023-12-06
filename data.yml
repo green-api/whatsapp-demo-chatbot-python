@@ -14,8 +14,8 @@ send_text_message:
   ru: "Это сообщение отправлено через sendMessage метод.\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
   eng: "This message is sent via sendMessage method.\n\nIf you want to know how the method works, follow the link\n"
 send_file_message:
-  ru: "Этот файл отправлен методом sendFileByUrl. Файл содержит фотографию корги в расширении png!\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
-  eng: "This file is sent via sendFileByUrl method. The file is image of corgi in the png extension!\n\nIf you want to know how the method works, follow the link\n"
+  ru: "Этот файл отправлен методом sendFileByUrl. Файл содержит фотографию корги в расширении pdf!\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
+  eng: "This file is sent via sendFileByUrl method. The file is image of corgi in the pdf extension!\n\nIf you want to know how the method works, follow the link\n"
 send_image_message:
   ru: "Это фото отправлено методом sendFileByUrl. Корги поднимет вам настроение!\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
   eng: "This image is sent via sendFileByUrl method. Hope a little corgi will lighten your mood!\n\nIf you want to know how the method works, follow the link\n"
@@ -23,8 +23,8 @@ send_contact_message:
   ru: "Следующий контакт будет отправлен методом sendContact. Это вы!\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
   eng: "The following contact to be sent via sendContact method. That is you!\n\nIf you want to know how the method works, follow the link\n"
 send_location_message:
-  ru: "Следующая геолокация будет отправлена методом SendLocation. Это адрес офиса GREEN-API!\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
-  eng: "The following location to be sent via SendLocation method. That is our GREEN-API office!\n\nIf you want to know how the method works, follow the link\n"
+  ru: "Следующая геолокация будет отправлена методом SendLocation. Это координаты острова Мальта!\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
+  eng: "The following location to be sent via SendLocation method. These are the coordinates of Malta island!\n\nIf you want to know how the method works, follow the link\n"
 not_recognized_message:
   ru: "Извините, я не совсем вас понял, напишите *меню*, чтобы посмотреть возможные опции"
   eng: "Sorry, I cannot understand what you are talking about, type in *menu* to see the available options"

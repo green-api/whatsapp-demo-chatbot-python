@@ -1,2 +1,4 @@
 whatsapp-chatbot-python==0.7.0
 PyYAML~=6.0.1
+python-dotenv
+spring-config-client

@@ -4,6 +4,7 @@ from whatsapp_chatbot_python import GreenAPIBot, Notification, filters
 from yaml import safe_load
 
 from user import User
+from config_loader import get_config
 
 
 # These parameters are available in the personal cabinet https://console.green-api.com/, copy and paste them in the corresponding fields
@@ -14,8 +15,10 @@ from user import User
 # id_instance = '1101123456'
 # api_token_instance = 'abcdefghjklmn1234567890oprstuwxyz'
 
-id_instance = ''
-api_token_instance = ''
+server_config = get_config()
+
+id_instance = server_config.user_id
+api_token_instance = server_config.api_token_id
 
 bot = GreenAPIBot(id_instance, api_token_instance)
 
@@ -81,15 +84,15 @@ def options(notification: Notification, user: User):
     elif message == "2":
         notification.api.sending.sendFileByUrl(
             chatId=notification.chat,
-            urlFile="https://images.rawpixel.com/image_png_1100/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTExL3Jhd3BpeGVsb2ZmaWNlMTlfcGhvdG9fb2ZfY29yZ2lzX2luX2NocmlzdG1hc19zd2VhdGVyX2luX2FfcGFydF80YWM1ODk3Zi1mZDMwLTRhYTItYWM5NS05YjY3Yjg1MTFjZmUucG5n.png",
-            fileName="corgi.png",
+            urlFile=server_config.link_1,
+            fileName="corgi.pdf",
             caption=f'{data["send_file_message"][user.language]}'
                     f'{data["links"][user.language]["send_file_documentation"]}',
         )
     elif message == "3":
         notification.api.sending.sendFileByUrl(
             chatId=notification.chat,
-            urlFile="https://images.rawpixel.com/image_1100/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTExL3Jhd3BpeGVsX29mZmljZV8zMF9hX3Bob3RvX29mX2hhcHB5X2NvcmdpX2RvZ193ZWFyaW5nX3NhbnRhX3N1aV8yNjIxNjEzNi0wNTA5LTQ0ZDMtOTA2NS00MDZlODNhOTBmOTBfMi5qcGc.jpg",
+            urlFile=server_config.link_2,
             fileName="corgi.jpg",
             caption=f'{data["send_image_message"][user.language]}'
                     f'{data["links"][user.language]["send_file_documentation"]}',
@@ -113,8 +116,8 @@ def options(notification: Notification, user: User):
         )
         notification.api.sending.sendLocation(
             chatId=notification.chat,
-            latitude=51.106955477493976,
-            longitude=71.43023641366786,
+            latitude=35.888171,
+            longitude=14.440230,
         )
     elif message in ["stop", "стоп"]:
         lang = user.language
