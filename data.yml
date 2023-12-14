@@ -14,8 +14,8 @@ send_text_message:
   ru: "Это сообщение отправлено через sendMessage метод.\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
   eng: "This message is sent via sendMessage method.\n\nIf you want to know how the method works, follow the link\n"
 send_file_message:
-  ru: "Этот файл отправлен методом sendFileByUrl. Файл содержит фотографию корги в расширении pdf!\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
-  eng: "This file is sent via sendFileByUrl method. The file is image of corgi in the pdf extension!\n\nIf you want to know how the method works, follow the link\n"
+  ru: "Этот файл отправлен методом sendFileByUrl. Файл содержит фотографию корги в расширении png\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
+  eng: "This file is sent via sendFileByUrl method. The file is image of corgi in the png extension!\n\nIf you want to know how the method works, follow the link\n"
 send_image_message:
   ru: "Это фото отправлено методом sendFileByUrl. Корги поднимет вам настроение!\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
   eng: "This image is sent via sendFileByUrl method. Hope a little corgi will lighten your mood!\n\nIf you want to know how the method works, follow the link\n"
