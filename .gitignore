@@ -151,9 +151,3 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
-
-# local development files
-config_loader.py
-.dockerignore
-docker-compose.yml
-Dockerfile
