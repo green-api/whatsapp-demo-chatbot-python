@@ -1,7 +1,6 @@
 from yaml import safe_load
 from user_manager import Manager
 from re import IGNORECASE
-from config_loader import get_config
 from whatsapp_chatbot_python import (
     BaseStates,
     GreenAPIBot,
@@ -21,16 +20,12 @@ from whatsapp_chatbot_python import (
 # ID_INSTANCE = '1101123456'
 # API_TOKEN_INSTANCE= 'abcdefghjklmn1234567890oprstuwxyz'
 
-server_config = get_config()
-
-ID_INSTANCE = server_config.user_id
-API_TOKEN_INSTANCE = server_config.api_token_id
+ID_INSTANCE = ''
+API_TOKEN_INSTANCE = ''
 
 bot = GreenAPIBot(
     ID_INSTANCE,
-    API_TOKEN_INSTANCE,
-    raise_errors=False,
-    delete_notifications_at_startup=False
+    API_TOKEN_INSTANCE
 )
 
 with open('data.yml', 'r', encoding='utf8') as stream:
@@ -108,8 +103,12 @@ def option_2(notification: Notification) -> None:
     if not user: return message_handler(Notification)
     notification.api.sending.sendFileByUrl(
         chatId=notification.chat,
-        urlFile=server_config.link_1,
-        fileName='corgi.pdf',
+        urlFile='https://images.rawpixel.com/image_png_1100/cHJpdmF0ZS9'
+                'sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTExL3Jhd3BpeGVsb2ZmaWNlM'
+                'TlfcGhvdG9fb2ZfY29yZ2lzX2luX2NocmlzdG1hc19zd2VhdGVyX2l'
+                'uX2FfcGFydF80YWM1ODk3Zi1mZDMwLTRhYTItYWM5NS05YjY3Yjg1M'
+                'TFjZmUucG5n.png',
+        fileName='corgi.png',
         caption=f'{data["send_file_message"][user.language]}'
         f'{data["links"][user.language]["send_file_documentation"]}',
         )
@@ -123,7 +122,11 @@ def option_3(notification: Notification) -> None:
     if not user: return message_handler(Notification)
     notification.api.sending.sendFileByUrl(
         chatId=notification.chat,
-        urlFile=server_config.link_2,
+        urlFile='https://images.rawpixel.com/image_1100/cHJpdmF0ZS9sci9'
+                'pbWFnZXMvd2Vic2l0ZS8yMDIzLTExL3Jhd3BpeGVsX29mZmljZV8zM'
+                'F9hX3Bob3RvX29mX2hhcHB5X2NvcmdpX2RvZ193ZWFyaW5nX3NhbnR'
+                'hX3N1aV8yNjIxNjEzNi0wNTA5LTQ0ZDMtOTA2NS00MDZlODNhOTBmO'
+                'TBfMi5qcGc.jpg',
         fileName='corgi.jpg',
         caption=f'{data["send_image_message"][user.language]}'
         f'{data["links"][user.language]["send_file_documentation"]}',
@@ -168,7 +171,7 @@ def option_5(notification: Notification) -> None:
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
-                    text_message=['stop', 'стоп'])
+                    text_message=['stop', 'стоп', 'Stop', 'Стоп'])
 def stop(notification: Notification) -> None:
     user = manager.check_user(notification.chat)
     if not user: return message_handler(Notification)
@@ -182,8 +185,8 @@ def stop(notification: Notification) -> None:
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
-                    text_message=['menu', 'меню'])
-def menu_eng(notification: Notification) -> None:
+                    text_message=['menu', 'меню', 'Menu', 'Меню'])
+def menu(notification: Notification) -> None:
     user = manager.check_user(notification.chat)
     if not user: return message_handler(Notification)
     notification.answer(data['menu'][user.language])
@@ -192,7 +195,7 @@ def menu_eng(notification: Notification) -> None:
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
                     regexp=(r'^((?!1|2).)*$', IGNORECASE))
-def menu_ru(notification: Notification) -> None:
+def not_recognized_message1(notification: Notification) -> None:
     user = manager.check_user(notification.chat)
     if not user: message_handler(Notification)
     notification.answer(data['specify_language'])
@@ -203,7 +206,7 @@ def menu_ru(notification: Notification) -> None:
                     regexp=(r'^((?![1-5]|menu|меню|stop|стоп|'
                             r'Menu|Меню|Stop|Стоп).)*$',
                             IGNORECASE))
-def menu_ru(notification: Notification) -> None:
+def not_recognized_message2(notification: Notification) -> None:
     user = manager.check_user(notification.chat)
     if not user: message_handler(Notification)
     notification.answer(data['not_recognized_message'][user.language])
