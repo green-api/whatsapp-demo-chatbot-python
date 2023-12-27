@@ -168,7 +168,7 @@ def option_5(notification: Notification) -> None:
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
-                    text_message=['stop', 'стоп'])
+                    text_message=['stop', 'стоп', 'Stop', 'Стоп'])
 def stop(notification: Notification) -> None:
     user = manager.check_user(notification.chat)
     if not user: return message_handler(Notification)
@@ -182,8 +182,8 @@ def stop(notification: Notification) -> None:
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
-                    text_message=['menu', 'меню'])
-def menu_eng(notification: Notification) -> None:
+                    text_message=['menu', 'меню', 'Menu', 'Меню'])
+def menu(notification: Notification) -> None:
     user = manager.check_user(notification.chat)
     if not user: return message_handler(Notification)
     notification.answer(data['menu'][user.language])
@@ -192,7 +192,7 @@ def menu_eng(notification: Notification) -> None:
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
                     regexp=(r'^((?!1|2).)*$', IGNORECASE))
-def menu_ru(notification: Notification) -> None:
+def not_recognized_message1(notification: Notification) -> None:
     user = manager.check_user(notification.chat)
     if not user: message_handler(Notification)
     notification.answer(data['specify_language'])
@@ -203,7 +203,7 @@ def menu_ru(notification: Notification) -> None:
                     regexp=(r'^((?![1-5]|menu|меню|stop|стоп|'
                             r'Menu|Меню|Stop|Стоп).)*$',
                             IGNORECASE))
-def menu_ru(notification: Notification) -> None:
+def not_recognized_message2(notification: Notification) -> None:
     user = manager.check_user(notification.chat)
     if not user: message_handler(Notification)
     notification.answer(data['not_recognized_message'][user.language])
