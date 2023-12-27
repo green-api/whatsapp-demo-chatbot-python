@@ -53,15 +53,18 @@ To use the chatbot on Whatsapp account one must sign up to [personal cabinet](ht
 idInstance
 apiTokenInstance
 ```
-After obtaining the mentioned parameters, one has to open the `bot.py` file and fill up the account's parameters with `idInstance` and `apiTokenInstance` values correspondingly in the 17th line. 
+After obtaining the mentioned parameters, one has to open the `bot.py` file and fill up the account's parameters with `idInstance` and `apiTokenInstance` values correspondingly in the 23th line. 
 Initialization is essential to synchronize with one's Whatsapp account:
 ```python
-id_instance = ''
-api_token_instance = ''
+ID_INSTANCE = ''
+API_TOKEN_INSTANCE = ''
 ```
 Then the chatbot will get access to one's Whatsapp account via these parameters:
 ```python
-bot = GreenAPIBot(id_instance, api_token_instance)
+bot = GreenAPIBot(
+    ID_INSTANCE,
+    API_TOKEN_INSTANCE
+)
 ```
 Save the changes to the file and run the following command in the cmd / bash from the current directory:
 ```
@@ -91,39 +94,45 @@ To stop the chatbot hover the cmd / bash from the current directory and click `C
 ## Setup
 The chatbot has default values for links to send files and images, but users can change them to their liking. 
 
-To do that, provide one link to the pdf/any other format file and one to jpg. Links can lead to cloud storage or open source. In the 81th line in the bot.py file:
+To do that, provide one link to the pdf/any other format file and one to jpg. Links can lead to cloud storage or open source. In the 101th line in the bot.py file:
 ```python
-elif message == "2":
+def option_2(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
     notification.api.sending.sendFileByUrl(
         chatId=notification.chat,
-        urlFile="https://....png",
-        fileName="corgi.png",
+        urlFile='https://...png',
+        fileName='...png',
         caption=f'{data["send_file_message"][user.language]}'
-                f'{data["links"][user.language]["send_file_documentation"]}',
-    )
+        f'{data["links"][user.language]["send_file_documentation"]}',
+        )
 ```
-Fill url of the file to the `urlFile=""` and give it a name in the `fileName=""`.
+Fill url of the file to the `urlFile=''` and give it a name in the `fileName=''`.
 
 Then it should look similar to the following:
 ```python
-elif message == "2":
+def option_2(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
     notification.api.sending.sendFileByUrl(
         chatId=notification.chat,
-        urlFile="https://...somefile.pdf",
-        fileName="somefile.pdf",
+        urlFile='https://...somefile.pdf',
+        fileName='somefile.pdf',
         caption=f'{data["send_file_message"][user.language]}'
-                f'{data["links"][user.language]["send_file_documentation"]}',
-    )
+        f'{data["links"][user.language]["send_file_documentation"]}',
+        )
 ```
-In the same fashion fill the link and the name for the jpg image in the 89th line
+In the same fashion fill the link and the name for the jpg image in the 120th line
 ```python
-elif message == "3":
+def option_3(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
     notification.api.sending.sendFileByUrl(
         chatId=notification.chat,
-        urlFile="https://...someimage.jpg",
-        fileName="someimage.jpg",
+        urlFile='https://...someimage.jpg',
+        fileName='someimage.jpg',
         caption=f'{data["send_image_message"][user.language]}'
-                f'{data["links"][user.language]["send_file_documentation"]}',
+        f'{data["links"][user.language]["send_file_documentation"]}',
     )
 ```
 All the changes must be saved, then the chatbot can be launched. To see how to launch chatbot return to the [section 2](#launching-a-chatbot)
@@ -175,42 +184,41 @@ Thank you for using the GREEN-API chatbot, user!
 The main part of the code is contained within the `bot.py` file. 
 It imports the chatbot library, on which the chatbot is based:
 ```python
-from whatsapp_chatbot_python import GreenAPIBot, Notification
+from whatsapp_chatbot_python import (
+    BaseStates,
+    GreenAPIBot,
+    Notification,
+    filters,
+)
 ```
-There is initialization of chatbot on 20th line:
+There is initialization of chatbot on 26th line:
 ```python
-bot = GreenAPIBot(id_instance, api_token_instance)
+bot = GreenAPIBot(
+    ID_INSTANCE,
+    API_TOKEN_INSTANCE
+)
 ```
-Then, there is router on 26th line that listens to notifications that is invoked everytime the text message is sent to the chatbot:
+Then, there is router that listens to notifications that is invoked everytime the text message is sent to the chatbot. The messages are processed ruther if they pass through set up filters. For example, every time the user sends a message, the state of the chat is `None`, which is filtered by router:
 ```python
-@bot.router.message(type_message=filters.TEXT_TYPES)
-def message_handler(notification: Notification) -> None:
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=None)
 ```
 Once the message handler got the notification it retrieves the data from the inside, which is dictionary of type [webhook](https://green-api.com/en/docs/api/receiving/notifications-format/).
-Getting the user's data, the chatbot saves that in the object of the same named class. The `user` class is within the `user.py` file and has 4 fields:
+Getting the user's data, the chatbot saves that in the object of the same named class. The `user` class is within the `user_manager.py` file and has 2 fields:
 ```python
+@dataclass
 class User:
-    def __init__(
-        self,
-        id: str,
-        language: str = None,
-        authorized: bool = None,
-        last_updated: datetime = None,
-    ):
-        self.id = id
-        self.language = language
-        self.authorized = authorized
-        self.last_updated = last_updated
+    language: Optional[str] = None
+    ts: Optional[datetime] = None
 ```
-The fields correspond to the user's phone number `id`, chosen language, authorization status, and timestamp of last interaction with bot. Every field has a role in the logic, which will be explained later.
+The fields correspond to the chosen languagenand timestamp of last interaction with bot. Every field has a role in the logic, which will be explained later.
 
-So, returning to `bot.py`, after the user sends a first message to the chatbot, there's checking if the user has active chat with the bot on the server side. If not, new user is created.
-
-Then, the bot sets up the authorized field to `True` to indicate that current chat is active and asks for the language choice from user:
+So, returning to `bot.py`, after the user sends a first message to the chatbot, there's checking if the user has active chat with the bot on the server side. If not, new user is created and the state of the chat is set to `ACTIVE`.
 ```python
-if not user.authorized:
-    user.authorize()
-    notification.answer(data['select_language'])
+notification.state_manager.update_state(notification.sender,
+                                        States.ACTIVE.value)
+user = manager.check_user(notification.chat)
+notification.answer(data['select_language'])
 ```
 The ```notification.answer()``` is the function of the chatbot library, it takes the parameters of user and sends a text message to the assigned user. The ```data['select_language']``` is the text we prepared for the chatbots answers, which is:
 ```
@@ -218,10 +226,17 @@ The ```notification.answer()``` is the function of the chatbot library, it takes
 ```
 So, then the user sends either 1 or 2 to set up English or Russian as the text of conversation.
 
-The chatbot sees that user with such number has active chat by checking the authorized field and forwards the notification to the `set_language` function. The function checks the message and sets the user's language field correspondingly:
+The chatbot sees that user with such number has active chat by checking the filter `state=States.ACTIVE.value`. The function sets the user's language field and sets the value of the state to `state=States.LANGUAGE_SET.value`, letting the bot to know that the language of interaction in this chat is already selected:
 ```python
-if message == "1":
-    user.set_language("eng")
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.ACTIVE.value,
+                    text_message=['1', '/1', '1.', '1 '])
+def set_eng(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
+    user.set_language('eng')
+    notification.state_manager.update_state(notification.sender,
+                                            States.LANGUAGE_SET.value)
     notification.answer(
         f'{data["welcome_message"][user.language]}'
         f'{notification.event["senderData"]["senderName"]}'
@@ -229,23 +244,21 @@ if message == "1":
         f'{data["menu"][user.language]}'
     )
 ```
-However, even if message contains extra slash or space like "/1", the chatbot will recognize it as there's regular expression that removes the all the redundant characters:
-```python
-message = "".join(
-    i
-    for i in notification.message_text
-    if i not in ["/", ".", " ", "<", ">", "[", "]"]
-).lower()
-```
-The next messages from user, that already is authorized and has language set up, are forwarded to the `options` function. 
+The text_message filter processes`['1', '/1', '1.', '1 ']` in case the user sent redundant symbols.
+After that the chatbot sets state of the chat to `state=States.LANGUAGE_SET.value` and expects commands 1-5 from the user
 
 So, if user sends 1, router will proceed to the following line:
 ```python
-if message == "1":
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.LANGUAGE_SET.value,
+                    text_message=['1', '/1', '1.', '1 '])
+def option_1(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
     notification.answer(
         f'{data["send_text_message"][user.language]}'
         f'{data["links"][user.language]["send_text_documentation"]}'
-    )
+        )
 ```
 And this part of code will send the corresponding message to user:
 ```
@@ -265,15 +278,15 @@ welcome_message:
   ru: "Добро пожаловать в GREEN-API чатбот, "
   eng: "Welcome the to the GREEN-API chatbot, "
 ```
-Lastly, everytime there's a message from user, the timestamp called ```last_updated``` is updated:
+Lastly, everytime there's a message from user, the timestamp called `ts` is updated:
 ```python
-user.last_updated = datetime.now()
+def update_ts(self):
+    self.ts = datetime.now()
 ```
 This must be done in order to compare the time between last timestamp and new one, so if there's time interval more than 2 minutes between ones, the user authorization and language are reset:
 ```python
-diff = datetime.now() - user.last_updated
-if diff.seconds > 120:
-    user.unauthorize()
+if diff > 120:
+    self.users.get(chat).set_language(None)
 ```
 
 

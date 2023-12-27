@@ -53,15 +53,18 @@ python -m pip install -r requirements.txt
 idInstance
 apiTokenInstance
 ```
-После получения данных параметров, откройте файл `bot.py` и введите `idInstance` и `apiTokenInstance` в следующие обьекты на 17-й строке. 
+После получения данных параметров, откройте файл `bot.py` и введите `idInstance` и `apiTokenInstance` в следующие обьекты на 23-й строке. 
 Иниализация данных необходима для связывания бота с Вашим Whatsapp аккаунтом:
 ```python
-id_instance = ''
-api_token_instance = ''
+ID_INSTANCE = ''
+API_TOKEN_INSTANCE = ''
 ```
 Далее чатбот получит доступ к Вашему аккаунту через эти данные:
 ```python
-bot = GreenAPIBot(id_instance, api_token_instance)
+bot = GreenAPIBot(
+    ID_INSTANCE,
+    API_TOKEN_INSTANCE
+)
 ```
 Сохраните изменения в файле. Далее можно запускать чатбот, для этого введите следующий запрос в командной строке:
 ```
@@ -93,39 +96,44 @@ python bot.py
 ## Настройка чатбота
 По умолчанию чатбот использует ссылки для выгрузки файлов из сети, однако пользователи могут добавить свои ссылки на файлы, одну для файла любого расширения pdf / docx /... и одну для картинки. 
 
-Ссылки должны вести на файлы из облачного хранилища или открытого доступа. На 81-й строке содержится следующий код:
+Ссылки должны вести на файлы из облачного хранилища или открытого доступа. На 101-й строке содержится следующий код:
 ```python
-elif message == "2":
+def option_2(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
     notification.api.sending.sendFileByUrl(
         chatId=notification.chat,
-        urlFile="https://....png",
-        fileName="corgi.png",
+        urlFile='https://...png',
+        fileName='...png',
         caption=f'{data["send_file_message"][user.language]}'
-                f'{data["links"][user.language]["send_file_documentation"]}',
-    )
+        f'{data["links"][user.language]["send_file_documentation"]}',
+        )
 ```
-Добавьте ссылку на файл любого расширения в `urlFile=""` и задайте имя файлу в `fileName=""`. Имя файла должно содержать расширение, например "somefile.pdf".
-
+Добавьте ссылку на файл любого расширения в `urlFile=''` и задайте имя файлу в `fileName=''`. Имя файла должно содержать расширение, например "somefile.pdf".
 Данная строка после изменения будет в следующем формате:
 ```python
-elif message == "2":
+def option_2(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
     notification.api.sending.sendFileByUrl(
         chatId=notification.chat,
-        urlFile="https://...somefile.pdf",
-        fileName="somefile.pdf",
+        urlFile='https://...somefile.pdf',
+        fileName='somefile.pdf',
         caption=f'{data["send_file_message"][user.language]}'
-                f'{data["links"][user.language]["send_file_documentation"]}',
-    )
+        f'{data["links"][user.language]["send_file_documentation"]}',
+        )
 ```
-Таким же образом введите ссылку и название для картинки на 89-й строке:
+Таким же образом введите ссылку и название для картинки на 120-й строке:
 ```python
-elif message == "3":
+def option_3(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
     notification.api.sending.sendFileByUrl(
         chatId=notification.chat,
-        urlFile="https://...someimage.jpg",
-        fileName="someimage.jpg",
+        urlFile='https://...someimage.jpg',
+        fileName='someimage.jpg',
         caption=f'{data["send_image_message"][user.language]}'
-                f'{data["links"][user.language]["send_file_documentation"]}',
+        f'{data["links"][user.language]["send_file_documentation"]}',
     )
 ```
 Все изменения должны быть сохранены, после чего можно запускать чатбот. Для запуска чатбота вернитесь к [пункту 2](#запуск-чатбота).
@@ -175,44 +183,43 @@ https://green-api.com/docs/api/sending/SendMessage/
 
 ## Структура кода
 Функциональная часть чатбота находится в файле `bot.py`.
-Здесь импортируется класс чатбота `GreenAPIBot` и входящее уведомление `Notification` для обработки сообщений:
+Здесь импортируется класс чатбота `GreenAPIBot`, входящее уведомление `Notification`, класс состояния чата `BaseStates` и фильтры `filters` для обработки сообщений:
 ```python
-from whatsapp_chatbot_python import GreenAPIBot, Notification
+from whatsapp_chatbot_python import (
+    BaseStates,
+    GreenAPIBot,
+    Notification,
+    filters,
+)
 ```
-Инициализация чатбота происходит на 20-й строке:
+Инициализация чатбота происходит на 26-й строке:
 ```python
-bot = GreenAPIBot(id_instance, api_token_instance)
+bot = GreenAPIBot(
+    ID_INSTANCE,
+    API_TOKEN_INSTANCE
+)
 ```
-Каждое сообщение отправленное чатботу обрабатывается на 26-й строке:
+Каждое сообщение отправленное чатботу обрабатывается роутером, импортируемые фильтры используются для проверки состояния чата с пользователем, типа сообщения и текствого значения. При поступлении сообщения от нового пользователя состояние чата имеет значение `None` по умолчанию.
 ```python
-@bot.router.message(type_message=filters.TEXT_TYPES)
-def message_handler(notification: Notification) -> None:
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=None)
 ```
 Обработчик получает сообщения через входящие уведомления типа [webhook](https://green-api.com/docs/api/receiving/notifications-format/incoming-message/Webhook-IncomingMessageReceived/).
-Проверив данные о пользователе, который отправил сообщение, чатбот сохраняет отправителя в объекте класса `user`. Данный класс хранится в файле `user.py` и имеет 4 поля:
+Проверив данные о пользователе, который отправил сообщение, чатбот сохраняет отправителя в объекте класса `user`. Данный класс хранится в файле `user_manager.py` и имеет 2 поля:
 ```python
+@dataclass
 class User:
-    def __init__(
-        self,
-        id: str,
-        language: str = None,
-        authorized: bool = None,
-        last_updated: datetime = None,
-    ):
-        self.id = id
-        self.language = language
-        self.authorized = authorized
-        self.last_updated = last_updated
+    language: Optional[str] = None
+    ts: Optional[datetime] = None
 ```
-В полях сохраняется номер телефона `id`, язык общения, статус авторизации, и время последнего общения с пользователем. Каждое поле используется в логике чатбота, но об этом будет упоминаться позже.
+В полях язык общения и время последнего общения с пользователем. Каждое поле используется в логике чатбота, но об этом будет упоминаться позже.
 
-Возвращаясь к файлу `bot.py`, после того, как пользователь отправит первое сообщение чатботу, чатбот проверяет есть ли данный пользователь в списке пользователей. Если нет, то новый пользователь создается.
-
-Потом, чатбот ставит статус авторизации данного пользователя на `True`, чтобы обозначить что данный чат активен и просит пользователя выбрать язык общения:
+Возвращаясь к файлу `bot.py`, после того, как пользователь отправит первое сообщение чатботу, чатбот проверяет есть ли данный пользователь в списке пользователей. Если нет, то новый пользователь создается и состояние чата изменяется на `ACTIVE`.
 ```python
-if not user.authorized:
-    user.authorize()
-    notification.answer(data['select_language'])
+notification.state_manager.update_state(notification.sender,
+                                        States.ACTIVE.value)
+user = manager.check_user(notification.chat)
+notification.answer(data['select_language'])
 ```
 ```notification.answer()``` это функция библиотеки чатбота, которая проверяет данные о пользователе из входящего уведомления и отправляет ответ данному пользователю. ```data['select_language']``` это один из текстовых ответов чатбота, приготовленных заранее:
 ```
@@ -220,10 +227,17 @@ if not user.authorized:
 ```
 Пользователь отправляет 1 или 2, тем самым выбрав язык общения с чатботом.
 
-Чатбот принимает входящее уведомление и видит, что чат с данным пользователем активен проверив статус авторизации. После этого чатбот передает входящее уведомление в локальную функцию `set_language`, устанавливает язык общения с пользователем:
+Чатбот принимает входящее уведомление и видит, что чат с данным пользователем активен проверив статус состояния чата через фильтр `state=States.ACTIVE.value`. После этого устанавливает язык общения и обновляет состояние чата на `state=States.LANGUAGE_SET.value`, тем самым давая боту понять, что язык общения в данном чате установлен.
 ```python
-if message == "1":
-    user.set_language("eng")
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.ACTIVE.value,
+                    text_message=['1', '/1', '1.', '1 '])
+def set_eng(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
+    user.set_language('eng')
+    notification.state_manager.update_state(notification.sender,
+                                            States.LANGUAGE_SET.value)
     notification.answer(
         f'{data["welcome_message"][user.language]}'
         f'{notification.event["senderData"]["senderName"]}'
@@ -231,23 +245,21 @@ if message == "1":
         f'{data["menu"][user.language]}'
     )
 ```
-Все полученые сообщения чатбот избавляет от лишних символов, чтобы если пользователь ответит "/1" или допустит лишний пробел, чатбот все равно мог разпознать его:
-```python
-message = "".join(
-    i
-    for i in notification.message_text
-    if i not in ["/", ".", " ", "<", ">", "[", "]"]
-).lower()
-```
-После того, как установлен язык общения, все входящие уведомления переходят к функции `options`, которые отвечают на команды 1-5. 
+Фильтр на проверку текста сообщения принимает значения с символами `['1', '/1', '1.', '1 ']`, чтобы чатбот все равно мог разпознать его:
+После того, как установлен язык общения, обработчик проверяет все входящие уведомления через `state=States.LANGUAGE_SET.value` и отвечает на команды 1-5. 
 
 Например, если пользователь отправит 1, следующий код будет запущен:
 ```python
-if message == "1":
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.LANGUAGE_SET.value,
+                    text_message=['1', '/1', '1.', '1 '])
+def option_1(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
     notification.answer(
         f'{data["send_text_message"][user.language]}'
         f'{data["links"][user.language]["send_text_documentation"]}'
-    )
+        )
 ```
 и отправит следующий ответ пользователю:
 ```
@@ -267,15 +279,15 @@ welcome_message:
   ru: "Добро пожаловать в GREEN-API чатбот, "
   eng: "Welcome the to the GREEN-API chatbot, "
 ```
-Так же каждый раз, когда пользователь отправляет новое сообщение, поле ```last_updated``` обновляется новым временем:
+Так же каждый раз, когда пользователь отправляет новое сообщение, поле `ts` обновляется новым временем:
 ```python
-user.last_updated = datetime.now()
+def update_ts(self):
+    self.ts = datetime.now()
 ```
 Это сделано для того, чтобы проверять когда пользователь обращался в последний раз. Если прошло более 2 минут с последнего обращения, значит чатбот сбросит авторизацию и язык общения, и начнет чат заново:
 ```python
-diff = datetime.now() - user.last_updated
-if diff.seconds > 120:
-    user.unauthorize()
+if diff > 120:
+    self.users.get(chat).set_language(None)
 ```
 
 
