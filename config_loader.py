@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class ServerConfig:
     def __init__(self, user_id: str, api_token_id: str, pool_id: str,
-                 server_id: str, app_name: str, link_1: str, link_2: str):
+                 server_id: str, app_name: str, link_1: str, link_2: str, link_3: str, link_4: str):
         self.user_id = user_id
         self.api_token_id = api_token_id
         self.pool_id = pool_id
@@ -19,6 +19,8 @@ class ServerConfig:
         self.app_name = app_name
         self.link_1 = link_1
         self.link_2 = link_2
+        self.link_3 = link_3
+        self.link_4 = link_4
 
 
 def __none_if_empty_str(s: str):
@@ -63,11 +65,15 @@ def get_config():
     sapi_user_token = str(config_result.get("api_token_id"))
     slink_1 = str(config_result.get("link_1"))
     slink_2 = str(config_result.get("link_2"))
+    slink_3 = str(config_result.get("link_3"))
+    slink_4 = str(config_result.get("link_4"))
 
     logger.info("user id is: " + sapi_user_id)
     logger.info("api token id is: " + sapi_user_token)
     logger.info("link for pdf is: " + slink_1)
     logger.info("link for jpg is: " + slink_2)
+    logger.info("link for mp3 is: " + slink_3)
+    logger.info("link for mp4 is: " + slink_4)
     logger.info("config loaded")
 
     return ServerConfig(
@@ -75,6 +81,8 @@ def get_config():
         api_token_id=sapi_user_token,
         link_1=slink_1,
         link_2=slink_2,
+        link_3=slink_3,
+        link_4=slink_4,
         pool_id=pool_id,
         server_id=server_id,
         app_name=app_name,

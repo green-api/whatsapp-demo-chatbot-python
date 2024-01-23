@@ -136,6 +136,36 @@ def option_3(notification: Notification) -> None:
 def option_4(notification: Notification) -> None:
     user = manager.check_user(notification.chat)
     if not user: return message_handler(Notification)
+    notification.api.sending.sendFileByUrl(
+        chatId=notification.chat,
+        urlFile=server_config.link_3,
+        fileName='corgi.mp3',
+        caption=f'{data["send_audio_message"][user.language]}'
+        f'{data["links"][user.language]["send_file_documentation"]}',
+    )
+
+
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.LANGUAGE_SET.value,
+                    text_message=['5', '/5', '5.', '5 '])
+def option_5(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
+    notification.api.sending.sendFileByUrl(
+        chatId=notification.chat,
+        urlFile=server_config.link_4,
+        fileName='corgi.mp4',
+        caption=f'{data["send_video_message"][user.language]}'
+        f'{data["links"][user.language]["send_file_documentation"]}',
+    )
+
+
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.LANGUAGE_SET.value,
+                    text_message=['6', '/6', '6.', '6 '])
+def option_6(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
     notification.answer(
         f'{data["send_contact_message"][user.language]}'
         f'{data["links"][user.language]["send_contact_documentation"]}'
@@ -151,8 +181,8 @@ def option_4(notification: Notification) -> None:
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
-                    text_message=['5', '/5', '5.', '5 '])
-def option_5(notification: Notification) -> None:
+                    text_message=['7', '/7', '7.', '7 '])
+def option_7(notification: Notification) -> None:
     user = manager.check_user(notification.chat)
     if not user: return message_handler(Notification)
     notification.answer(
@@ -164,6 +194,31 @@ def option_5(notification: Notification) -> None:
         latitude=35.888171,
         longitude=14.440230,
     )
+
+
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.LANGUAGE_SET.value,
+                    text_message=['8', '/8', '8.', '8 '])
+def option_8(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
+    notification.answer(
+        f'{data["send_poll_message"][user.language]}'
+        f'{data["links"][user.language]["send_poll_documentation"]}'
+    )
+    notification.api.sending.sendPoll(
+        chatId=notification.chat,
+        message=f'{data["poll_question"][user.language]}',
+        options=[
+            {"optionName": f'{data["poll_option_1"][user.language]}'},
+            {"optionName": f'{data["poll_option_2"][user.language]}'},
+            {"optionName": f'{data["poll_option_3"][user.language]}'}
+        ],
+        multipleAnswers=False
+    )
+    # TODO: обработка ответа пользователя.
+    # Нужно будет сначала создать доработать Router.
+    # Туда нужно добавить обработку события pollUpdateMessage
 
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
