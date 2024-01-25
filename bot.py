@@ -21,6 +21,11 @@ from whatsapp_chatbot_python import (
 # ID_INSTANCE = '1101123456'
 # API_TOKEN_INSTANCE= 'abcdefghjklmn1234567890oprstuwxyz'
 
+# server_config = get_config()
+
+# ID_INSTANCE = server_config.user_id
+# API_TOKEN_INSTANCE = server_config.api_token_id
+
 server_config = get_config()
 
 ID_INSTANCE = server_config.user_id
@@ -45,7 +50,7 @@ class States(BaseStates):
 manager = Manager()
 
 
-@bot.router.message(type_message=filters.TEXT_TYPES,
+@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
                     state=None)
 def message_handler(notification: Notification) -> None:
     notification.state_manager.update_state(notification.sender,
@@ -54,7 +59,7 @@ def message_handler(notification: Notification) -> None:
     notification.answer(data['select_language'])
 
 
-@bot.router.message(type_message=filters.TEXT_TYPES,
+@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
                     text_message=['1', '/1', '1.', '1 '])
 def set_eng(notification: Notification) -> None:
@@ -71,7 +76,7 @@ def set_eng(notification: Notification) -> None:
     )
 
 
-@bot.router.message(type_message=filters.TEXT_TYPES,
+@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
                     text_message=['2', '/2', '2.', '2 '])
 def set_ru(notification: Notification) -> None:
@@ -88,7 +93,7 @@ def set_ru(notification: Notification) -> None:
     )
 
 
-@bot.router.message(type_message=filters.TEXT_TYPES,
+@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['1', '/1', '1.', '1 '])
 def option_1(notification: Notification) -> None:
@@ -100,7 +105,7 @@ def option_1(notification: Notification) -> None:
         )
 
 
-@bot.router.message(type_message=filters.TEXT_TYPES,
+@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['2', '/2', '2.', '2 '])
 def option_2(notification: Notification) -> None:
@@ -115,7 +120,7 @@ def option_2(notification: Notification) -> None:
         )
 
 
-@bot.router.message(type_message=filters.TEXT_TYPES,
+@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['3', '/3', '3.', '3 '])
 def option_3(notification: Notification) -> None:
@@ -130,7 +135,7 @@ def option_3(notification: Notification) -> None:
     )
 
 
-@bot.router.message(type_message=filters.TEXT_TYPES,
+@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['4', '/4', '4.', '4 '])
 def option_4(notification: Notification) -> None:
@@ -145,7 +150,7 @@ def option_4(notification: Notification) -> None:
     )
 
 
-@bot.router.message(type_message=filters.TEXT_TYPES,
+@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['5', '/5', '5.', '5 '])
 def option_5(notification: Notification) -> None:
@@ -160,7 +165,7 @@ def option_5(notification: Notification) -> None:
     )
 
 
-@bot.router.message(type_message=filters.TEXT_TYPES,
+@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['6', '/6', '6.', '6 '])
 def option_6(notification: Notification) -> None:
@@ -179,7 +184,7 @@ def option_6(notification: Notification) -> None:
     )
 
 
-@bot.router.message(type_message=filters.TEXT_TYPES,
+@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['7', '/7', '7.', '7 '])
 def option_7(notification: Notification) -> None:
@@ -196,7 +201,7 @@ def option_7(notification: Notification) -> None:
     )
 
 
-@bot.router.message(type_message=filters.TEXT_TYPES,
+@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['8', '/8', '8.', '8 '])
 def option_8(notification: Notification) -> None:
@@ -221,7 +226,6 @@ def option_8(notification: Notification) -> None:
 def polls_handler(notification: Notification) -> None:
     user = manager.check_user(notification.chat)
     if not user: return message_handler(Notification)
-    chatId = notification.chat
     vote_data = notification.event["messageData"]["pollMessageData"]["votes"]
     sender_vote = None
 
@@ -230,14 +234,89 @@ def polls_handler(notification: Notification) -> None:
             sender_vote = vote["optionName"]
             break
     if sender_vote == "Yes":
-        notification.api.sending.sendMessage(chatId, f'{data["poll_answer_1"][user.language]}')
+        notification.api.sending.sendMessage(notification.chat, f'{data["poll_answer_1"][user.language]}')
     if sender_vote == "No":
-        notification.api.sending.sendMessage(chatId, f'{data["poll_answer_2"][user.language]}')
+        notification.api.sending.sendMessage(notification.chat, f'{data["poll_answer_2"][user.language]}')
     else :
-        notification.api.sending.sendMessage(chatId, f'{data["poll_answer_3"][user.language]}')
+        notification.api.sending.sendMessage(notification.chat, f'{data["poll_answer_3"][user.language]}')
 
+@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+                    state=States.LANGUAGE_SET.value,
+                    text_message=['9', '/9', '9.', '9 '])
+def option_9(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
+    notification.answer(
+        f'{data["get_avatar_message"][user.language]}'
+        f'{data["links"][user.language]["get_avatar_documentation"]}'
+    )
+    response = notification.api.serviceMethods.getAvatar(notification.chat)
+    if response.data["urlAvatar"]:
+        notification.api.sending.sendMessage(notification.chat, f'{data["avatar_found"][user.language]}')
+        notification.api.sending.sendFileByUrl(notification.chat, response.data["urlAvatar"], "your_avatar.png")
+    else:
+        notification.api.sending.sendMessage(notification.chat, f'{data["avatar_not_found"][user.language]}')
+    
+@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+                    state=States.LANGUAGE_SET.value,
+                    text_message=['10', '/10', '10.', '10 '])
+def option_10(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
+    notification.api.sending.sendMessage(
+        notification.chat,
+        f'{data["send_link_message_preview"][user.language]}'
+        f'{data["links"][user.language]["send_link_documentation"]}',
+        linkPreview=True
+    )
+    notification.api.sending.sendMessage(
+        notification.chat,
+        f'{data["send_link_message_no_preview"][user.language]}',
+        linkPreview=False
+    )
 
-@bot.router.message(type_message=filters.TEXT_TYPES,
+@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+                    state=States.LANGUAGE_SET.value,
+                    text_message=['11', '/11', '11.', '11 '])
+def option_11(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
+    group_response = notification.api.groups.createGroup(
+        f'{data["group_name"][user.language]}',
+        [notification.chat, bot.api.account.getSettings().data["wid"]]
+    )
+    if group_response.data["created"]:
+        group_picture_response = notification.api.groups.setGroupPicture(
+            f'{group_response.data["chatId"]}',
+            ('file',('{{file}}.jpeg',open('C:/{{file}}.jpeg','rb'),'image/jpeg'))
+        )
+        if group_picture_response.data["setGroupPicture"]:
+            notification.api.sending.sendMessage(
+                f'{group_response.data["chatId"]}',
+                f'{data["send_group_message"][user.language]}'
+                f'{data["links"][user.language]["groups_documentation"]}',
+            )
+        else:
+            notification.api.sending.sendMessage(
+                f'{group_response.data["chatId"]}',
+                f'{data["send_group_message_set_picture_false"][user.language]}'
+                f'{data["links"][user.language]["groups_documentation"]}',
+            )
+
+@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+                    state=States.LANGUAGE_SET.value,
+                    text_message=['12', '/12', '12.', '12 '])
+def option_12(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
+    notification.api.sending.sendMessage(
+        notification.chat,
+        f'{data["send_quoted_message"][user.language]}'
+        f'{data["links"][user.language]["send_quoted_message_documentation"]}',
+        quotedMessageId=notification.event["idMessage"]
+    )
+
+@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['stop', 'стоп', 'Stop', 'Стоп'])
 def stop(notification: Notification) -> None:
@@ -251,7 +330,7 @@ def stop(notification: Notification) -> None:
     )
 
 
-@bot.router.message(type_message=filters.TEXT_TYPES,
+@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['menu', 'меню', 'Menu', 'Меню'])
 def menu(notification: Notification) -> None:
@@ -260,7 +339,7 @@ def menu(notification: Notification) -> None:
     notification.answer(data['menu'][user.language])
 
 
-@bot.router.message(type_message=filters.TEXT_TYPES,
+@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
                     regexp=(r'^((?!1|2).)*$', IGNORECASE))
 def not_recognized_message1(notification: Notification) -> None:
@@ -269,7 +348,7 @@ def not_recognized_message1(notification: Notification) -> None:
     notification.answer(data['specify_language'])
 
 
-@bot.router.message(type_message=filters.TEXT_TYPES,
+@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     regexp=(r'^((?![1-5]|menu|меню|stop|стоп|'
                             r'Menu|Меню|Stop|Стоп).)*$',
