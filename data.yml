@@ -8,17 +8,23 @@ stop_message:
   ru: "Спасибо за использование чатбота GREEN-API, "
   eng: "Thank you for using the GREEN-API chatbot, "
 menu:
-  ru: "GREEN-API предоставляет отправку данных следующих видов. Выберите цифру из списка, чтобы проверить как работает метод отправки!\n1. Текстовое сообщение 📩\n2. Файл 📋\n3. Картинка 🖼\n4. Контакт 📱\n5. Геолокация 🌎\n\nЧтобы вернуться в начало напишите *стоп*"
-  eng: "GREEN-API provides the following kinds of message services. Type in a number to see how the corresponding method works!\n\n1. Text message 📩\n2. File 📋\n3. Image 🖼\n4. Contact 📱\n5. Location 🌎\n\nTo restart the conversation type *stop*"
+  ru: "GREEN-API предоставляет отправку данных следующих видов. Выберите цифру из списка, чтобы проверить как работает метод отправки!\n1. Текстовое сообщение 📩\n2. Файл 📋\n3. Картинка 🖼\n4.Аудио 🎵\n5. Видео 📽\n6. Контакт 📱\n7. Геолокация 🌎\n8. Опрос ✔\n9. Получить картинку моего аватара 👤\n10. Отправить ссылку 🔗\n11. Создать группу с ботом 👥\n12. Цитировать сообщение ©️\n\nЧтобы вернуться в начало напишите *стоп*"
+  eng: "GREEN-API provides the following kinds of message services. Type in a number to see how the corresponding method works!\n\n1. Text message 📩\n2. File 📋\n3. Image 🖼\n4.Audio 🎵\n5. Video 📽\n6. Contact 📱\n7. Location 🌎\n8. Poll ✔\n9. Get image of my avatar 👤\n10. Send link 🔗\n11. Create group with bot 👥\n12. Quote message ©️\n\nTo restart the conversation type *stop*"
 send_text_message:
   ru: "Это сообщение отправлено через sendMessage метод.\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
   eng: "This message is sent via sendMessage method.\n\nIf you want to know how the method works, follow the link\n"
 send_file_message:
-  ru: "Этот файл отправлен методом sendFileByUrl. Файл содержит фотографию корги в расширении png!\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
-  eng: "This file is sent via sendFileByUrl method. The file is image of corgi in the png extension!\n\nIf you want to know how the method works, follow the link\n"
+  ru: "Этот файл отправлен методом sendFileByUrl. Файл содержит фотографию корги в расширении pdf!\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
+  eng: "This file is sent via sendFileByUrl method. The file is image of corgi in the pdf extension!\n\nIf you want to know how the method works, follow the link\n"
 send_image_message:
   ru: "Это фото отправлено методом sendFileByUrl. Корги поднимет вам настроение!\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
   eng: "This image is sent via sendFileByUrl method. Hope a little corgi will lighten your mood!\n\nIf you want to know how the method works, follow the link\n"
+send_audio_message:
+  ru: "Это аудио отправлено методом sendFileByUrl.\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
+  eng: "This audio is sent via sendFileByUrl method.\n\nIf you want to know how the method works, follow the link\n"
+send_video_message:
+  ru: "Это видео отправлено методом sendFileByUrl.\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
+  eng: "This video is sent via sendFileByUrl method.\n\nIf you want to know how the method works, follow the link\n"
 send_contact_message:
   ru: "Следующий контакт будет отправлен методом sendContact. Это вы!\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
   eng: "The following contact to be sent via sendContact method. That is you!\n\nIf you want to know how the method works, follow the link\n"
@@ -28,14 +34,79 @@ send_location_message:
 not_recognized_message:
   ru: "Извините, я не совсем вас понял, напишите *меню*, чтобы посмотреть возможные опции"
   eng: "Sorry, I cannot understand what you are talking about, type in *menu* to see the available options"
+send_poll_message:
+  ru: "Метод опроса GREEN API - Отправить опрос позволяет отправить опрос в чат, пользователи смогут сделать свой выбор нажав на выбранный пункт. Вы можете использовать опросы в качестве замены кнопкам, более подробно можно прочитать в статье\n"
+  eng: "GREEN API poll method - Send poll allows you to send a poll to the chat, users will be able to make their choice by clicking on the selected item. You can use polls as a replacement for buttons; you can read more in the article\n"
+poll_question:
+  ru: "Выберете вариант ответа\nВам нравиться работа демо чатбота?"
+  eng: "Select an answer\nDo you like the work of the demo chat bot?"
+poll_option_1:
+  ru: "Да"
+  eng: "Yes"
+poll_option_2:
+  ru: "Нет"
+  eng: "No"
+poll_option_3:
+  ru: "Затрудняюсь ответит"
+  eng: "Difficult to answer"
+poll_answer_1:
+  ru: "Спасибо! Мы стараемся быть лучше"
+  eng: "Thank you! We are working to be better"
+poll_answer_2:
+  ru: "Мы будем стараться лучше. Спасибо!"
+  eng: "We will try better. Thank you!"
+poll_answer_3:
+  ru: "Спасибо! Мы стараемся быть лучше"
+  eng: "Thank you! We are working to be better"
+get_avatar_message:
+  ru: "Метод GetAvatar GREEN API - Получить аватар позволяет получить аватар собеседника\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
+  eng: "Method GetAvatar GREEN API - Get an avatar Allows you to get the avatar of your interlocutor\n\nIf you want to know how the method works, follow the link\n"
+avatar_found:
+  ru: "Картинка вашего аватара"
+  eng: "Your avatar picture"
+avatar_not_found:
+  ru: "У Вас отсутствует картинка аватар"
+  eng: "You don't have an avatar picture"
+send_link_message_preview:
+  ru: "Это сообщение отправлено через sendMessage метод.\n\nМетод sendMessage GREEN API - Отправить текст позволяет отправлять сообщения с ссылкой, данное сообщение с привью\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
+  eng: "This message was sent via the sendMessage method.\n\nThe sendMessage GREEN API - Send text method allows you to send messages with a link, this message with a preview\n\nIf you want to know how the method works, follow the link\n"
+send_link_message_no_preview:
+  ru: "Это сообщение без привью GREEN API - Отправить текст , для отключение привью необходимо указать поле linkPreview: false\n"
+  eng: "This message is without preview GREEN API - Send text, to disable preview you must specify the linkPreview field: false\n"
+group_name:
+  ru: "Группа с демо чат ботом"
+  eng: "Group with demo chat bot"
+send_group_message:
+  ru: "Группа “Группа с демо чат ботом” создана ботом методом CreateGroup GREEN API - Создать группу , далее в группе была установлена аватарка методом SetGroupPicture GREEN API - Установить Аватар Группы и отправлено сообщение методом sendMessage   GREEN API - Отправить текст.\n\nЧтобы узнать как работать с методами групп пройдите по ссылке   GREEN API - Группы обзор\n"
+  eng: "The group “Group with demo chat bot” was created by the bot using the CreateGroup GREEN API - Create a group method, then an avatar was set in the group using the SetGroupPicture GREEN API - SetGroupPicture method and a message was sent using the sendMessage GREEN API - Send text method.\n\nTo to learn how to work with group methods, follow the link GREEN API - Groups overview\n"
+send_group_message_set_picture_false:
+  ru: "Группа “Группа с демо чат ботом” создана ботом методом CreateGroup GREEN API - Создать группу и отправлено сообщение методом sendMessage GREEN API - Отправить текст.\n\nЧтобы узнать как работать с методами групп пройдите по ссылке GREEN API - Группы обзор\n"
+  eng: "The group “Group with demo chat bot” was created by the bot using the CreateGroup GREEN API - Create a group method and the message was sent using the sendMessage GREEN API - Send text method.\n\nTo to learn how to work with group methods, follow the link GREEN API - Groups overview\n"
+send_quoted_message:
+  ru: "Это сообщение отправлено через sendMessage метод.\n\nМетод sendMessage GREEN API - Отправить текст позволяет цитировать сообщения, для этого требуется указать id сообщения, которое необходимо процитировать в поле quotedMessageId\n"
+  eng: "This message was sent via the sendMessage method.\n\nThe sendMessage GREEN API - Send text method allows you to quote messages; for this you need to specify the id of the message that needs to be quoted in the quotedMessageId field\n"
 links:
   ru:
     send_text_documentation: "https://green-api.com/docs/api/sending/SendMessage/"
     send_file_documentation: "https://green-api.com/docs/api/sending/SendFileByUrl/"
     send_contact_documentation: "https://green-api.com/docs/api/sending/SendContact/"
     send_location_documentation: "https://green-api.com/docs/api/sending/SendLocation/"
+    send_poll_documentation: "https://green-api.com/docs/api/sending/SendPoll/"
+    get_avatar_documentation: "https://green-api.com/docs/api/service/GetAvatar/"
+    send_link_documentation: "https://green-api.com/docs/api/sending/SendMessage/"
+    create_group_documentation: "https://green-api.com/docs/api/groups/CreateGroup/"
+    set_group_picture_documentation: "https://green-api.com/docs/api/groups/SetGroupPicture/"
+    groups_documentation: "https://green-api.com/docs/api/groups/"
+    send_quoted_message_documentation: "https://green-api.com/docs/api/sending/SendMessage/"
   eng:
     send_text_documentation: "https://green-api.com/en/docs/api/sending/SendMessage/"
     send_file_documentation: "https://green-api.com/en/docs/api/sending/SendFileByUrl/"
     send_contact_documentation: "https://green-api.com/en/docs/api/sending/SendContact/"
     send_location_documentation: "https://green-api.com/en/docs/api/sending/SendLocation/"
+    send_poll_documentation: "https://green-api.com/docs/api/sending/SendPoll/"
+    get_avatar_documentation: "https://green-api.com/docs/api/service/GetAvatar/"
+    send_link_documentation: "https://green-api.com/docs/api/sending/SendMessage/"
+    create_group_documentation: "https://green-api.com/docs/api/groups/CreateGroup/"
+    set_group_picture_documentation: "https://green-api.com/docs/api/groups/SetGroupPicture/"
+    groups_documentation: "https://green-api.com/docs/api/groups/"
+    send_quoted_message_documentation: "https://green-api.com/docs/api/sending/SendMessage/"

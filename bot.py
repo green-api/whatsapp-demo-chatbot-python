@@ -139,6 +139,38 @@ def option_3(notification: Notification) -> None:
 def option_4(notification: Notification) -> None:
     user = manager.check_user(notification.chat)
     if not user: return message_handler(Notification)
+    notification.api.sending.sendFileByUrl(
+        chatId=notification.chat,
+        # TODO: get file links
+        urlFile="TODO",
+        fileName='green-api.mp3',
+        caption=f'{data["send_audio_message"][user.language]}'
+        f'{data["links"][user.language]["send_file_documentation"]}',
+    )
+
+
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.LANGUAGE_SET.value,
+                    text_message=['5', '/5', '5.', '5 '])
+def option_5(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
+    notification.api.sending.sendFileByUrl(
+        chatId=notification.chat,
+        # TODO: get file links
+        urlFile="TODO",
+        fileName='green-api.mp4',
+        caption=f'{data["send_video_message"][user.language]}'
+        f'{data["links"][user.language]["send_file_documentation"]}',
+    )
+
+
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.LANGUAGE_SET.value,
+                    text_message=['6', '/6', '6.', '6 '])
+def option_6(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
     notification.answer(
         f'{data["send_contact_message"][user.language]}'
         f'{data["links"][user.language]["send_contact_documentation"]}'
@@ -154,8 +186,8 @@ def option_4(notification: Notification) -> None:
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
-                    text_message=['5', '/5', '5.', '5 '])
-def option_5(notification: Notification) -> None:
+                    text_message=['7', '/7', '7.', '7 '])
+def option_7(notification: Notification) -> None:
     user = manager.check_user(notification.chat)
     if not user: return message_handler(Notification)
     notification.answer(
@@ -168,6 +200,121 @@ def option_5(notification: Notification) -> None:
         longitude=14.440230,
     )
 
+
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.LANGUAGE_SET.value,
+                    text_message=['8', '/8', '8.', '8 '])
+def option_8(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
+    notification.answer(
+        f'{data["send_poll_message"][user.language]}'
+        f'{data["links"][user.language]["send_poll_documentation"]}'
+    )
+    notification.api.sending.sendPoll(
+        chatId=notification.chat,
+        message=f'{data["poll_question"][user.language]}',
+        options=[
+            {"optionName": f'{data["poll_option_1"][user.language]}'},
+            {"optionName": f'{data["poll_option_2"][user.language]}'},
+            {"optionName": f'{data["poll_option_3"][user.language]}'}
+        ],
+        multipleAnswers=False
+    )
+
+@bot.router.polls()
+def polls_handler(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
+    vote_data = notification.event["messageData"]["pollMessageData"]["votes"]
+    sender_vote = None
+
+    for vote in vote_data:
+        if notification.event["senderData"]["sender"] in vote["optionVoters"]:
+            sender_vote = vote["optionName"]
+            break
+    if sender_vote == "Yes":
+        notification.api.sending.sendMessage(notification.chat, f'{data["poll_answer_1"][user.language]}')
+    if sender_vote == "No":
+        notification.api.sending.sendMessage(notification.chat, f'{data["poll_answer_2"][user.language]}')
+    else :
+        notification.api.sending.sendMessage(notification.chat, f'{data["poll_answer_3"][user.language]}')
+
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.LANGUAGE_SET.value,
+                    text_message=['9', '/9', '9.', '9 '])
+def option_9(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
+    notification.answer(
+        f'{data["get_avatar_message"][user.language]}'
+        f'{data["links"][user.language]["get_avatar_documentation"]}'
+    )
+    response = notification.api.serviceMethods.getAvatar(notification.chat)
+    if response.data["urlAvatar"]:
+        notification.api.sending.sendMessage(notification.chat, f'{data["avatar_found"][user.language]}')
+        notification.api.sending.sendFileByUrl(notification.chat, response.data["urlAvatar"], "your_avatar.png")
+    else:
+        notification.api.sending.sendMessage(notification.chat, f'{data["avatar_not_found"][user.language]}')
+    
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.LANGUAGE_SET.value,
+                    text_message=['10', '/10', '10.', '10 '])
+def option_10(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
+    notification.api.sending.sendMessage(
+        notification.chat,
+        f'{data["send_link_message_preview"][user.language]}'
+        f'{data["links"][user.language]["send_link_documentation"]}',
+        linkPreview=True
+    )
+    notification.api.sending.sendMessage(
+        notification.chat,
+        f'{data["send_link_message_no_preview"][user.language]}',
+        linkPreview=False
+    )
+
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.LANGUAGE_SET.value,
+                    text_message=['11', '/11', '11.', '11 '])
+def option_11(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
+    group_response = notification.api.groups.createGroup(
+        f'{data["group_name"][user.language]}',
+        [notification.chat, bot.api.account.getSettings().data["wid"]]
+    )
+    if group_response.data["created"]:
+        group_picture_response = notification.api.groups.setGroupPicture(
+            f'{group_response.data["chatId"]}',
+            ('file',('{{file}}.jpeg',open('C:/{{file}}.jpeg','rb'),'image/jpeg'))
+        )
+        if group_picture_response.data["setGroupPicture"]:
+            notification.api.sending.sendMessage(
+                f'{group_response.data["chatId"]}',
+                f'{data["send_group_message"][user.language]}'
+                f'{data["links"][user.language]["groups_documentation"]}',
+            )
+        else:
+            notification.api.sending.sendMessage(
+                f'{group_response.data["chatId"]}',
+                f'{data["send_group_message_set_picture_false"][user.language]}'
+                f'{data["links"][user.language]["groups_documentation"]}',
+            )
+
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.LANGUAGE_SET.value,
+                    text_message=['12', '/12', '12.', '12 '])
+def option_12(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
+    notification.api.sending.sendMessage(
+        notification.chat,
+        f'{data["send_quoted_message"][user.language]}'
+        f'{data["links"][user.language]["send_quoted_message_documentation"]}',
+        quotedMessageId=notification.event["idMessage"]
+    )
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
