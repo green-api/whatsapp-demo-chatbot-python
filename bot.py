@@ -144,7 +144,7 @@ def option_4(notification: Notification) -> None:
     notification.api.sending.sendFileByUrl(
         chatId=notification.chat,
         urlFile=server_config.link_3,
-        fileName='corgi.mp3',
+        fileName='green-api.mp3',
         caption=f'{data["send_audio_message"][user.language]}'
         f'{data["links"][user.language]["send_file_documentation"]}',
     )
@@ -159,7 +159,7 @@ def option_5(notification: Notification) -> None:
     notification.api.sending.sendFileByUrl(
         chatId=notification.chat,
         urlFile=server_config.link_4,
-        fileName='corgi.mp4',
+        fileName='green-api.mp4',
         caption=f'{data["send_video_message"][user.language]}'
         f'{data["links"][user.language]["send_file_documentation"]}',
     )
@@ -288,6 +288,7 @@ def option_11(notification: Notification) -> None:
     if group_response.data["created"]:
         group_picture_response = notification.api.groups.setGroupPicture(
             f'{group_response.data["chatId"]}',
+            # TODO: get file to send
             ('file',('{{file}}.jpeg',open('C:/{{file}}.jpeg','rb'),'image/jpeg'))
         )
         if group_picture_response.data["setGroupPicture"]:
