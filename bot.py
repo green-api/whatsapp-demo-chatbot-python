@@ -216,9 +216,25 @@ def option_8(notification: Notification) -> None:
         ],
         multipleAnswers=False
     )
-    # TODO: обработка ответа пользователя.
-    # Нужно будет сначала создать доработать Router.
-    # Туда нужно добавить обработку события pollUpdateMessage
+
+@bot.router.polls()
+def polls_handler(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
+    chatId = notification.chat
+    vote_data = notification.event["messageData"]["pollMessageData"]["votes"]
+    sender_vote = None
+
+    for vote in vote_data:
+        if notification.event["senderData"]["sender"] in vote["optionVoters"]:
+            sender_vote = vote["optionName"]
+            break
+    if sender_vote == "Yes":
+        notification.api.sending.sendMessage(chatId, f'{data["poll_answer_1"][user.language]}')
+    if sender_vote == "No":
+        notification.api.sending.sendMessage(chatId, f'{data["poll_answer_2"][user.language]}')
+    else :
+        notification.api.sending.sendMessage(chatId, f'{data["poll_answer_3"][user.language]}')
 
 
 @bot.router.message(type_message=filters.TEXT_TYPES,

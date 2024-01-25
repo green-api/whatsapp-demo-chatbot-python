@@ -49,6 +49,15 @@ poll_option_2:
 poll_option_3:
   ru: "Затрудняюсь ответит"
   eng: "Difficult to answer"
+poll_answer_1:
+  ru: "Спасибо! Мы стараемся быть лучше"
+  eng: "Thank you! We are working to be better"
+poll_answer_2:
+  ru: "Мы будем стараться лучше. Спасибо!"
+  eng: "We will try better. Thank you!"
+poll_answer_3:
+  ru: "Спасибо! Мы стараемся быть лучше"
+  eng: "Thank you! We are working to be better"
 links:
   ru:
     send_text_documentation: "https://green-api.com/docs/api/sending/SendMessage/"
