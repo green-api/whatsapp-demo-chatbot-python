@@ -50,7 +50,7 @@ class States(BaseStates):
 manager = Manager()
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=None)
 def message_handler(notification: Notification) -> None:
     notification.state_manager.update_state(notification.sender,
@@ -59,7 +59,7 @@ def message_handler(notification: Notification) -> None:
     notification.answer(data['select_language'])
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
                     text_message=['1', '/1', '1.', '1 '])
 def set_eng(notification: Notification) -> None:
@@ -76,7 +76,7 @@ def set_eng(notification: Notification) -> None:
     )
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
                     text_message=['2', '/2', '2.', '2 '])
 def set_ru(notification: Notification) -> None:
@@ -93,7 +93,7 @@ def set_ru(notification: Notification) -> None:
     )
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['1', '/1', '1.', '1 '])
 def option_1(notification: Notification) -> None:
@@ -105,7 +105,7 @@ def option_1(notification: Notification) -> None:
         )
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['2', '/2', '2.', '2 '])
 def option_2(notification: Notification) -> None:
@@ -120,7 +120,7 @@ def option_2(notification: Notification) -> None:
         )
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['3', '/3', '3.', '3 '])
 def option_3(notification: Notification) -> None:
@@ -135,7 +135,7 @@ def option_3(notification: Notification) -> None:
     )
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['4', '/4', '4.', '4 '])
 def option_4(notification: Notification) -> None:
@@ -150,7 +150,7 @@ def option_4(notification: Notification) -> None:
     )
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['5', '/5', '5.', '5 '])
 def option_5(notification: Notification) -> None:
@@ -165,7 +165,7 @@ def option_5(notification: Notification) -> None:
     )
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['6', '/6', '6.', '6 '])
 def option_6(notification: Notification) -> None:
@@ -184,7 +184,7 @@ def option_6(notification: Notification) -> None:
     )
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['7', '/7', '7.', '7 '])
 def option_7(notification: Notification) -> None:
@@ -201,7 +201,7 @@ def option_7(notification: Notification) -> None:
     )
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['8', '/8', '8.', '8 '])
 def option_8(notification: Notification) -> None:
@@ -240,7 +240,7 @@ def polls_handler(notification: Notification) -> None:
     else :
         notification.api.sending.sendMessage(notification.chat, f'{data["poll_answer_3"][user.language]}')
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['9', '/9', '9.', '9 '])
 def option_9(notification: Notification) -> None:
@@ -257,7 +257,7 @@ def option_9(notification: Notification) -> None:
     else:
         notification.api.sending.sendMessage(notification.chat, f'{data["avatar_not_found"][user.language]}')
     
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['10', '/10', '10.', '10 '])
 def option_10(notification: Notification) -> None:
@@ -275,7 +275,7 @@ def option_10(notification: Notification) -> None:
         linkPreview=False
     )
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['11', '/11', '11.', '11 '])
 def option_11(notification: Notification) -> None:
@@ -303,7 +303,7 @@ def option_11(notification: Notification) -> None:
                 f'{data["links"][user.language]["groups_documentation"]}',
             )
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['12', '/12', '12.', '12 '])
 def option_12(notification: Notification) -> None:
@@ -316,7 +316,7 @@ def option_12(notification: Notification) -> None:
         quotedMessageId=notification.event["idMessage"]
     )
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['stop', 'стоп', 'Stop', 'Стоп'])
 def stop(notification: Notification) -> None:
@@ -330,7 +330,7 @@ def stop(notification: Notification) -> None:
     )
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['menu', 'меню', 'Menu', 'Меню'])
 def menu(notification: Notification) -> None:
@@ -339,7 +339,7 @@ def menu(notification: Notification) -> None:
     notification.answer(data['menu'][user.language])
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
                     regexp=(r'^((?!1|2).)*$', IGNORECASE))
 def not_recognized_message1(notification: Notification) -> None:
@@ -348,7 +348,7 @@ def not_recognized_message1(notification: Notification) -> None:
     notification.answer(data['specify_language'])
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     regexp=(r'^((?![1-5]|menu|меню|stop|стоп|'
                             r'Menu|Меню|Stop|Стоп).)*$',
