@@ -94,6 +94,57 @@ def set_ru(notification: Notification) -> None:
 
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.ACTIVE.value,
+                    text_message=['3', '/3', '3.', '3 '])
+def set_he(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
+    user.set_language('he')
+    notification.state_manager.update_state(notification.sender,
+                                            States.LANGUAGE_SET.value)
+    notification.answer(
+        f'{data["welcome_message"][user.language]}'
+        f'{notification.event["senderData"]["senderName"]}'
+        f'! '
+        f'{data["menu"][user.language]}'
+    )
+
+
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.ACTIVE.value,
+                    text_message=['4', '/4', '4.', '4 '])
+def set_es(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
+    user.set_language('es')
+    notification.state_manager.update_state(notification.sender,
+                                            States.LANGUAGE_SET.value)
+    notification.answer(
+        f'{data["welcome_message"][user.language]}'
+        f'{notification.event["senderData"]["senderName"]}'
+        f'! '
+        f'{data["menu"][user.language]}'
+    )
+
+
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.ACTIVE.value,
+                    text_message=['5', '/5', '5.', '5 '])
+def set_ar(notification: Notification) -> None:
+    user = manager.check_user(notification.chat)
+    if not user: return message_handler(Notification)
+    user.set_language('ar')
+    notification.state_manager.update_state(notification.sender,
+                                            States.LANGUAGE_SET.value)
+    notification.answer(
+        f'{data["welcome_message"][user.language]}'
+        f'{notification.event["senderData"]["senderName"]}'
+        f'! '
+        f'{data["menu"][user.language]}'
+    )
+
+
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['1', '/1', '1.', '1 '])
 def option_1(notification: Notification) -> None:
