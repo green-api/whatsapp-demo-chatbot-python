@@ -338,7 +338,7 @@ def option_11(notification: Notification) -> None:
         group_picture_response = notification.api.groups.setGroupPicture(
             f'{group_response.data["chatId"]}',
             # TODO: узнать что сюда ставить
-            ('file',('{{file}}.jpeg',open('C:/{{file}}.jpeg','rb'),'image/jpeg'))
+            "green_api.jpg"
         )
         if group_picture_response.data["setGroupPicture"]:
             notification.api.sending.sendMessage(
