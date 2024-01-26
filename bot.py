@@ -192,8 +192,7 @@ def option_4(notification: Notification) -> None:
     if not user: return message_handler(Notification)
     notification.api.sending.sendFileByUrl(
         chatId=notification.chat,
-        # TODO: get file links
-        urlFile="TODO",
+        urlFile="https://storage.yandexcloud.net/sw-prod-03-test/ChatBot/Audio_for_bot.mp3",
         fileName='green-api.mp3',
         caption=f'{data["send_audio_message"][user.language]}'
         f'{data["links"][user.language]["send_file_documentation"]}',
@@ -208,8 +207,7 @@ def option_5(notification: Notification) -> None:
     if not user: return message_handler(Notification)
     notification.api.sending.sendFileByUrl(
         chatId=notification.chat,
-        # TODO: get file links
-        urlFile="TODO",
+        urlFile="https://storage.yandexcloud.net/sw-prod-03-test/ChatBot/For_bot.mp4",
         fileName='green-api.mp4',
         caption=f'{data["send_video_message"][user.language]}'
         f'{data["links"][user.language]["send_file_documentation"]}',
@@ -339,6 +337,7 @@ def option_11(notification: Notification) -> None:
     if group_response.data["created"]:
         group_picture_response = notification.api.groups.setGroupPicture(
             f'{group_response.data["chatId"]}',
+            # TODO: узнать что сюда ставить
             ('file',('{{file}}.jpeg',open('C:/{{file}}.jpeg','rb'),'image/jpeg'))
         )
         if group_picture_response.data["setGroupPicture"]:
