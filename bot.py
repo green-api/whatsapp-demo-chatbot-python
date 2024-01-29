@@ -8,6 +8,7 @@ from whatsapp_chatbot_python import (
     Notification,
     filters,
 )
+import logging
 
 
 # These parameters are available in the personal cabinet
@@ -21,10 +22,20 @@ from whatsapp_chatbot_python import (
 # ID_INSTANCE = '1101123456'
 # API_TOKEN_INSTANCE= 'abcdefghjklmn1234567890oprstuwxyz'
 
-# server_config = get_config()
+logging.basicConfig(
+    level=logging.INFO,
+    filename="logs.txt",
+    filemode="w",
+    format="%(asctime)s %(levelname)s %(message)s"
+)
 
-# ID_INSTANCE = server_config.user_id
-# API_TOKEN_INSTANCE = server_config.api_token_id
+def log_exception(e: Exception)->None:
+    logging.error(f"An exception occurred: {e}, Type: {e.__class__}, Args: {e.args}, Traceback: {e.__traceback__}, Cause: {e.__cause__}")
+
+def write_apology(notification: Notification) -> None:
+    notification.answer(
+        "We are sorry, an error occured while processing your request"
+    )
 
 server_config = get_config()
 
@@ -53,352 +64,450 @@ manager = Manager()
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=None)
 def message_handler(notification: Notification) -> None:
-    notification.state_manager.update_state(notification.sender,
-                                            States.ACTIVE.value)
-    user = manager.check_user(notification.chat)
-    notification.answer(data['select_language'])
+    try:
+        notification.state_manager.update_state(
+            notification.sender,
+            States.ACTIVE.value
+        )
+        user = manager.check_user(notification.chat)
+        notification.answer(data['select_language'])
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
 
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
                     text_message=['1', '/1', '1.', '1 '])
 def set_eng(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: return message_handler(Notification)
-    user.set_language('eng')
-    notification.state_manager.update_state(notification.sender,
-                                            States.LANGUAGE_SET.value)
-    notification.answer(
-        f'{data["welcome_message"][user.language]}'
-        f'{notification.event["senderData"]["senderName"]}'
-        f'! '
-        f'{data["menu"][user.language]}'
-    )
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: return message_handler(Notification)
+        user.set_language('eng')
+        notification.state_manager.update_state(
+            notification.sender,
+            States.LANGUAGE_SET.value
+        )
+        notification.answer(
+            f'{data["welcome_message"][user.language]}'
+            f'{notification.event["senderData"]["senderName"]}'
+            f'! '
+            f'{data["menu"][user.language]}'
+        )
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
 
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
                     text_message=['2', '/2', '2.', '2 '])
 def set_ru(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: return message_handler(Notification)
-    user.set_language('ru')
-    notification.state_manager.update_state(notification.sender,
-                                            States.LANGUAGE_SET.value)
-    notification.answer(
-        f'{data["welcome_message"][user.language]}'
-        f'{notification.event["senderData"]["senderName"]}'
-        f'! '
-        f'{data["menu"][user.language]}'
-    )
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: return message_handler(Notification)
+        user.set_language('ru')
+        notification.state_manager.update_state(
+            notification.sender,
+            States.LANGUAGE_SET.value
+        )
+        notification.answer(
+            f'{data["welcome_message"][user.language]}'
+            f'{notification.event["senderData"]["senderName"]}'
+            f'! '
+            f'{data["menu"][user.language]}'
+        )
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
 
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
                     text_message=['3', '/3', '3.', '3 '])
 def set_he(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: return message_handler(Notification)
-    user.set_language('he')
-    notification.state_manager.update_state(notification.sender,
-                                            States.LANGUAGE_SET.value)
-    notification.answer(
-        f'{data["welcome_message"][user.language]}'
-        f'{notification.event["senderData"]["senderName"]}'
-        f'! '
-        f'{data["menu"][user.language]}'
-    )
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: return message_handler(Notification)
+        user.set_language('he')
+        notification.state_manager.update_state(
+            notification.sender,
+            States.LANGUAGE_SET.value
+        )
+        notification.answer(
+            f'{data["welcome_message"][user.language]}'
+            f'{notification.event["senderData"]["senderName"]}'
+            f'! '
+            f'{data["menu"][user.language]}'
+        )
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
 
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
                     text_message=['4', '/4', '4.', '4 '])
 def set_es(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: return message_handler(Notification)
-    user.set_language('es')
-    notification.state_manager.update_state(notification.sender,
-                                            States.LANGUAGE_SET.value)
-    notification.answer(
-        f'{data["welcome_message"][user.language]}'
-        f'{notification.event["senderData"]["senderName"]}'
-        f'! '
-        f'{data["menu"][user.language]}'
-    )
-
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: return message_handler(Notification)
+        user.set_language('es')
+        notification.state_manager.update_state(
+            notification.sender,
+            States.LANGUAGE_SET.value
+        )
+        notification.answer(
+            f'{data["welcome_message"][user.language]}'
+            f'{notification.event["senderData"]["senderName"]}'
+            f'! '
+            f'{data["menu"][user.language]}'
+        )
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
                     text_message=['5', '/5', '5.', '5 '])
 def set_ar(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: return message_handler(Notification)
-    user.set_language('ar')
-    notification.state_manager.update_state(notification.sender,
-                                            States.LANGUAGE_SET.value)
-    notification.answer(
-        f'{data["welcome_message"][user.language]}'
-        f'{notification.event["senderData"]["senderName"]}'
-        f'! '
-        f'{data["menu"][user.language]}'
-    )
-
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: return message_handler(Notification)
+        user.set_language('ar')
+        notification.state_manager.update_state(
+            notification.sender,
+            States.LANGUAGE_SET.value
+        )
+        notification.answer(
+            f'{data["welcome_message"][user.language]}'
+            f'{notification.event["senderData"]["senderName"]}'
+            f'! '
+            f'{data["menu"][user.language]}'
+        )
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['1', '/1', '1.', '1 '])
 def option_1(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: return message_handler(Notification)
-    notification.answer(
-        f'{data["send_text_message"][user.language]}'
-        f'{data["links"][user.language]["send_text_documentation"]}'
-        )
-
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: return message_handler(Notification)
+        notification.answer(
+            f'{data["send_text_message"][user.language]}'
+            f'{data["links"][user.language]["send_text_documentation"]}'
+            )
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['2', '/2', '2.', '2 '])
 def option_2(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: return message_handler(Notification)
-    notification.api.sending.sendFileByUrl(
-        chatId=notification.chat,
-        urlFile=server_config.link_1,
-        fileName='corgi.pdf',
-        caption=f'{data["send_file_message"][user.language]}'
-        f'{data["links"][user.language]["send_file_documentation"]}',
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: return message_handler(Notification)
+        notification.api.sending.sendFileByUrl(
+            chatId=notification.chat,
+            urlFile=server_config.link_1,
+            fileName='corgi.pdf',
+            caption=f'{data["send_file_message"][user.language]}'
+            f'{data["links"][user.language]["send_file_documentation"]}',
         )
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
 
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['3', '/3', '3.', '3 '])
 def option_3(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: return message_handler(Notification)
-    notification.api.sending.sendFileByUrl(
-        chatId=notification.chat,
-        urlFile=server_config.link_2,
-        fileName='corgi.jpg',
-        caption=f'{data["send_image_message"][user.language]}'
-        f'{data["links"][user.language]["send_file_documentation"]}',
-    )
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: return message_handler(Notification)
+        notification.api.sending.sendFileByUrl(
+            chatId=notification.chat,
+            urlFile=server_config.link_2,
+            fileName='corgi.jpg',
+            caption=f'{data["send_image_message"][user.language]}'
+            f'{data["links"][user.language]["send_file_documentation"]}',
+        )
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
 
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['4', '/4', '4.', '4 '])
 def option_4(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: return message_handler(Notification)
-    notification.api.sending.sendFileByUrl(
-        chatId=notification.chat,
-        urlFile=server_config.link_3,
-        fileName='green-api.mp3',
-        caption=f'{data["send_audio_message"][user.language]}'
-        f'{data["links"][user.language]["send_file_documentation"]}',
-    )
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: return message_handler(Notification)
+        notification.api.sending.sendFileByUrl(
+            chatId=notification.chat,
+            urlFile=server_config.link_3,
+            fileName='green-api.mp3',
+            caption=f'{data["send_audio_message"][user.language]}'
+            f'{data["links"][user.language]["send_file_documentation"]}',
+        )
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
 
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['5', '/5', '5.', '5 '])
 def option_5(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: return message_handler(Notification)
-    notification.api.sending.sendFileByUrl(
-        chatId=notification.chat,
-        urlFile=server_config.link_4,
-        fileName='green-api.mp4',
-        caption=f'{data["send_video_message"][user.language]}'
-        f'{data["links"][user.language]["send_file_documentation"]}',
-    )
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: return message_handler(Notification)
+        notification.api.sending.sendFileByUrl(
+            chatId=notification.chat,
+            urlFile=server_config.link_4,
+            fileName='green-api.mp4',
+            caption=f'{data["send_video_message"][user.language]}'
+            f'{data["links"][user.language]["send_file_documentation"]}',
+        )
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
 
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['6', '/6', '6.', '6 '])
 def option_6(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: return message_handler(Notification)
-    notification.answer(
-        f'{data["send_contact_message"][user.language]}'
-        f'{data["links"][user.language]["send_contact_documentation"]}'
-    )
-    notification.api.sending.sendContact(
-        chatId=notification.chat,
-        contact={
-            'phoneContact': notification.chat.split('@')[0],
-            'firstName': notification.event['senderData']['senderName'],
-        },
-    )
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: return message_handler(Notification)
+        notification.answer(
+            f'{data["send_contact_message"][user.language]}'
+            f'{data["links"][user.language]["send_contact_documentation"]}'
+        )
+        notification.api.sending.sendContact(
+            chatId=notification.chat,
+            contact={
+                'phoneContact': notification.chat.split('@')[0],
+                'firstName': notification.event['senderData']['senderName'],
+            },
+        )
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
 
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['7', '/7', '7.', '7 '])
 def option_7(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: return message_handler(Notification)
-    notification.answer(
-        f'{data["send_location_message"][user.language]}'
-        f'{data["links"][user.language]["send_location_documentation"]}'
-    )
-    notification.api.sending.sendLocation(
-        chatId=notification.chat,
-        latitude=35.888171,
-        longitude=14.440230,
-    )
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: return message_handler(Notification)
+        notification.answer(
+            f'{data["send_location_message"][user.language]}'
+            f'{data["links"][user.language]["send_location_documentation"]}'
+        )
+        notification.api.sending.sendLocation(
+            chatId=notification.chat,
+            latitude=35.888171,
+            longitude=14.440230,
+        )
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
 
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['8', '/8', '8.', '8 '])
 def option_8(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: return message_handler(Notification)
-    notification.answer(
-        f'{data["send_poll_message"][user.language]}'
-        f'{data["links"][user.language]["send_poll_documentation"]}'
-    )
-    notification.api.sending.sendPoll(
-        chatId=notification.chat,
-        message=f'{data["poll_question"][user.language]}',
-        options=[
-            {"optionName": f'{data["poll_option_1"][user.language]}'},
-            {"optionName": f'{data["poll_option_2"][user.language]}'},
-            {"optionName": f'{data["poll_option_3"][user.language]}'}
-        ],
-        multipleAnswers=False
-    )
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: return message_handler(Notification)
+        notification.answer(
+            f'{data["send_poll_message"][user.language]}'
+            f'{data["links"][user.language]["send_poll_documentation"]}'
+        )
+        notification.api.sending.sendPoll(
+            chatId=notification.chat,
+            message=f'{data["poll_question"][user.language]}',
+            options=[
+                {"optionName": f'{data["poll_option_1"][user.language]}'},
+                {"optionName": f'{data["poll_option_2"][user.language]}'},
+                {"optionName": f'{data["poll_option_3"][user.language]}'}
+            ],
+            multipleAnswers=False
+        )
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
+
 
 @bot.router.polls()
 def polls_handler(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: return message_handler(Notification)
-    vote_data = notification.event["messageData"]["pollMessageData"]["votes"]
-    sender_vote = None
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: return message_handler(Notification)
+        vote_data = notification.event["messageData"]["pollMessageData"]["votes"]
+        sender_vote = None
 
-    for vote in vote_data:
-        if notification.event["senderData"]["sender"] in vote["optionVoters"]:
-            sender_vote = vote["optionName"]
-            break
-    if sender_vote == "Yes":
-        notification.api.sending.sendMessage(notification.chat, f'{data["poll_answer_1"][user.language]}')
-    if sender_vote == "No":
-        notification.api.sending.sendMessage(notification.chat, f'{data["poll_answer_2"][user.language]}')
-    else :
-        notification.api.sending.sendMessage(notification.chat, f'{data["poll_answer_3"][user.language]}')
-
+        for vote in vote_data:
+            if notification.event["senderData"]["sender"] in vote["optionVoters"]:
+                sender_vote = vote["optionName"]
+                break
+        if sender_vote == "Yes":
+            notification.api.sending.sendMessage(notification.chat, f'{data["poll_answer_1"][user.language]}')
+        if sender_vote == "No":
+            notification.api.sending.sendMessage(notification.chat, f'{data["poll_answer_2"][user.language]}')
+        else :
+            notification.api.sending.sendMessage(notification.chat, f'{data["poll_answer_3"][user.language]}')
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
+        
+        
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['9', '/9', '9.', '9 '])
 def option_9(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: return message_handler(Notification)
-    notification.answer(
-        f'{data["get_avatar_message"][user.language]}'
-        f'{data["links"][user.language]["get_avatar_documentation"]}'
-    )
-    response = notification.api.serviceMethods.getAvatar(notification.chat)
-    if response.data["urlAvatar"]:
-        notification.api.sending.sendMessage(notification.chat, f'{data["avatar_found"][user.language]}')
-        notification.api.sending.sendFileByUrl(notification.chat, response.data["urlAvatar"], "your_avatar.png")
-    else:
-        notification.api.sending.sendMessage(notification.chat, f'{data["avatar_not_found"][user.language]}')
-    
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: return message_handler(Notification)
+        notification.answer(
+            f'{data["get_avatar_message"][user.language]}'
+            f'{data["links"][user.language]["get_avatar_documentation"]}'
+        )
+        response = notification.api.serviceMethods.getAvatar(notification.chat)
+        if response.data["urlAvatar"]:
+            notification.api.sending.sendMessage(notification.chat, f'{data["avatar_found"][user.language]}')
+            notification.api.sending.sendFileByUrl(notification.chat, response.data["urlAvatar"], "your_avatar.png")
+        else:
+            notification.api.sending.sendMessage(notification.chat, f'{data["avatar_not_found"][user.language]}')
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
+        
+
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['10', '/10', '10.', '10 '])
 def option_10(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: return message_handler(Notification)
-    notification.api.sending.sendMessage(
-        notification.chat,
-        f'{data["send_link_message_preview"][user.language]}'
-        f'{data["links"][user.language]["send_link_documentation"]}',
-        linkPreview=True
-    )
-    notification.api.sending.sendMessage(
-        notification.chat,
-        f'{data["send_link_message_no_preview"][user.language]}',
-        linkPreview=False
-    )
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: return message_handler(Notification)
+        notification.api.sending.sendMessage(
+            notification.chat,
+            f'{data["send_link_message_preview"][user.language]}'
+            f'{data["links"][user.language]["send_link_documentation"]}',
+            linkPreview=True
+        )
+        notification.api.sending.sendMessage(
+            notification.chat,
+            f'{data["send_link_message_no_preview"][user.language]}',
+            linkPreview=False
+        )
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['11', '/11', '11.', '11 '])
 def option_11(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: return message_handler(Notification)
-    group_response = notification.api.groups.createGroup(
-        f'{data["group_name"][user.language]}',
-        [notification.chat, bot.api.account.getSettings().data["wid"]]
-    )
-    if group_response.data["created"]:
-        group_picture_response = notification.api.groups.setGroupPicture(
-            f'{group_response.data["chatId"]}',
-            # TODO: get file to send
-            ('file',('{{file}}.jpeg',open('C:/{{file}}.jpeg','rb'),'image/jpeg'))
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: return message_handler(Notification)
+        group_response = notification.api.groups.createGroup(
+            f'{data["group_name"][user.language]}',
+            [notification.chat, bot.api.account.getSettings().data["wid"]]
         )
-        if group_picture_response.data["setGroupPicture"]:
-            notification.api.sending.sendMessage(
+        if group_response.data["created"]:
+            group_picture_response = notification.api.groups.setGroupPicture(
                 f'{group_response.data["chatId"]}',
-                f'{data["send_group_message"][user.language]}'
-                f'{data["links"][user.language]["groups_documentation"]}',
+                # TODO: get file to send
+                "green_api.jpg"
             )
-        else:
-            notification.api.sending.sendMessage(
-                f'{group_response.data["chatId"]}',
-                f'{data["send_group_message_set_picture_false"][user.language]}'
-                f'{data["links"][user.language]["groups_documentation"]}',
-            )
+            if group_picture_response.data["setGroupPicture"]:
+                notification.api.sending.sendMessage(
+                    f'{group_response.data["chatId"]}',
+                    f'{data["send_group_message"][user.language]}'
+                    f'{data["links"][user.language]["groups_documentation"]}',
+                )
+            else:
+                notification.api.sending.sendMessage(
+                    f'{group_response.data["chatId"]}',
+                    f'{data["send_group_message_set_picture_false"][user.language]}'
+                    f'{data["links"][user.language]["groups_documentation"]}',
+                )
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['12', '/12', '12.', '12 '])
 def option_12(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: return message_handler(Notification)
-    notification.api.sending.sendMessage(
-        notification.chat,
-        f'{data["send_quoted_message"][user.language]}'
-        f'{data["links"][user.language]["send_quoted_message_documentation"]}',
-        quotedMessageId=notification.event["idMessage"]
-    )
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: return message_handler(Notification)
+        notification.api.sending.sendMessage(
+            notification.chat,
+            f'{data["send_quoted_message"][user.language]}'
+            f'{data["links"][user.language]["send_quoted_message_documentation"]}',
+            quotedMessageId=notification.event["idMessage"]
+        )
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['stop', 'стоп', 'Stop', 'Стоп'])
 def stop(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: return message_handler(Notification)
-    notification.state_manager.update_state(notification.chat, None)
-    notification.answer(
-        f'{data["stop_message"][user.language]}'
-        f'{notification.event["senderData"]["senderName"]}'
-        f'!'
-    )
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: return message_handler(Notification)
+        notification.state_manager.update_state(notification.chat, None)
+        notification.answer(
+            f'{data["stop_message"][user.language]}'
+            f'{notification.event["senderData"]["senderName"]}'
+            f'!'
+        )
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
 
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['menu', 'меню', 'Menu', 'Меню'])
 def menu(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: return message_handler(Notification)
-    notification.answer(data['menu'][user.language])
-
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: return message_handler(Notification)
+        notification.answer(data['menu'][user.language])
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
                     regexp=(r'^((?!1|2).)*$', IGNORECASE))
 def not_recognized_message1(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: message_handler(Notification)
-    notification.answer(data['specify_language'])
-
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: message_handler(Notification)
+        notification.answer(data['specify_language'])
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
@@ -406,9 +515,13 @@ def not_recognized_message1(notification: Notification) -> None:
                             r'Menu|Меню|Stop|Стоп).)*$',
                             IGNORECASE))
 def not_recognized_message2(notification: Notification) -> None:
-    user = manager.check_user(notification.chat)
-    if not user: message_handler(Notification)
-    notification.answer(data['not_recognized_message'][user.language])
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: message_handler(Notification)
+        notification.answer(data['not_recognized_message'][user.language])
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
 
 
 bot.run_forever()
