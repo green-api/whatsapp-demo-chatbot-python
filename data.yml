@@ -1,4 +1,4 @@
-select_language: "1 - English\n2 - Русский\n3 - עברית\n4 - Español\n5 - AR (Not ready yet)"
+select_language: "1 - English\n2 - Русский\n3 - עברית\n4 - Español\n5 - AR (Not ready)"
 specify_language: "Please choose a language for further conversation\n1 - English\n2 - Русский\n3 - עברית\n4 - ES\n5 - AR"
 please_use_text: "Please enter a text message for further conversation with bot\n"
 welcome_message:
@@ -154,13 +154,13 @@ group_name:
 send_group_message:
   ru: "Группа “Группа с демо чат ботом” создана ботом методом CreateGroup GREEN API - Создать группу , далее в группе была установлена аватарка методом SetGroupPicture GREEN API - Установить Аватар Группы и отправлено сообщение методом sendMessage   GREEN API - Отправить текст.\n\nЧтобы узнать как работать с методами групп пройдите по ссылке   GREEN API - Группы обзор\n"
   eng: "The group “Group with demo chat bot” was created by the bot using the CreateGroup GREEN API - Create a group method, then an avatar was set in the group using the SetGroupPicture GREEN API - SetGroupPicture method and a message was sent using the sendMessage GREEN API - Send text method.\n\nTo to learn how to work with group methods, follow the link GREEN API - Groups overview\n"
-  he: "הקבוצה "קבוצה עם הדגמה צ'אט בוט" נוצרה על ידי הבוט באמצעות CreateGroup GREEN API - צור שיטת קבוצה, לאחר מכן הוגדר אווטאר בקבוצה באמצעות שיטת SetGroupPicture GREEN API - שיטת SetGroupPicture והודעה נשלחה באמצעות sendMessage GREEN API - שיטת שלח טקסט.\n\nכדי ללמוד כיצד לעבוד עם שיטות קבוצתיות, עקוב אחר הקישור GREEN API - סקירת קבוצות\n"
+  he: "הקבוצה \"קבוצה עם הדגמה צ'אט בוט\" נוצרה על ידי הבוט באמצעות CreateGroup GREEN API - צור שיטת קבוצה, לאחר מכן הוגדר אווטאר בקבוצה באמצעות שיטת SetGroupPicture GREEN API - שיטת SetGroupPicture והודעה נשלחה באמצעות sendMessage GREEN API - שיטת שלח טקסט.\n\nכדי ללמוד כיצד לעבוד עם שיטות קבוצתיות, עקוב אחר הקישור GREEN API - סקירת קבוצות"
   es: "El grupo “Grupo con bot de chat de demostración” fue creado por el bot de GREEN API utilizando CreateGroup. - Cree un método de grupo, luego se configuró un avatar en el grupo utilizando GREEN API SetGroupPicture - Método SetGroupPicture y se envió un mensaje usando el sendMessage de GREEN API  - Método de envío de texto.\n\nPara aprender a trabajar con métodos de grupo, siga el enlace GREEN API - Descripción general de grupos\n"
   ar: ""
 send_group_message_set_picture_false:
   ru: "Группа “Группа с демо чат ботом” создана ботом методом CreateGroup GREEN API - Создать группу и отправлено сообщение методом sendMessage GREEN API - Отправить текст.\n\nЧтобы узнать как работать с методами групп пройдите по ссылке GREEN API - Группы обзор\n"
   eng: "The group “Group with demo chat bot” was created by the bot using the CreateGroup GREEN API - Create a group method and the message was sent using the sendMessage GREEN API - Send text method.\n\nTo to learn how to work with group methods, follow the link GREEN API - Groups overview\n"
-  he: "הקבוצה "קבוצה עם הדגמה צ'אט בוט" נוצרה על ידי הבוט באמצעות CreateGroup GREEN API - צור שיטת קבוצה וההודעה נשלחה באמצעות sendMessage GREEN API - שיטת שלח טקסט.\n\nכדי ללמוד איך לעבוד עם קבוצה שיטות, עקוב אחר הקישור GREEN API - סקירת קבוצות\n"
+  he: "הקבוצה \"קבוצה עם הדגמה צ'אט בוט\" נוצרה על ידי הבוט באמצעות CreateGroup GREEN API - צור שיטת קבוצה וההודעה נשלחה באמצעות sendMessage GREEN API - שיטת שלח טקסט.\n\nכדי ללמוד איך לעבוד עם קבוצה שיטות, עקוב אחר הקישור GREEN API - סקירת קבוצות"
   es: "El grupo “Grupo con bot de chat de demostración” fue creado por el bot utilizando GREEN API CreateGroup. - Cree un método de grupo y el mensaje se envió usando sendMessage GREEN API - Enviar método de texto.\n\nPara aprender a trabajar con métodos de grupo, siga el enlace GREEN API - Descripción general de grupos\n"
   ar: ""
 send_quoted_message:
