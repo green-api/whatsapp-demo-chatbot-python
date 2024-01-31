@@ -8,6 +8,7 @@ from whatsapp_chatbot_python import (
     filters,
 )
 import logging
+import urllib.request 
 
 logging.basicConfig(
     level=logging.INFO,
@@ -55,7 +56,7 @@ class States(BaseStates):
 manager = Manager()
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=None)
 def message_handler(notification: Notification) -> None:
     try:
@@ -70,7 +71,7 @@ def message_handler(notification: Notification) -> None:
         write_apology(notification)
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
                     text_message=['1', '/1', '1.', '1 '])
 def set_eng(notification: Notification) -> None:
@@ -93,7 +94,7 @@ def set_eng(notification: Notification) -> None:
         write_apology(notification)
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
                     text_message=['2', '/2', '2.', '2 '])
 def set_ru(notification: Notification) -> None:
@@ -116,7 +117,7 @@ def set_ru(notification: Notification) -> None:
         write_apology(notification)
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
                     text_message=['3', '/3', '3.', '3 '])
 def set_he(notification: Notification) -> None:
@@ -139,7 +140,7 @@ def set_he(notification: Notification) -> None:
         write_apology(notification)
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
                     text_message=['4', '/4', '4.', '4 '])
 def set_es(notification: Notification) -> None:
@@ -161,7 +162,7 @@ def set_es(notification: Notification) -> None:
         log_exception(e)
         write_apology(notification)
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
                     text_message=['5', '/5', '5.', '5 '])
 def set_ar(notification: Notification) -> None:
@@ -183,7 +184,7 @@ def set_ar(notification: Notification) -> None:
         log_exception(e)
         write_apology(notification)
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['1', '/1', '1.', '1 '])
 def option_1(notification: Notification) -> None:
@@ -198,7 +199,7 @@ def option_1(notification: Notification) -> None:
         log_exception(e)
         write_apology(notification)
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['2', '/2', '2.', '2 '])
 def option_2(notification: Notification) -> None:
@@ -221,7 +222,7 @@ def option_2(notification: Notification) -> None:
         write_apology(notification)
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['3', '/3', '3.', '3 '])
 def option_3(notification: Notification) -> None:
@@ -244,7 +245,7 @@ def option_3(notification: Notification) -> None:
         write_apology(notification)
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['4', '/4', '4.', '4 '])
 def option_4(notification: Notification) -> None:
@@ -263,7 +264,7 @@ def option_4(notification: Notification) -> None:
         write_apology(notification)
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['5', '/5', '5.', '5 '])
 def option_5(notification: Notification) -> None:
@@ -282,7 +283,7 @@ def option_5(notification: Notification) -> None:
         write_apology(notification)
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['6', '/6', '6.', '6 '])
 def option_6(notification: Notification) -> None:
@@ -305,7 +306,7 @@ def option_6(notification: Notification) -> None:
         write_apology(notification)
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['7', '/7', '7.', '7 '])
 def option_7(notification: Notification) -> None:
@@ -326,7 +327,7 @@ def option_7(notification: Notification) -> None:
         write_apology(notification)
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['8', '/8', '8.', '8 '])
 def option_8(notification: Notification) -> None:
@@ -375,7 +376,7 @@ def polls_handler(notification: Notification) -> None:
         write_apology(notification)
         
         
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['9', '/9', '9.', '9 '])
 def option_9(notification: Notification) -> None:
@@ -397,7 +398,7 @@ def option_9(notification: Notification) -> None:
         write_apology(notification)
         
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['10', '/10', '10.', '10 '])
 def option_10(notification: Notification) -> None:
@@ -419,7 +420,7 @@ def option_10(notification: Notification) -> None:
         log_exception(e)
         write_apology(notification)
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['11', '/11', '11.', '11 '])
 def option_11(notification: Notification) -> None:
@@ -434,7 +435,7 @@ def option_11(notification: Notification) -> None:
             group_picture_response = notification.api.groups.setGroupPicture(
                 f'{group_response.data["chatId"]}',
                 # TODO: get file to send
-                "green_api.jpg"
+                "green_api.png"
             )
             if group_picture_response.data["setGroupPicture"]:
                 notification.api.sending.sendMessage(
@@ -452,7 +453,7 @@ def option_11(notification: Notification) -> None:
         log_exception(e)
         write_apology(notification)
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['12', '/12', '12.', '12 '])
 def option_12(notification: Notification) -> None:
@@ -469,7 +470,7 @@ def option_12(notification: Notification) -> None:
         log_exception(e)
         write_apology(notification)
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['stop', 'стоп', 'Stop', 'Стоп'])
 def stop(notification: Notification) -> None:
@@ -487,7 +488,7 @@ def stop(notification: Notification) -> None:
         write_apology(notification)
 
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['menu', 'меню', 'Menu', 'Меню'])
 def menu(notification: Notification) -> None:
@@ -499,7 +500,7 @@ def menu(notification: Notification) -> None:
         log_exception(e)
         write_apology(notification)
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
                     regexp=(r'^((?!1|4).)*$', IGNORECASE))
 def not_recognized_message1(notification: Notification) -> None:
@@ -511,7 +512,7 @@ def not_recognized_message1(notification: Notification) -> None:
         log_exception(e)
         write_apology(notification)
 
-@bot.router.outgoing_message(type_message=filters.TEXT_TYPES,
+@bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     regexp=(r'^((?![1-12]|menu|меню|stop|стоп|).)*$',
                             IGNORECASE))
