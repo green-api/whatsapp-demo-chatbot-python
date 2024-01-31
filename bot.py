@@ -499,7 +499,7 @@ def menu(notification: Notification) -> None:
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
-                    regexp=(r'^((?!1|2).)*$', IGNORECASE))
+                    regexp=(r'^((?!1|4).)*$', IGNORECASE))
 def not_recognized_message1(notification: Notification) -> None:
     try:
         user = manager.check_user(notification.chat)
@@ -511,8 +511,7 @@ def not_recognized_message1(notification: Notification) -> None:
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
-                    regexp=(r'^((?![1-5]|menu|меню|stop|стоп|'
-                            r'Menu|Меню|Stop|Стоп).)*$',
+                    regexp=(r'^((?![1-12]|menu|меню|stop|стоп|).)*$',
                             IGNORECASE))
 def not_recognized_message2(notification: Notification) -> None:
     try:
