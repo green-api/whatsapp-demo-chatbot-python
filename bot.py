@@ -1,3 +1,6 @@
+import sys
+import logging
+import traceback
 from yaml import safe_load
 from user_manager import Manager
 from re import IGNORECASE
@@ -7,8 +10,6 @@ from whatsapp_chatbot_python import (
     Notification,
     filters,
 )
-import logging
-import urllib.request 
 
 logging.basicConfig(
     level=logging.INFO,
@@ -17,13 +18,22 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(message)s"
 )
 
-def log_exception(e: Exception) -> None:
-    logging.error(f"An exception occurred: {e}, Type: {e.__class__}, Args: {e.args}, Traceback: {e.__traceback__}, Cause: {e.__cause__}")
+def log_exception(e: Exception, notification: Notification) -> None:
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    traceback_details = {
+        'filename': exc_traceback.tb_frame.f_code.co_filename,
+        'lineno': exc_traceback.tb_lineno,
+        'name': exc_traceback.tb_frame.f_code.co_name,
+        'type': exc_type.__name__,
+        'message': str(exc_value),
+    }
+
+    logging.error(f"An exception occurred: {traceback_details}, Type: {e.__class__}, Args: {e.args}, Cause: {e.__cause__}")
+    logging.error(f"Notification details: {notification.__dict__}")
+
 
 def write_apology(notification: Notification) -> None:
-    notification.answer(
-        "We are sorry, an error occured while processing your request"
-    )
+    notification.answer(message="We are sorry, an error occured while processing your request")
 
 # These parameters are available in the personal cabinet
 # https://console.green-api.com/, copy and paste them in the corresponding
@@ -33,12 +43,14 @@ def write_apology(notification: Notification) -> None:
 
 # Example of filling personal data:
 
-ID_INSTANCE = '1101123456'
-API_TOKEN_INSTANCE= 'abcdefghjklmn1234567890oprstuwxyz'
+ID_INSTANCE = 'your_instance_id'
+API_TOKEN_INSTANCE= 'your_token'
 
 bot = GreenAPIBot(
     ID_INSTANCE,
-    API_TOKEN_INSTANCE
+    API_TOKEN_INSTANCE,
+    debug_mode=True,
+    bot_debug_mode=True
 )
 
 with open('data.yml', 'r', encoding='utf8') as stream:
@@ -228,11 +240,7 @@ def option_2(notification: Notification) -> None:
         if not user: return message_handler(Notification)
         notification.api.sending.sendFileByUrl(
             chatId=notification.chat,
-            urlFile='https://images.rawpixel.com/image_png_1100/cHJpdmF0ZS9'
-                'sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTExL3Jhd3BpeGVsb2ZmaWNlM'
-                'TlfcGhvdG9fb2ZfY29yZ2lzX2luX2NocmlzdG1hc19zd2VhdGVyX2l'
-                'uX2FfcGFydF80YWM1ODk3Zi1mZDMwLTRhYTItYWM5NS05YjY3Yjg1M'
-                'TFjZmUucG5n.png',
+            urlFile="https://storage.yandexcloud.net/sw-prod-03-test/ChatBot/dorgi.pdf",
             fileName='corgi.pdf',
             caption=f'{data["send_file_message"][user.language]}'
             f'{data["links"][user.language]["send_file_documentation"]}',
@@ -385,9 +393,9 @@ def polls_handler(notification: Notification) -> None:
             if notification.event["senderData"]["sender"] in vote["optionVoters"]:
                 sender_vote = vote["optionName"]
                 break
-        if sender_vote == "Yes":
+        if sender_vote == f'{data["poll_option_1"][user.language]}':
             notification.api.sending.sendMessage(notification.chat, f'{data["poll_answer_1"][user.language]}')
-        if sender_vote == "No":
+        if sender_vote == f'{data["poll_option_2"][user.language]}':
             notification.api.sending.sendMessage(notification.chat, f'{data["poll_answer_2"][user.language]}')
         else :
             notification.api.sending.sendMessage(notification.chat, f'{data["poll_answer_3"][user.language]}')
@@ -409,8 +417,8 @@ def option_9(notification: Notification) -> None:
         )
         response = notification.api.serviceMethods.getAvatar(notification.chat)
         if response.data["urlAvatar"]:
-            notification.api.sending.sendMessage(notification.chat, f'{data["avatar_found"][user.language]}')
             notification.api.sending.sendFileByUrl(notification.chat, response.data["urlAvatar"], "your_avatar.png")
+            notification.api.sending.sendMessage(notification.chat, f'{data["avatar_found"][user.language]}')
         else:
             notification.api.sending.sendMessage(notification.chat, f'{data["avatar_not_found"][user.language]}')
     except Exception as e:
@@ -449,7 +457,7 @@ def option_11(notification: Notification) -> None:
         if not user: return message_handler(Notification)
         group_response = notification.api.groups.createGroup(
             f'{data["group_name"][user.language]}',
-            [notification.chat, bot.api.account.getSettings().data["wid"]]
+            [notification.event["senderData"]["chatId"], bot.api.account.getSettings().data["wid"]]
         )
         if group_response.data["created"]:
             group_picture_response = notification.api.groups.setGroupPicture(
@@ -492,7 +500,7 @@ def option_12(notification: Notification) -> None:
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
-                    text_message=['stop', 'стоп', 'Stop', 'Стоп'])
+                    text_message=['stop', 'стоп', 'Stop', 'Стоп', '0'])
 def stop(notification: Notification) -> None:
     try:
         user = manager.check_user(notification.chat)
