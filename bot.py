@@ -97,11 +97,34 @@ def set_eng(notification: Notification) -> None:
     except Exception as e:
         log_exception(e)
         write_apology(notification)
-
+        
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
                     text_message=['2', '/2', '2.', '2 '])
+def set_kz(notification: Notification) -> None:
+    try:
+        user = manager.check_user(notification.chat)
+        if not user: return message_handler(Notification)
+        user.set_language('kz')
+        notification.state_manager.update_state(
+            notification.sender,
+            States.LANGUAGE_SET.value
+        )
+        notification.answer(
+            f'{data["welcome_message"][user.language]}'
+            f'{notification.event["senderData"]["senderName"]}'
+            f'! '
+            f'{data["menu"][user.language]}'
+        )
+    except Exception as e:
+        log_exception(e)
+        write_apology(notification)
+
+
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.ACTIVE.value,
+                    text_message=['3', '/3', '3.', '3 '])
 def set_ru(notification: Notification) -> None:
     try:
         user = manager.check_user(notification.chat)
@@ -124,7 +147,7 @@ def set_ru(notification: Notification) -> None:
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
-                    text_message=['3', '/3', '3.', '3 '])
+                    text_message=['5', '/5', '5.', '5 '])
 def set_he(notification: Notification) -> None:
     try:
         user = manager.check_user(notification.chat)
@@ -169,7 +192,7 @@ def set_es(notification: Notification) -> None:
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
-                    text_message=['5', '/5', '5.', '5 '])
+                    text_message=['6', '/6', '6.', '6 '])
 def set_ar(notification: Notification) -> None:
     try:
         user = manager.check_user(notification.chat)
