@@ -1,3 +1,6 @@
+import sys
+import logging
+import traceback
 from yaml import safe_load
 from user_manager import Manager
 from re import IGNORECASE
@@ -8,7 +11,6 @@ from whatsapp_chatbot_python import (
     Notification,
     filters,
 )
-import logging
 
 
 # These parameters are available in the personal cabinet
@@ -29,13 +31,21 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(message)s"
 )
 
-def log_exception(e: Exception)->None:
-    logging.error(f"An exception occurred: {e}, Type: {e.__class__}, Args: {e.args}, Traceback: {e.__traceback__}, Cause: {e.__cause__}")
+def log_exception(e: Exception, notification: Notification) -> None:
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    traceback_details = {
+        'filename': exc_traceback.tb_frame.f_code.co_filename,
+        'lineno': exc_traceback.tb_lineno,
+        'name': exc_traceback.tb_frame.f_code.co_name,
+        'type': exc_type.__name__,
+        'message': str(exc_value),
+    }
 
+    logging.error(f"An exception occurred: {traceback_details}, Type: {e.__class__}, Args: {e.args}, Cause: {e.__cause__}")
+    logging.error(f"Notification details: {notification.__dict__}")
+    
 def write_apology(notification: Notification) -> None:
-    notification.answer(
-        "We are sorry, an error occured while processing your request"
-    )
+    notification.answer(message="We are sorry, an error occured while processing your request")
 
 server_config = get_config()
 
@@ -385,9 +395,9 @@ def polls_handler(notification: Notification) -> None:
             if notification.event["senderData"]["sender"] in vote["optionVoters"]:
                 sender_vote = vote["optionName"]
                 break
-        if sender_vote == "Yes":
+        if sender_vote == f'{data["poll_option_1"][user.language]}':
             notification.api.sending.sendMessage(notification.chat, f'{data["poll_answer_1"][user.language]}')
-        if sender_vote == "No":
+        if sender_vote == f'{data["poll_option_2"][user.language]}':
             notification.api.sending.sendMessage(notification.chat, f'{data["poll_answer_2"][user.language]}')
         else :
             notification.api.sending.sendMessage(notification.chat, f'{data["poll_answer_3"][user.language]}')
@@ -409,8 +419,8 @@ def option_9(notification: Notification) -> None:
         )
         response = notification.api.serviceMethods.getAvatar(notification.chat)
         if response.data["urlAvatar"]:
-            notification.api.sending.sendMessage(notification.chat, f'{data["avatar_found"][user.language]}')
             notification.api.sending.sendFileByUrl(notification.chat, response.data["urlAvatar"], "your_avatar.png")
+            notification.api.sending.sendMessage(notification.chat, f'{data["avatar_found"][user.language]}')
         else:
             notification.api.sending.sendMessage(notification.chat, f'{data["avatar_not_found"][user.language]}')
     except Exception as e:

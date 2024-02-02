@@ -2,10 +2,10 @@ select_language: "1 - English\n2 - Қазақша\n3 - Русский\n4 - Espa�
 specify_language: "Please choose a language for further conversation\n1 - English\n2 - Қазақша\n3 - Русский\n4 - Español\n5 - עברית\n6 - عربي (Not ready)"
 please_use_text: "Please enter a text message for further conversation with bot\n"
 welcome_message:
-  ru: "Добро пожаловать в GREEN API чат-бот, "
-  eng: "Welcome the to the GREEN API chatbot, "
-  he: "ברוכים הבאים לצ'אטבוט GREEN API, "
-  es: "Bienvenido al chatbot GREEN API, "
+  ru: "Добро пожаловать в GREEN API чат-бот, \n"
+  eng: "Welcome the to the GREEN API chatbot, \n"
+  he: "ברוכים הבאים לצ'אטבוט GREEN API, \n"
+  es: "Bienvenido al chatbot GREEN API, \n"
   ar: ""
   kz: "GREEN API чат-ботына қош келдіңіз"
 stop_message:
@@ -16,10 +16,10 @@ stop_message:
   ar: ""
   kz: "GREEN API чат-ботты пайдаланғаныңыз үшін рақмет"
 menu:
-  ru: "GREEN API предоставляет отправку данных следующих видов. Выберите цифру из списка, чтобы проверить как работает метод отправки!\n1. Текстовое сообщение 📩\n2. Файл 📋\n3. Картинка 🖼\n4.Аудио 🎵\n5. Видео 📽\n6. Контакт 📱\n7. Геолокация 🌎\n8. Опрос ✔\n9. Получить картинку моего аватара 👤\n10. Отправить ссылку 🔗\n11. Создать группу с ботом 👥\n12. Цитировать сообщение ©️\n\nЧтобы вернуться в начало напишите *стоп*"
-  eng: "GREEN API provides the following kinds of message services. Type in a number to see how the corresponding method works!\n\n1. Text message 📩\n2. File 📋\n3. Image 🖼\n4.Audio 🎵\n5. Video 📽\n6. Contact 📱\n7. Location 🌎\n8. Poll ✔\n9. Get image of my avatar 👤\n10. Send link 🔗\n11. Create group with bot 👥\n12. Quote message ©️\n\nTo restart the conversation type *stop*"
+  ru: "GREEN API предоставляет отправку данных следующих видов. Выберите цифру из списка, чтобы проверить как работает метод отправки!\n1. Текстовое сообщение 📩\n2. Файл 📋\n3. Картинка 🖼\n4. Аудио 🎵\n5. Видео 📽\n6. Контакт 📱\n7. Геолокация 🌎\n8. Опрос ✔\n9. Получить картинку моего аватара 👤\n10. Отправить ссылку 🔗\n11. Создать группу с ботом 👥\n12. Цитировать сообщение ©️\n\nЧтобы вернуться в начало напишите *стоп*"
+  eng: "GREEN API provides the following kinds of message services. Type in a number to see how the corresponding method works!\n\n1. Text message 📩\n2. File 📋\n3. Image 🖼\n4. Audio 🎵\n5. Video 📽\n6. Contact 📱\n7. Location 🌎\n8. Poll ✔\n9. Get image of my avatar 👤\n10. Send link 🔗\n11. Create group with bot 👥\n12. Quote message ©️\n\nTo restart the conversation type *stop*"
   he: "GREEN API מספק את סוגי שירותי ההודעות הבאים. הקלד מספר כדי לראות כיצד פועלת השיטה המתאימה!\n\n1. הודעת טקסט 📩\n2. קובץ 📋\n3. תמונה 🖼\n4. אודיו 🎵\n5. סרטון 📽\n6. צור קשר 📱\n7. מיקום 🌎\n8. סקר ✔\n9. קבל תמונה של הדמות שלי 👤\n10. שלח קישור 🔗\n11. צור קבוצה עם בוט 👥\n12. הודעת ציטוט ©️\n\nכדי להפעיל מחדש את השיחה הקלד *stop*"
-  es: "GREEN API proporciona los siguientes tipos de servicios de mensajes. ¡Escriba un número para ver cómo funciona el método correspondiente!\n\n1. Mensaje de texto 📩\n2. Archivo 📋\n3. Imagen 🖼\n4.Audio 🎵\n5. Video 📽\n6. Contacto 📱\n7. Ubicación 🌎\n8. Encuesta ✔\n9. Obtener imagen de mi avatar 👤\n10. Enviar enlace 🔗\n11. Crear grupo con bot 👥\n12. Mensaje citado ©️\n\nPara reiniciar la conversación escriba *stop*"
+  es: "GREEN API proporciona los siguientes tipos de servicios de mensajes. ¡Escriba un número para ver cómo funciona el método correspondiente!\n\n1. Mensaje de texto 📩\n2. Archivo 📋\n3. Imagen 🖼\n4. Audio 🎵\n5. Video 📽\n6. Contacto 📱\n7. Ubicación 🌎\n8. Encuesta ✔\n9. Obtener imagen de mi avatar 👤\n10. Enviar enlace 🔗\n11. Crear grupo con bot 👥\n12. Mensaje citado ©️\n\nPara reiniciar la conversación escriba *stop*"
   ar: ""
   kz: "GREEN API келесі көрсетілген түрдегі деректерді жіберуді қамтамасыз етеді. Жіберу әдістерін тексеру үшін тізімнен сан таңдаңыз!\n1. Мәтінді хабарлама 📩\n2. Файл 📋\n3. Сурет 🖼\n4. Аудио 🎵\n5. Видео 📽\n6. Контакт 📱\n7. Геолокация 🌎\n8. Сауалнама ✔\n9. Менің аватарымның суретін алу 👤\n10. Сілтеме жіберу 🔗\n11. Ботпен топ құру 👥\n12. Хабарламаға дәйексөз келтіру ©️\n\nБасына оралу үшін стоп деп жазыңыз"
 send_text_message:
@@ -142,12 +142,12 @@ get_avatar_message:
   ar: ""
   kz: "GetAvatar GREEN API - Аватар алу әдісі сұхбаттасушының аватарын алуға мүмкіндік береді\n\nӘдіс жұмысы туралы білу үшін сілтеме бойынша өтіңіз"
 avatar_found:
-  ru: "Картинка вашего аватара"
-  eng: "Your avatar picture"
-  he: "תמונת האווטאר שלך"
-  es: "Tu foto de avatar"
+  ru: "👤 Картинка вашего аватара"
+  eng: "👤 Your avatar picture"
+  he: "👤 תמונת האווטאר שלך"
+  es: "👤 Tu foto de avatar"
   ar: ""
-  kz: "Сіздің аватарыңыздың суреті"
+  kz: "👤 Сіздің аватарыңыздың суреті"
 avatar_not_found:
   ru: "У Вас отсутствует картинка аватар"
   eng: "You don't have an avatar picture"
