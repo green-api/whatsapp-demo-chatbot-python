@@ -461,6 +461,8 @@ def option_10(notification: Notification) -> None:
         log_exception(e)
         write_apology(notification)
 
+# To add user to a group that user's number must be in your phone numbers contact list!
+# Attempt to add user who is not included in your contact list will result in a group without the targeted user.
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
                     text_message=['11', '/11', '11.', '11 '])
