@@ -43,8 +43,8 @@ def write_apology(notification: Notification) -> None:
 
 # Example of filling personal data:
 
-ID_INSTANCE = 'your_instance_id'
-API_TOKEN_INSTANCE= 'your_token'
+ID_INSTANCE = '9903893035'
+API_TOKEN_INSTANCE= '2d0d3e70b1d749fb8deb94b27e66f682092e2fc687204a8cba'
 
 settings = {
     # set markIncomingMessagesReaded to yes to mark incoming messages as readed. Set to no otherwise.
@@ -305,12 +305,14 @@ def option_4(notification: Notification) -> None:
     try:
         user = manager.check_user(notification.chat)
         if not user: return message_handler(Notification)
+        notification.answer(
+            f'{data["send_audio_message"][user.language]}'
+            f'{data["links"][user.language]["send_file_documentation"]}',
+        )
         notification.api.sending.sendFileByUrl(
             chatId=notification.chat,
             urlFile="https://storage.yandexcloud.net/sw-prod-03-test/ChatBot/Audio_for_bot.mp3",
-            fileName='green-api.mp3',
-            caption=f'{data["send_audio_message"][user.language]}'
-            f'{data["links"][user.language]["send_file_documentation"]}',
+            fileName='green-api.mp3'
         )
     except Exception as e:
         log_exception(e)
@@ -442,8 +444,12 @@ def option_9(notification: Notification) -> None:
         )
         response = notification.api.serviceMethods.getAvatar(notification.chat)
         if response.data["urlAvatar"]:
-            notification.api.sending.sendFileByUrl(notification.chat, response.data["urlAvatar"], "your_avatar.png")
-            notification.api.sending.sendMessage(notification.chat, f'{data["avatar_found"][user.language]}')
+            notification.api.sending.sendFileByUrl(
+                notification.chat,
+                urlFile=response.data["urlAvatar"],
+                fileName="your_avatar.png",
+                caption=f'{data["avatar_found"][user.language]}'
+            )
         else:
             notification.api.sending.sendMessage(notification.chat, f'{data["avatar_not_found"][user.language]}')
     except Exception as e:
@@ -466,7 +472,8 @@ def option_10(notification: Notification) -> None:
         )
         notification.api.sending.sendMessage(
             notification.chat,
-            f'{data["send_link_message_no_preview"][user.language]}',
+            f'{data["send_link_message_no_preview"][user.language]}'
+            f'{data["links"][user.language]["send_link_documentation"]}',
             linkPreview=False
         )
     except Exception as e:
@@ -504,6 +511,10 @@ def option_11(notification: Notification) -> None:
                     f'{data["send_group_message_set_picture_false"][user.language]}'
                     f'{data["links"][user.language]["groups_documentation"]}',
                 )
+            notification.answer(
+                f'{data["group_created_message"][user.language]}'
+                f'{group_response.data["groupInviteLink"]}'
+            )
     except Exception as e:
         log_exception(e)
         write_apology(notification)
