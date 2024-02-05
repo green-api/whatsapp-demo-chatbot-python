@@ -219,11 +219,16 @@ def set_ar(notification: Notification) -> None:
             notification.sender,
             States.LANGUAGE_SET.value
         )
-        notification.answer(
-            f'{data["welcome_message"][user.language]}'
+        path = "welcome_eng.png"
+        if user.language == "ru":
+            path = "welcome_ru.png"
+        notification.api.sending.sendFileByUpload(
+            caption=f'{data["welcome_message"][user.language]}'
             f'{notification.event["senderData"]["senderName"]}'
             f'! '
-            f'{data["menu"][user.language]}'
+            f'{data["menu"][user.language]}',
+            path=path,
+            fileName="welcome.png"
         )
     except Exception as e:
         log_exception(e)
