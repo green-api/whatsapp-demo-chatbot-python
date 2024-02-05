@@ -44,8 +44,8 @@ def write_apology(notification: Notification) -> None:
 
 # Example of filling personal data:
 
-ID_INSTANCE = '9903893035'
-API_TOKEN_INSTANCE= '2d0d3e70b1d749fb8deb94b27e66f682092e2fc687204a8cba'
+ID_INSTANCE = 'ID_INSTANCE'
+API_TOKEN_INSTANCE= 'API_TOKEN_INSTANCE'
 
 settings = {
     # set markIncomingMessagesReaded to yes to mark incoming messages as readed. Set to no otherwise.
