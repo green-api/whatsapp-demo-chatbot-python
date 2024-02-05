@@ -46,11 +46,24 @@ def write_apology(notification: Notification) -> None:
 ID_INSTANCE = 'your_instance_id'
 API_TOKEN_INSTANCE= 'your_token'
 
+settings = {
+    # set markIncomingMessagesReaded to yes to mark incoming messages as readed. Set to no otherwise.
+    "markIncomingMessagesReaded": "yes",
+    # set markIncomingMessagesReadedOnReply to mark incoming messages as read when sending a chat message via the API, possible values: yes, no. If the value is 'yes', then the markIncomingMessagesReaded setting is ignored.
+    "markIncomingMessagesReadedOnReply": "no",
+    # set outgoingWebhook to yes to receive notifications about messages sent from your phone. Set to no otherwise.
+    "outgoingWebhook": "yes",
+    # set outgoingMessageWebhook to yes receive notifications about messages sent via the API. Set to no otherwise.
+    "outgoingMessageWebhook": "yes",
+    # set incomingWebhook to yes to recieve incoming messages, files. Set to no otherwise.
+    "incomingWebhook": "yes",
+    # set Receive pollMessageWebhook to yes to recieve notifications about poll creation and poll voting, possible values: yes, no. Polls will not be handled by bot if setting set to no.
+    "pollMessageWebhook": "yes",
+}
+
 bot = GreenAPIBot(
     ID_INSTANCE,
     API_TOKEN_INSTANCE,
-    debug_mode=True,
-    bot_debug_mode=True
 )
 
 with open('data.yml', 'r', encoding='utf8') as stream:
