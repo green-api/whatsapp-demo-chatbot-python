@@ -1,6 +1,7 @@
 import sys
 import logging
 import traceback
+import requests
 from yaml import safe_load
 from user_manager import Manager
 from re import IGNORECASE
@@ -444,10 +445,12 @@ def option_9(notification: Notification) -> None:
         )
         response = notification.api.serviceMethods.getAvatar(notification.chat)
         if response.data["urlAvatar"]:
+            mime_type = requests.head(response.data["urlAvatar"]).headers.get('content-type')
+            extension = mime_type.split('/')[-1]
             notification.api.sending.sendFileByUrl(
                 notification.chat,
                 urlFile=response.data["urlAvatar"],
-                fileName="your_avatar.png",
+                fileName="your_avatar."+extension,
                 caption=f'{data["avatar_found"][user.language]}'
             )
         else:
