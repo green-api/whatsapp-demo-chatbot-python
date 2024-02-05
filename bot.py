@@ -105,11 +105,13 @@ def set_eng(notification: Notification) -> None:
             notification.sender,
             States.LANGUAGE_SET.value
         )
-        notification.answer(
-            f'{data["welcome_message"][user.language]}'
+        notification.answer_with_file(
+            caption=f'{data["welcome_message"][user.language]}'
             f'{notification.event["senderData"]["senderName"]}'
             f'! '
-            f'{data["menu"][user.language]}'
+            f'{data["menu"][user.language]}',
+            file="welcome_eng.png",
+            file_name="welcome.png"
         )
     except Exception as e:
         log_exception(e)
@@ -128,11 +130,13 @@ def set_kz(notification: Notification) -> None:
             notification.sender,
             States.LANGUAGE_SET.value
         )
-        notification.answer(
-            f'{data["welcome_message"][user.language]}'
+        notification.answer_with_file(
+            caption=f'{data["welcome_message"][user.language]}'
             f'{notification.event["senderData"]["senderName"]}'
             f'! '
-            f'{data["menu"][user.language]}'
+            f'{data["menu"][user.language]}',
+            file="welcome_ru.png",
+            file_name="welcome.png"
         )
     except Exception as e:
         log_exception(e)
@@ -151,11 +155,13 @@ def set_ru(notification: Notification) -> None:
             notification.sender,
             States.LANGUAGE_SET.value
         )
-        notification.answer(
-            f'{data["welcome_message"][user.language]}'
+        notification.answer_with_file(
+            caption=f'{data["welcome_message"][user.language]}'
             f'{notification.event["senderData"]["senderName"]}'
             f'! '
-            f'{data["menu"][user.language]}'
+            f'{data["menu"][user.language]}',
+            file="welcome_ru.png",
+            file_name="welcome.png"
         )
     except Exception as e:
         log_exception(e)
@@ -174,11 +180,13 @@ def set_he(notification: Notification) -> None:
             notification.sender,
             States.LANGUAGE_SET.value
         )
-        notification.answer(
-            f'{data["welcome_message"][user.language]}'
+        notification.answer_with_file(
+            caption=f'{data["welcome_message"][user.language]}'
             f'{notification.event["senderData"]["senderName"]}'
             f'! '
-            f'{data["menu"][user.language]}'
+            f'{data["menu"][user.language]}',
+            file="welcome_eng.png",
+            file_name="welcome.png"
         )
     except Exception as e:
         log_exception(e)
@@ -197,11 +205,13 @@ def set_es(notification: Notification) -> None:
             notification.sender,
             States.LANGUAGE_SET.value
         )
-        notification.answer(
-            f'{data["welcome_message"][user.language]}'
+        notification.answer_with_file(
+            caption=f'{data["welcome_message"][user.language]}'
             f'{notification.event["senderData"]["senderName"]}'
             f'! '
-            f'{data["menu"][user.language]}'
+            f'{data["menu"][user.language]}',
+            file="welcome_eng.png",
+            file_name="welcome.png"
         )
     except Exception as e:
         log_exception(e)
@@ -219,16 +229,13 @@ def set_ar(notification: Notification) -> None:
             notification.sender,
             States.LANGUAGE_SET.value
         )
-        path = "welcome_eng.png"
-        if user.language == "ru":
-            path = "welcome_ru.png"
-        notification.api.sending.sendFileByUpload(
+        notification.answer_with_file(
             caption=f'{data["welcome_message"][user.language]}'
             f'{notification.event["senderData"]["senderName"]}'
             f'! '
             f'{data["menu"][user.language]}',
-            path=path,
-            fileName="welcome.png"
+            file="welcome_eng.png",
+            file_name="welcome.png"
         )
     except Exception as e:
         log_exception(e)
