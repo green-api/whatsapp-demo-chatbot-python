@@ -101,7 +101,7 @@ def set_eng(notification: Notification) -> None:
         )
         notification.answer_with_file(
             caption=f'{data["welcome_message"][user.language]}'
-            f'{notification.event["senderData"]["senderName"]}'
+            f'*{notification.event["senderData"]["senderName"]}*'
             f'! '
             f'{data["menu"][user.language]}',
             file="welcome_eng.png",
@@ -126,7 +126,7 @@ def set_kz(notification: Notification) -> None:
         )
         notification.answer_with_file(
             caption=f'{data["welcome_message"][user.language]}'
-            f'{notification.event["senderData"]["senderName"]}'
+            f'*{notification.event["senderData"]["senderName"]}*'
             f'! '
             f'{data["menu"][user.language]}',
             file="welcome_ru.png",
@@ -151,7 +151,7 @@ def set_ru(notification: Notification) -> None:
         )
         notification.answer_with_file(
             caption=f'{data["welcome_message"][user.language]}'
-            f'{notification.event["senderData"]["senderName"]}'
+            f'*{notification.event["senderData"]["senderName"]}*'
             f'! '
             f'{data["menu"][user.language]}',
             file="welcome_ru.png",
@@ -176,7 +176,7 @@ def set_he(notification: Notification) -> None:
         )
         notification.answer_with_file(
             caption=f'{data["welcome_message"][user.language]}'
-            f'{notification.event["senderData"]["senderName"]}'
+            f'*{notification.event["senderData"]["senderName"]}*'
             f'! '
             f'{data["menu"][user.language]}',
             file="welcome_eng.png",
@@ -201,7 +201,7 @@ def set_es(notification: Notification) -> None:
         )
         notification.answer_with_file(
             caption=f'{data["welcome_message"][user.language]}'
-            f'{notification.event["senderData"]["senderName"]}'
+            f'*{notification.event["senderData"]["senderName"]}*'
             f'! '
             f'{data["menu"][user.language]}',
             file="welcome_eng.png",
@@ -225,7 +225,7 @@ def set_ar(notification: Notification) -> None:
         )
         notification.answer_with_file(
             caption=f'{data["welcome_message"][user.language]}'
-            f'{notification.event["senderData"]["senderName"]}'
+            f'*{notification.event["senderData"]["senderName"]}*'
             f'! '
             f'{data["menu"][user.language]}',
             file="welcome_eng.png",
@@ -535,7 +535,7 @@ def stop(notification: Notification) -> None:
         notification.state_manager.update_state(notification.chat, None)
         notification.answer(
             f'{data["stop_message"][user.language]}'
-            f'{notification.event["senderData"]["senderName"]}'
+            f'*{notification.event["senderData"]["senderName"]}*'
             f'!'
         )
     except Exception as e:
