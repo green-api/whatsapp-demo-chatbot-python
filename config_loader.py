@@ -1,6 +1,6 @@
 import logging
 import os
-import urllib.request 
+import urllib.request
 from functools import cache
 
 from dotenv import load_dotenv
@@ -73,11 +73,11 @@ def get_config():
     slink_3 = str(config_result.get("link_3"))
     slink_4 = str(config_result.get("link_4"))
     slink_5 = str(config_result.get("link_5"))
-    
+
     try:
         urllib.request.urlretrieve(slink_5, "green_api.jpg")
     except Exception as e:
-        logger.error("Failed to download group_image from: "+slink_5)
+        logger.error("Failed to download group_image from: " + slink_5)
 
     logger.info("user id is: " + sapi_user_id)
     logger.info("api token id is: " + sapi_user_token)
