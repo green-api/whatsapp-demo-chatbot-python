@@ -5,12 +5,8 @@ import requests
 from yaml import safe_load
 from user_manager import Manager
 from re import IGNORECASE
-from whatsapp_chatbot_python import (
-    BaseStates,
-    GreenAPIBot,
-    Notification,
-    filters,
-)
+from whatsapp_chatbot_python import BaseStates, GreenAPIBot, Notification, filters
+
 
 logging.basicConfig(
     level=logging.INFO,
