@@ -1,17 +1,12 @@
 import sys
 import logging
 import traceback
+import requests
 from yaml import safe_load
 from user_manager import Manager
 from re import IGNORECASE
+from whatsapp_chatbot_python import BaseStates, GreenAPIBot, Notification, filters
 from config_loader import get_config
-from whatsapp_chatbot_python import (
-    BaseStates,
-    GreenAPIBot,
-    Notification,
-    filters,
-)
-import requests
 
 
 # These parameters are available in the personal cabinet
