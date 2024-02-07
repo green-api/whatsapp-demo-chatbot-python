@@ -11,16 +11,12 @@ logger = logging.getLogger(__name__)
 
 
 class ServerConfig:
-    def __init__(self, user_id: str, api_token_id: str, pool_id: str,
-                 server_id: str, app_name: str,
+    def __init__(self, user_id: str, api_token_id: str,
                  link_1: str, link_2: str,
                  link_3: str, link_4: str,
                  link_5: str):
         self.user_id = user_id
         self.api_token_id = api_token_id
-        self.pool_id = pool_id
-        self.server_id = server_id
-        self.app_name = app_name
         self.link_1 = link_1
         self.link_2 = link_2
         self.link_3 = link_3
@@ -46,15 +42,11 @@ def get_config():
     app_name = "sw-chatbot-7103"
 
     active_profile = __none_if_empty_str(os.environ.get("ACTIVE_PROFILE"))
-    pool_id, server_id = active_profile.split(",")
 
     endpoint = __none_if_empty_str(os.environ.get("SPRING_CLOUD_CONFIG_URI"))
     if not debug and endpoint is None:
         raise Exception("SPRING_CLOUD_CONFIG_URI not set!")
 
-    if endpoint is None:
-        api_port = 0
-        sapi_params_dict = os.environ
     else:
         client_config = (
             ClientConfigurationBuilder()
@@ -95,8 +87,5 @@ def get_config():
         link_2=slink_2,
         link_3=slink_3,
         link_4=slink_4,
-        link_5=slink_5,
-        pool_id=pool_id,
-        server_id=server_id,
-        app_name=app_name,
+        link_5=slink_5
     )

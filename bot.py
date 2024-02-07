@@ -1,6 +1,3 @@
-import sys
-import logging
-import traceback
 import requests
 from yaml import safe_load
 from user_manager import Manager
@@ -19,32 +16,6 @@ from config_loader import get_config
 
 # ID_INSTANCE = '1101123456'
 # API_TOKEN_INSTANCE= 'abcdefghjklmn1234567890oprstuwxyz'
-
-logging.basicConfig(
-    level=logging.INFO,
-    filename="logs.txt",
-    filemode="w",
-    format="%(asctime)s %(levelname)s %(message)s"
-)
-
-
-def log_exception(e: Exception, notification: Notification) -> None:
-    exc_type, exc_value, exc_traceback = sys.exc_info()
-    traceback_details = {
-        'filename': exc_traceback.tb_frame.f_code.co_filename,
-        'lineno': exc_traceback.tb_lineno,
-        'name': exc_traceback.tb_frame.f_code.co_name,
-        'type': exc_type.__name__,
-        'message': str(exc_value),
-    }
-
-    logging.error(
-        f"An exception occurred: {traceback_details}, Type: {
-            e.__class__}, Args: {
-            e.args}, Cause: {
-                e.__cause__}"
-                )
-    logging.error(f"Notification details: {notification.__dict__}")
 
 
 def write_apology(notification: Notification) -> None:
@@ -87,163 +58,45 @@ def message_handler(notification: Notification) -> None:
         user = manager.check_user(notification.chat)
         notification.answer(data['select_language'])
     except Exception as e:
-        log_exception(e)
         write_apology(notification)
 
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
-                    text_message=['1', '/1', '1.', '1 '])
-def set_eng(notification: Notification) -> None:
+                    regexp=(r'^[.\s]?[1-6][.\s]?$'))
+def set_language(notification: Notification) -> None:
     try:
         user = manager.check_user(notification.chat)
         if not user:
             return message_handler(Notification)
-        user.set_language('eng')
+
+        language_dict = {
+            '1': 'en',
+            '2': 'kz',
+            '3': 'ru',
+            '4': 'es',
+            '5': 'he',
+            '6': 'ar',
+        }
+        
+        text_message = notification.event["messageData"]["textMessageData"]["textMessage"]
+        num = str(next(char for char in text_message if char.isdigit()))
+        selected_language = language_dict[num]
+        
+        user.set_language(selected_language)
         notification.state_manager.update_state(
-            notification.sender,
-            States.LANGUAGE_SET.value
-        )
+            notification.sender, States.LANGUAGE_SET.value)
+        landing_image = "welcome_ru.png" if selected_language in [
+            'kz', 'ru'] else "welcome_en.png"
         notification.answer_with_file(
             caption=f'{data["welcome_message"][user.language]}'
             f'*{notification.event["senderData"]["senderName"]}*'
             f'! '
             f'{data["menu"][user.language]}',
-            file="welcome_eng.png",
+            file=landing_image,
             file_name="welcome.png"
         )
     except Exception as e:
-        log_exception(e)
-        write_apology(notification)
-
-
-@bot.router.message(type_message=filters.TEXT_TYPES,
-                    state=States.ACTIVE.value,
-                    text_message=['2', '/2', '2.', '2 '])
-def set_kz(notification: Notification) -> None:
-    try:
-        user = manager.check_user(notification.chat)
-        if not user:
-            return message_handler(Notification)
-        user.set_language('kz')
-        notification.state_manager.update_state(
-            notification.sender,
-            States.LANGUAGE_SET.value
-        )
-        notification.answer_with_file(
-            caption=f'{data["welcome_message"][user.language]}'
-            f'*{notification.event["senderData"]["senderName"]}*'
-            f'! '
-            f'{data["menu"][user.language]}',
-            file="welcome_ru.png",
-            file_name="welcome.png"
-        )
-    except Exception as e:
-        log_exception(e)
-        write_apology(notification)
-
-
-@bot.router.message(type_message=filters.TEXT_TYPES,
-                    state=States.ACTIVE.value,
-                    text_message=['3', '/3', '3.', '3 '])
-def set_ru(notification: Notification) -> None:
-    try:
-        user = manager.check_user(notification.chat)
-        if not user:
-            return message_handler(Notification)
-        user.set_language('ru')
-        notification.state_manager.update_state(
-            notification.sender,
-            States.LANGUAGE_SET.value
-        )
-        notification.answer_with_file(
-            caption=f'{data["welcome_message"][user.language]}'
-            f'*{notification.event["senderData"]["senderName"]}*'
-            f'! '
-            f'{data["menu"][user.language]}',
-            file="welcome_ru.png",
-            file_name="welcome.png"
-        )
-    except Exception as e:
-        log_exception(e)
-        write_apology(notification)
-
-
-@bot.router.message(type_message=filters.TEXT_TYPES,
-                    state=States.ACTIVE.value,
-                    text_message=['5', '/5', '5.', '5 '])
-def set_he(notification: Notification) -> None:
-    try:
-        user = manager.check_user(notification.chat)
-        if not user:
-            return message_handler(Notification)
-        user.set_language('he')
-        notification.state_manager.update_state(
-            notification.sender,
-            States.LANGUAGE_SET.value
-        )
-        notification.answer_with_file(
-            caption=f'{data["welcome_message"][user.language]}'
-            f'*{notification.event["senderData"]["senderName"]}*'
-            f'! '
-            f'{data["menu"][user.language]}',
-            file="welcome_eng.png",
-            file_name="welcome.png"
-        )
-    except Exception as e:
-        log_exception(e)
-        write_apology(notification)
-
-
-@bot.router.message(type_message=filters.TEXT_TYPES,
-                    state=States.ACTIVE.value,
-                    text_message=['4', '/4', '4.', '4 '])
-def set_es(notification: Notification) -> None:
-    try:
-        user = manager.check_user(notification.chat)
-        if not user:
-            return message_handler(Notification)
-        user.set_language('es')
-        notification.state_manager.update_state(
-            notification.sender,
-            States.LANGUAGE_SET.value
-        )
-        notification.answer_with_file(
-            caption=f'{data["welcome_message"][user.language]}'
-            f'*{notification.event["senderData"]["senderName"]}*'
-            f'! '
-            f'{data["menu"][user.language]}',
-            file="welcome_eng.png",
-            file_name="welcome.png"
-        )
-    except Exception as e:
-        log_exception(e)
-        write_apology(notification)
-
-
-@bot.router.message(type_message=filters.TEXT_TYPES,
-                    state=States.ACTIVE.value,
-                    text_message=['6', '/6', '6.', '6 '])
-def set_ar(notification: Notification) -> None:
-    try:
-        user = manager.check_user(notification.chat)
-        if not user:
-            return message_handler(Notification)
-        user.set_language('ar')
-        notification.state_manager.update_state(
-            notification.sender,
-            States.LANGUAGE_SET.value
-        )
-        notification.answer_with_file(
-            caption=f'{data["welcome_message"][user.language]}'
-            f'*{notification.event["senderData"]["senderName"]}*'
-            f'! '
-            f'{data["menu"][user.language]}',
-            file="welcome_eng.png",
-            file_name="welcome.png"
-        )
-    except Exception as e:
-        log_exception(e)
         write_apology(notification)
 
 
@@ -260,7 +113,6 @@ def option_1(notification: Notification) -> None:
             f'{data["links"][user.language]["send_text_documentation"]}'
         )
     except Exception as e:
-        log_exception(e)
         write_apology(notification)
 
 
@@ -280,7 +132,6 @@ def option_2(notification: Notification) -> None:
             f'{data["links"][user.language]["send_file_documentation"]}',
         )
     except Exception as e:
-        log_exception(e)
         write_apology(notification)
 
 
@@ -300,7 +151,6 @@ def option_3(notification: Notification) -> None:
             f'{data["links"][user.language]["send_file_documentation"]}',
         )
     except Exception as e:
-        log_exception(e)
         write_apology(notification)
 
 
@@ -322,7 +172,6 @@ def option_4(notification: Notification) -> None:
             fileName='green-api.mp3'
         )
     except Exception as e:
-        log_exception(e)
         write_apology(notification)
 
 
@@ -342,7 +191,6 @@ def option_5(notification: Notification) -> None:
             f'{data["links"][user.language]["send_file_documentation"]}',
         )
     except Exception as e:
-        log_exception(e)
         write_apology(notification)
 
 
@@ -366,7 +214,6 @@ def option_6(notification: Notification) -> None:
             },
         )
     except Exception as e:
-        log_exception(e)
         write_apology(notification)
 
 
@@ -388,7 +235,6 @@ def option_7(notification: Notification) -> None:
             longitude=14.440230,
         )
     except Exception as e:
-        log_exception(e)
         write_apology(notification)
 
 
@@ -404,45 +250,41 @@ def option_8(notification: Notification) -> None:
             f'{data["send_poll_message"][user.language]}'
             f'{data["links"][user.language]["send_poll_documentation"]}'
         )
-        notification.api.sending.sendPoll(
-            chatId=notification.chat,
+        notification.answer_with_poll(
             message=f'{data["poll_question"][user.language]}',
             options=[
                 {"optionName": f'{data["poll_option_1"][user.language]}'},
                 {"optionName": f'{data["poll_option_2"][user.language]}'},
                 {"optionName": f'{data["poll_option_3"][user.language]}'}
             ],
-            multipleAnswers=False
+            multiple_answers=False
         )
     except Exception as e:
-        log_exception(e)
         write_apology(notification)
 
 
-@bot.router.polls()
+@bot.router.poll_update_message()
 def polls_handler(notification: Notification) -> None:
     try:
         user = manager.check_user(notification.chat)
         if not user:
             return message_handler(Notification)
-        vote_data = notification.event["messageData"]["pollMessageData"]["votes"]
-        sender_vote = None
+        votes = notification.event["messageData"]["pollMessageData"]["votes"]
 
-        for vote in vote_data:
-            if notification.event["senderData"]["sender"] in vote["optionVoters"]:
-                sender_vote = vote["optionName"]
-                break
-        if sender_vote == f'{data["poll_option_1"][user.language]}':
-            notification.api.sending.sendMessage(
-                notification.chat, f'{data["poll_answer_1"][user.language]}')
-        if sender_vote == f'{data["poll_option_2"][user.language]}':
-            notification.api.sending.sendMessage(
-                notification.chat, f'{data["poll_answer_2"][user.language]}')
-        else:
-            notification.api.sending.sendMessage(
-                notification.chat, f'{data["poll_answer_3"][user.language]}')
+        for vote_data in votes:
+            voters = vote_data["optionVoters"]
+            if voters:
+                option_name = vote_data["optionName"]
+                if option_name == f"{data["poll_option_1"][user.language]}":
+                    notification.answer(
+                        f'{data["poll_answer_1"][user.language]}')
+                elif option_name == f"{data["poll_option_2"][user.language]}":
+                    notification.answer(
+                        f'{data["poll_answer_2"][user.language]}')
+                elif option_name == f"{data["poll_option_3"][user.language]}":
+                    notification.answer(
+                        f'{data["poll_answer_3"][user.language]}')
     except Exception as e:
-        log_exception(e)
         write_apology(notification)
 
 
@@ -473,7 +315,6 @@ def option_9(notification: Notification) -> None:
             notification.api.sending.sendMessage(
                 notification.chat, f'{data["avatar_not_found"][user.language]}')
     except Exception as e:
-        log_exception(e)
         write_apology(notification)
 
 
@@ -498,7 +339,6 @@ def option_10(notification: Notification) -> None:
             linkPreview=False
         )
     except Exception as e:
-        log_exception(e)
         write_apology(notification)
 
 
@@ -537,7 +377,6 @@ def option_11(notification: Notification) -> None:
                 f'{group_response.data["groupInviteLink"]}'
             )
     except Exception as e:
-        log_exception(e)
         write_apology(notification)
 
 
@@ -557,7 +396,6 @@ def option_12(notification: Notification) -> None:
             quotedMessageId=notification.event["idMessage"]
         )
     except Exception as e:
-        log_exception(e)
         write_apology(notification)
 
 
@@ -576,7 +414,6 @@ def stop(notification: Notification) -> None:
             f'!'
         )
     except Exception as e:
-        log_exception(e)
         write_apology(notification)
 
 
@@ -590,7 +427,6 @@ def menu(notification: Notification) -> None:
             return message_handler(Notification)
         notification.answer(data['menu'][user.language])
     except Exception as e:
-        log_exception(e)
         write_apology(notification)
 
 
@@ -604,7 +440,6 @@ def not_recognized_message1(notification: Notification) -> None:
             message_handler(Notification)
         notification.answer(data['specify_language'])
     except Exception as e:
-        log_exception(e)
         write_apology(notification)
 
 
@@ -619,7 +454,6 @@ def not_recognized_message2(notification: Notification) -> None:
             message_handler(Notification)
         notification.answer(data['not_recognized_message'][user.language])
     except Exception as e:
-        log_exception(e)
         write_apology(notification)
 
 
