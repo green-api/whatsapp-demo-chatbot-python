@@ -7,4 +7,4 @@ requests==2.31.0
 spring-config-client==0.2
 urllib3==2.1.0
 whatsapp-api-client-python==0.0.44
-whatsapp-chatbot-python==0.8.0
+whatsapp-chatbot-python==0.9.0
