@@ -397,6 +397,29 @@ def option_12(notification: Notification) -> None:
         )
     except Exception as e:
         write_apology(notification)
+        
+        
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.LANGUAGE_SET.value,
+                    text_message=['13', '/13', '13.', '13 '])
+def option_13(notification: Notification) -> None:
+    try:
+        user = manager.check_user(notification.chat)
+        if not user:
+            return message_handler(Notification)
+        notification.answer(
+            f'{data["about_python_chatbot"][user.language]}'
+            f'{data["link_to_docs"][user.language]}'
+            f'{data["links"][user.language]["chatbot_documentation"]}'
+            f'{data["link_to_source_code"][user.language]}'
+            f'{data["links"][user.language]["chatbot_source_code"]}'
+            f'{data["link_to_green_api"][user.language]}'
+            f'{data["links"][user.language]["greenapi_website"]}'
+            f'{data["link_to_console"][user.language]}'
+            f'{data["links"][user.language]["greenapi_console"]}'
+        )
+    except Exception as e:
+        write_apology(notification)
 
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
