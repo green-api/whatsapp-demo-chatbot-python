@@ -18,8 +18,8 @@ def write_apology(notification: Notification) -> None:
 # Example of filling personal data:
 
 
-ID_INSTANCE = '7103888795'
-API_TOKEN_INSTANCE = 'bf18f7bef8534503bc3693713b47634dec26594ce2f146c9b9'
+ID_INSTANCE = '9903893035'
+API_TOKEN_INSTANCE = '2d0d3e70b1d749fb8deb94b27e66f682092e2fc687204a8cba'
 
 settings = {
     # set markIncomingMessagesReaded to yes to mark incoming messages as
@@ -48,7 +48,10 @@ settings = {
 bot = GreenAPIBot(
     ID_INSTANCE,
     API_TOKEN_INSTANCE,
-    delete_notifications_at_startup=False
+    delete_notifications_at_startup=False,
+    bot_debug_mode=True,
+    debug_mode=True,
+    raise_errors=True
 )
 
 with open('data.yml', 'r', encoding='utf8') as stream:
@@ -422,6 +425,29 @@ def option_12(notification: Notification) -> None:
         )
     except Exception as e:
         write_apology(notification)
+        
+        
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.LANGUAGE_SET.value,
+                    text_message=['13', '/13', '13.', '13 '])
+def option_13(notification: Notification) -> None:
+    try:
+        user = manager.check_user(notification.chat)
+        if not user:
+            return message_handler(Notification)
+        notification.answer(
+            f'{data["about_python_chatbot"][user.language]}'
+            f'{data["link_to_docs"][user.language]}'
+            f'{data["links"][user.language]["chatbot_documentation"]}'
+            f'{data["link_to_source_code"][user.language]}'
+            f'{data["links"][user.language]["chatbot_source_code"]}'
+            f'{data["link_to_green_api"][user.language]}'
+            f'{data["links"][user.language]["greenapi_website"]}'
+            f'{data["link_to_console"][user.language]}'
+            f'{data["links"][user.language]["greenapi_console"]}'
+        )
+    except Exception as e:
+        write_apology(notification)
 
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
@@ -470,7 +496,7 @@ def not_recognized_message1(notification: Notification) -> None:
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
-                    regexp=(r'^((?![1-12]|menu|меню|stop|стоп|).)*$',
+                    regexp=(r'^((?![1-13]|menu|меню|stop|стоп|).)*$',
                             IGNORECASE))
 def not_recognized_message2(notification: Notification) -> None:
     try:
