@@ -81,15 +81,24 @@ def set_language(notification: Notification) -> None:
             '5': 'he',
         }
 
-        text_message: str = notification.event["messageData"]["textMessageData"]["textMessage"]
+        type_message = notification.event["messageData"]["typeMessage"]
+        text_message: str
+        
+        if type_message == "textMessage":
+            text_message = notification.event["messageData"]["textMessageData"]["textMessage"]
+        else:
+            text_message = notification.event["messageData"]["extendedTextMessageData"]["text"]
+        
         num: str = str(next(char for char in text_message if char.isdigit()))
         selected_language: str = language_dict[num]
-
+        
         user.set_language(selected_language)
         notification.state_manager.update_state(
             notification.sender, States.LANGUAGE_SET.value)
+        
         landing_image: str = "welcome_ru.png" if selected_language in [
             'kz', 'ru'] else "welcome_en.png"
+        
         notification.answer_with_file(
             caption=f'{data["welcome_message"][user.language]}'
             f'*{notification.event["senderData"]["senderName"]}*'
