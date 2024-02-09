@@ -44,13 +44,14 @@ class States(BaseStates):
     ACTIVE: str = 'active'
     LANGUAGE_SET: str = 'lang_set'
     WAITING_RESPONSE: str = 'waiting_response'
+    NOT_ACTIVE: str = 'not_active'
 
 
 manager: Manager = Manager()
 
 
-@bot.router.message(type_message=filters.TEXT_TYPES,
-                    state=None)
+@bot.router.message(type_message=filters.TEXT_TYPES, state=None)
+@bot.router.message(type_message=filters.TEXT_TYPES, state=States.NOT_ACTIVE.value)
 def message_handler(notification: Notification) -> None:
     try:
         notification.state_manager.update_state(
@@ -278,7 +279,8 @@ def polls_handler(notification: Notification) -> None:
         user: User | None = manager.check_user(notification.chat)
         if not user:
             return message_handler(Notification)
-        votes: list[dict[str, str]] = notification.event["messageData"]["pollMessageData"]["votes"]
+        votes: list[dict[str, str]
+                    ] = notification.event["messageData"]["pollMessageData"]["votes"]
 
         for vote_data in votes:
             voters = vote_data["optionVoters"]
@@ -309,7 +311,8 @@ def option_9(notification: Notification) -> None:
             f'{data["get_avatar_message"][user.language]}'
             f'{data["links"][user.language]["get_avatar_documentation"]}'
         )
-        response: Response = notification.api.serviceMethods.getAvatar(notification.chat)
+        response: Response = notification.api.serviceMethods.getAvatar(
+            notification.chat)
         if response.data["urlAvatar"]:
             mime_type = requests.head(
                 response.data["urlAvatar"]).headers.get('content-type')
@@ -366,7 +369,8 @@ def option_11(notification: Notification) -> None:
         notification.answer(
             f'{data["add_to_contact"][user.language]}'
         )
-        bot_number: int = int(bot.api.account.getSettings().data["wid"].split("@")[0])
+        bot_number: int = int(
+            bot.api.account.getSettings().data["wid"].split("@")[0])
         notification.api.sending.sendContact(
             chatId=notification.chat,
             contact={
@@ -498,7 +502,8 @@ def stop(notification: Notification) -> None:
         user: User | None = manager.check_user(notification.chat)
         if not user:
             return message_handler(Notification)
-        notification.state_manager.update_state(notification.chat, "")
+        notification.state_manager.update_state(
+            notification.chat, States.NOT_ACTIVE.value)
         notification.answer(
             f'{data["stop_message"][user.language]}'
             f'*{notification.event["senderData"]["senderName"]}*'
