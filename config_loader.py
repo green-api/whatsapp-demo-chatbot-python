@@ -12,16 +12,19 @@ logger = logging.getLogger(__name__)
 
 class ServerConfig:
     def __init__(self, user_id: str, api_token_id: str,
-                 link_1: str, link_2: str,
-                 link_3: str, link_4: str,
-                 link_5: str):
+                 link_pdf: str, link_jpg: str,
+                 link_audio_ru: str, link_video_ru: str,
+                 link_audio_en: str, link_video_en: str,
+                 link_group_image: str):
         self.user_id = user_id
         self.api_token_id = api_token_id
-        self.link_1 = link_1
-        self.link_2 = link_2
-        self.link_3 = link_3
-        self.link_4 = link_4
-        self.link_5 = link_5
+        self.link_pdf = link_pdf
+        self.link_jpg = link_jpg
+        self.link_audio_ru = link_audio_ru
+        self.link_video_ru = link_video_ru
+        self.link_audio_en = link_audio_en
+        self.link_video_en = link_video_en
+        self.link_group_image = link_group_image
 
 
 def __none_if_empty_str(s: str):
@@ -60,32 +63,40 @@ def get_config():
 
     sapi_user_id = str(config_result.get("user_id"))
     sapi_user_token = str(config_result.get("api_token_id"))
-    slink_1 = str(config_result.get("link_1"))
-    slink_2 = str(config_result.get("link_2"))
-    slink_3 = str(config_result.get("link_3"))
-    slink_4 = str(config_result.get("link_4"))
-    slink_5 = str(config_result.get("link_5"))
+    slink_pdf = str(config_result.get("link_pdf"))
+    slink_jpg = str(config_result.get("link_jpg"))
+    slink_audio_en = str(config_result.get("link_audio_en"))
+    slink_video_en = str(config_result.get("link_video_en"))
+    slink_audio_ru = str(config_result.get("link_audio_ru"))
+    slink_video_ru = str(config_result.get("link_video_ru"))
+    slink_group_image = str(config_result.get("link_group_image"))
 
     try:
-        urllib.request.urlretrieve(slink_5, "green_api.jpg")
+        urllib.request.urlretrieve(slink_group_image, "green_api.jpg")
     except Exception as e:
-        logger.error("Failed to download group_image from: " + slink_5)
+        logger.error(
+            "Failed to download group_image from: " +
+            slink_group_image)
 
     logger.info("user id is: " + sapi_user_id)
     logger.info("api token id is: " + sapi_user_token)
-    logger.info("link for pdf is: " + slink_1)
-    logger.info("link for jpg is: " + slink_2)
-    logger.info("link for mp3 is: " + slink_3)
-    logger.info("link for mp4 is: " + slink_4)
-    logger.info("link for group_image is: " + slink_5)
+    logger.info("link for pdf is: " + slink_pdf)
+    logger.info("link for jpg is: " + slink_jpg)
+    logger.info("link for audio (ru) is: " + slink_audio_ru)
+    logger.info("link for video (ru) is: " + slink_video_ru)
+    logger.info("link for audio (en) is: " + slink_audio_en)
+    logger.info("link for video (en) is: " + slink_video_en)
+    logger.info("link for group_image is: " + slink_group_image)
     logger.info("config loaded")
 
     return ServerConfig(
         user_id=sapi_user_id,
         api_token_id=sapi_user_token,
-        link_1=slink_1,
-        link_2=slink_2,
-        link_3=slink_3,
-        link_4=slink_4,
-        link_5=slink_5
+        link_pdf=slink_pdf,
+        link_jpg=slink_jpg,
+        link_audio_ru=slink_audio_ru,
+        link_video_ru=slink_video_ru,
+        link_audio_en=slink_audio_en,
+        link_video_en=slink_video_en,
+        link_group_image=slink_group_image
     )

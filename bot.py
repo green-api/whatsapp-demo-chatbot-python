@@ -42,6 +42,7 @@ with open('data.yml', 'r', encoding='utf8') as stream:
 class States(BaseStates):
     ACTIVE = 'active'
     LANGUAGE_SET = 'lang_set'
+    WAITING_RESPONSE = 'waiting_response'
 
 
 manager = Manager()
@@ -63,7 +64,7 @@ def message_handler(notification: Notification) -> None:
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
-                    regexp=(r'^[.\s]?[1-6][.\s]?$'))
+                    regexp=(r'^[.\s]?[1-5][.\s]?$'))
 def set_language(notification: Notification) -> None:
     try:
         user = manager.check_user(notification.chat)
@@ -76,7 +77,6 @@ def set_language(notification: Notification) -> None:
             '3': 'ru',
             '4': 'es',
             '5': 'he',
-            '6': 'ar',
         }
         
         text_message = notification.event["messageData"]["textMessageData"]["textMessage"]
@@ -124,9 +124,10 @@ def option_2(notification: Notification) -> None:
         user = manager.check_user(notification.chat)
         if not user:
             return message_handler(Notification)
+        urlFile = server_config.link_pdf
         notification.api.sending.sendFileByUrl(
             chatId=notification.chat,
-            urlFile=server_config.link_1,
+            urlFile=urlFile,
             fileName='corgi.pdf',
             caption=f'{data["send_file_message"][user.language]}'
             f'{data["links"][user.language]["send_file_documentation"]}',
@@ -143,9 +144,10 @@ def option_3(notification: Notification) -> None:
         user = manager.check_user(notification.chat)
         if not user:
             return message_handler(Notification)
+        urlFile = server_config.link_jpg
         notification.api.sending.sendFileByUrl(
             chatId=notification.chat,
-            urlFile=server_config.link_2,
+            urlFile=server_config.link_jpg,
             fileName='corgi.jpg',
             caption=f'{data["send_image_message"][user.language]}'
             f'{data["links"][user.language]["send_file_documentation"]}',
@@ -162,14 +164,17 @@ def option_4(notification: Notification) -> None:
         user = manager.check_user(notification.chat)
         if not user:
             return message_handler(Notification)
+        urlFile = server_config.link_audio_en
+        if user.language in ["kz", "ru"]:
+            urlFile = server_config.link_audio_ru
         notification.answer(
             f'{data["send_audio_message"][user.language]}'
             f'{data["links"][user.language]["send_file_documentation"]}',
         )
         notification.api.sending.sendFileByUrl(
             chatId=notification.chat,
-            urlFile=server_config.link_3,
-            fileName='green-api.mp3'
+            urlFile=urlFile,
+            fileName='green-api.wov'
         )
     except Exception as e:
         write_apology(notification)
@@ -183,9 +188,12 @@ def option_5(notification: Notification) -> None:
         user = manager.check_user(notification.chat)
         if not user:
             return message_handler(Notification)
+        urlFile = server_config.link_video_en
+        if user.language in ["kz", "ru"]:
+            urlFile = server_config.link_video_ru
         notification.api.sending.sendFileByUrl(
             chatId=notification.chat,
-            urlFile=server_config.link_4,
+            urlFile=urlFile,
             fileName='green-api.mp4',
             caption=f'{data["send_video_message"][user.language]}'
             f'{data["links"][user.language]["send_file_documentation"]}',
@@ -350,9 +358,38 @@ def option_11(notification: Notification) -> None:
         user = manager.check_user(notification.chat)
         if not user:
             return message_handler(Notification)
+        notification.answer(
+            f'{data["add_to_contact"][user.language]}'
+        )
+        bot_number = int(bot.api.account.getSettings().data["wid"].split("@")[0])
+        notification.api.sending.sendContact(
+            chatId=notification.chat,
+            contact={
+                'phoneContact': bot_number,
+                'firstName': data["bot_name"][user.language],
+            },
+        )
+        notification.state_manager.update_state(
+            notification.sender, States.WAITING_RESPONSE.value)
+    except Exception as e:
+        write_apology(notification)
+
+
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.WAITING_RESPONSE.value,
+                    regexp=(r'^[.\s]?1[.\s]?$',
+                            IGNORECASE))
+def option_11_1(notification: Notification) -> None:
+    try:
+        user = manager.check_user(notification.chat)
+        if not user:
+            return message_handler(Notification)
+        notification.state_manager.update_state(
+            notification.sender, States.LANGUAGE_SET.value)
         group_response = notification.api.groups.createGroup(
             f'{data["group_name"][user.language]}',
-            [notification.chat, bot.api.account.getSettings().data["wid"]]
+            [notification.event["senderData"]["chatId"],
+                bot.api.account.getSettings().data["wid"]]
         )
         if group_response.data["created"]:
             group_picture_response = notification.api.groups.setGroupPicture(
@@ -376,6 +413,28 @@ def option_11(notification: Notification) -> None:
                 f'{data["group_created_message"][user.language]}'
                 f'{group_response.data["groupInviteLink"]}'
             )
+    except Exception as e:
+        write_apology(notification)
+
+
+@bot.router.message(type_message=filters.TEXT_TYPES,
+                    state=States.WAITING_RESPONSE.value,
+                    regexp=(r'^[.\s]?0[.\s]?$',
+                            IGNORECASE))
+def option_11_0(notification: Notification) -> None:
+    try:
+        user = manager.check_user(notification.chat)
+        if not user:
+            return message_handler(Notification)
+        notification.state_manager.update_state(
+            notification.sender, States.LANGUAGE_SET.value)
+        landing_image = "welcome_ru.png" if user.language in [
+            'kz', 'ru'] else "welcome_en.png"
+        notification.answer_with_file(
+            caption=f'{data["menu"][user.language]}',
+            file=landing_image,
+            file_name="welcome.png"
+        )
     except Exception as e:
         write_apology(notification)
 
@@ -407,8 +466,10 @@ def option_13(notification: Notification) -> None:
         user = manager.check_user(notification.chat)
         if not user:
             return message_handler(Notification)
-        notification.answer(
-            f'{data["about_python_chatbot"][user.language]}'
+        notification.answer_with_file(
+            file="about.jpg",
+            file_name="about.jpg",
+            caption=f'{data["about_python_chatbot"][user.language]}'
             f'{data["link_to_docs"][user.language]}'
             f'{data["links"][user.language]["chatbot_documentation"]}'
             f'{data["link_to_source_code"][user.language]}'
@@ -455,7 +516,7 @@ def menu(notification: Notification) -> None:
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.ACTIVE.value,
-                    regexp=(r'^((?!1|4).)*$', IGNORECASE))
+                    regexp=(r'^(?![.\s]?[1-5][.\s]?$).*', IGNORECASE))
 def not_recognized_message1(notification: Notification) -> None:
     try:
         user = manager.check_user(notification.chat)
@@ -468,7 +529,7 @@ def not_recognized_message1(notification: Notification) -> None:
 
 @bot.router.message(type_message=filters.TEXT_TYPES,
                     state=States.LANGUAGE_SET.value,
-                    regexp=(r'^((?![1-12]|menu|меню|stop|стоп|).)*$',
+                    regexp=(r'^(?!(?:[0-9]|10|11|12|13|menu|меню|stop|стоп)$).*',
                             IGNORECASE))
 def not_recognized_message2(notification: Notification) -> None:
     try:

@@ -17,7 +17,7 @@ class Manager:
     def check_user(self, chat: str):
         if self.users.get(chat):
             diff = (datetime.now()-self.users.get(chat).ts).total_seconds()
-            if diff > 300:
+            if diff > 3600:
                 self.users.get(chat).set_language(None)
                 return None
             self.users[chat].update_ts()
