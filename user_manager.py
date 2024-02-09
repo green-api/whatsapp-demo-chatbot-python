@@ -10,7 +10,7 @@ class Manager:
         self.users = {}
 
     def add_user(self, chat: str) -> "User":
-        user = User()
+        user: User = User()
         self.users[chat] = user
         return user
     
