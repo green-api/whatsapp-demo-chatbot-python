@@ -498,7 +498,7 @@ def stop(notification: Notification) -> None:
         user: User | None = manager.check_user(notification.chat)
         if not user:
             return message_handler(Notification)
-        notification.state_manager.update_state(notification.chat, None)
+        notification.state_manager.update_state(notification.chat, "")
         notification.answer(
             f'{data["stop_message"][user.language]}'
             f'*{notification.event["senderData"]["senderName"]}*'
