@@ -50,8 +50,6 @@ bot: GreenAPIBot = GreenAPIBot(
     ID_INSTANCE,
     API_TOKEN_INSTANCE,
     delete_notifications_at_startup=False,
-    bot_debug_mode=True,
-    debug_mode=True,
     raise_errors=True
 )
 
@@ -99,11 +97,18 @@ def set_language(notification: Notification) -> None:
             '4': 'es',
             '5': 'he',
         }
-
-        text_message: str = notification.event["messageData"]["textMessageData"]["textMessage"]
+        
+        type_message = notification.event["messageData"]["typeMessage"]
+        text_message: str
+        
+        if type_message == "textMessage":
+            text_message = notification.event["messageData"]["textMessageData"]["textMessage"]
+        else:
+            text_message = notification.event["messageData"]["extendedTextMessageData"]["text"]
+        
         num: str = str(next(char for char in text_message if char.isdigit()))
         selected_language: str = language_dict[num]
-
+            
         user.set_language(selected_language)
         notification.state_manager.update_state(
             notification.sender, States.LANGUAGE_SET.value)
