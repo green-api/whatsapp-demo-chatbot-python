@@ -1,6 +1,5 @@
 import logging
 import os
-import urllib.request
 from functools import cache
 
 from dotenv import load_dotenv
@@ -24,7 +23,6 @@ class ServerConfig:
         self.link_video_ru = link_video_ru
         self.link_audio_en = link_audio_en
         self.link_video_en = link_video_en
-        self.link_group_image = link_group_image
 
 
 def __none_if_empty_str(s: str):
@@ -38,7 +36,7 @@ def get_config():
     debug = int(os.environ.get("DEBUG", 0)) > 0 or False
 
     if not debug:
-        env_loaded = load_dotenv()
+        env_loaded = load_dotenv("config/.env")
         if not env_loaded:
             raise Exception(".env not found")
 
@@ -69,14 +67,6 @@ def get_config():
     slink_video_en = str(config_result.get("link_video_en"))
     slink_audio_ru = str(config_result.get("link_audio_ru"))
     slink_video_ru = str(config_result.get("link_video_ru"))
-    slink_group_image = str(config_result.get("link_group_image"))
-
-    try:
-        urllib.request.urlretrieve(slink_group_image, "green_api.jpg")
-    except Exception:
-        logger.error(
-            "Failed to download group_image from: " +
-            slink_group_image)
 
     logger.info("user id is: " + sapi_user_id)
     logger.info("api token id is: " + sapi_user_token)
@@ -86,7 +76,6 @@ def get_config():
     logger.info("link for video (ru) is: " + slink_video_ru)
     logger.info("link for audio (en) is: " + slink_audio_en)
     logger.info("link for video (en) is: " + slink_video_en)
-    logger.info("link for group_image is: " + slink_group_image)
     logger.info("config loaded")
 
     return ServerConfig(
@@ -98,5 +87,4 @@ def get_config():
         link_video_ru=slink_video_ru,
         link_audio_en=slink_audio_en,
         link_video_en=slink_video_en,
-        link_group_image=slink_group_image
     )
