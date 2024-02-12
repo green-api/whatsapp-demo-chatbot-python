@@ -53,7 +53,7 @@ bot: GreenAPIBot = GreenAPIBot(
     raise_errors=True
 )
 
-with open('data.yml', 'r', encoding='utf8') as stream:
+with open('config/data.yml', 'r', encoding='utf8') as stream:
     data = safe_load(stream)
 
 
@@ -97,22 +97,15 @@ def set_language(notification: Notification) -> None:
             '5': 'he',
         }
         
-        type_message = notification.event["messageData"]["typeMessage"]
-        text_message: str
-        
-        if type_message == "textMessage":
-            text_message = notification.event["messageData"]["textMessageData"]["textMessage"]
-        else:
-            text_message = notification.event["messageData"]["extendedTextMessageData"]["text"]
-        
+        text_message: str = notification.message_text
         num: str = str(next(char for char in text_message if char.isdigit()))
         selected_language: str = language_dict[num]
             
         user.set_language(selected_language)
         notification.state_manager.update_state(
             notification.sender, States.LANGUAGE_SET.value)
-        landing_image: str = "welcome_ru.png" if selected_language in [
-            'kz', 'ru'] else "welcome_en.png"
+        landing_image: str = "media/welcome_ru.png" if selected_language in [
+            'kz', 'ru'] else "media/welcome_en.png"
         notification.answer_with_file(
             caption=f'{data["welcome_message"][user.language]}'
             f'*{notification.event["senderData"]["senderName"]}*'
@@ -149,8 +142,7 @@ def option_2(notification: Notification) -> None:
         user: User | None = manager.check_user(notification.chat)
         if not user:
             return message_handler(Notification)
-        notification.api.sending.sendFileByUrl(
-            chatId=notification.chat,
+        notification.answer_with_file(
             urlFile="https://storage.yandexcloud.net/sw-prod-03-test/ChatBot/dorgi.pdf",
             fileName='corgi.pdf',
             caption=f'{data["send_file_message"][user.language]}'
@@ -168,8 +160,7 @@ def option_3(notification: Notification) -> None:
         user: User | None = manager.check_user(notification.chat)
         if not user:
             return message_handler(Notification)
-        notification.api.sending.sendFileByUrl(
-            chatId=notification.chat,
+        notification.answer_with_file(
             urlFile='https://images.rawpixel.com/image_1100/cHJpdmF0ZS9sci9'
             'pbWFnZXMvd2Vic2l0ZS8yMDIzLTExL3Jhd3BpeGVsX29mZmljZV8zM'
             'F9hX3Bob3RvX29mX2hhcHB5X2NvcmdpX2RvZ193ZWFyaW5nX3NhbnR'
@@ -198,8 +189,7 @@ def option_4(notification: Notification) -> None:
         urlFile: str = "https://storage.yandexcloud.net/sw-prod-03-test/ChatBot/Audio_bot_eng.wav"
         if user.language in ["kz", "ru"]:
             urlFile: str = "https://storage.yandexcloud.net/sw-prod-03-test/ChatBot/Audio_bot.wav"
-        notification.api.sending.sendFileByUrl(
-            chatId=notification.chat,
+        notification.answer_with_file(
             urlFile=urlFile,
             fileName='green-api.wav')
     except Exception:
@@ -217,8 +207,7 @@ def option_5(notification: Notification) -> None:
         urlFile: str = "https://storage.yandexcloud.net/sw-prod-03-test/ChatBot/Video_bot_ru.mp4"
         if user.language in ["kz", "ru"]:
             urlFile: str = "https://storage.yandexcloud.net/sw-prod-03-test/ChatBot/Video_bot_eng.mp4"
-        notification.api.sending.sendFileByUrl(
-            chatId=notification.chat,
+        notification.answer_with_file(
             urlFile=urlFile,
             fileName='green-api.mp4',
             caption=f'{data["send_video_message"][user.language]}'
@@ -343,14 +332,13 @@ def option_9(notification: Notification) -> None:
             mime_type = requests.head(
                 response.data["urlAvatar"]).headers.get('content-type')
             extension = mime_type.split('/')[-1]
-            notification.api.sending.sendFileByUrl(
-                notification.chat,
+            notification.answer_with_file(
                 urlFile=response.data["urlAvatar"],
                 fileName="your_avatar." + extension,
                 caption=f'{data["avatar_found"][user.language]}'
             )
         else:
-            notification.api.sending.sendMessage(
+            notification.answer(
                 notification.chat, f'{data["avatar_not_found"][user.language]}')
     except Exception:
         write_apology(notification)
@@ -364,14 +352,12 @@ def option_10(notification: Notification) -> None:
         user: User | None = manager.check_user(notification.chat)
         if not user:
             return message_handler(Notification)
-        notification.api.sending.sendMessage(
-            notification.chat,
+        notification.answer(
             f'{data["send_link_message_preview"][user.language]}'
             f'{data["links"][user.language]["send_link_documentation"]}',
             linkPreview=True
         )
-        notification.api.sending.sendMessage(
-            notification.chat,
+        notification.answer(
             f'{data["send_link_message_no_preview"][user.language]}'
             f'{data["links"][user.language]["send_link_documentation"]}',
             linkPreview=False
@@ -429,7 +415,7 @@ def option_11_1(notification: Notification) -> None:
         if group_response.data["created"]:
             group_picture_response: Response = notification.api.groups.setGroupPicture(
                 f'{group_response.data["chatId"]}',
-                "green_api.jpg"
+                "media/green_api.jpg"
             )
             if group_picture_response.data["setGroupPicture"]:
                 notification.api.sending.sendMessage(
@@ -463,8 +449,8 @@ def option_11_0(notification: Notification) -> None:
             return message_handler(Notification)
         notification.state_manager.update_state(
             notification.sender, States.LANGUAGE_SET.value)
-        landing_image: str = "welcome_ru.png" if user.language in [
-            'kz', 'ru'] else "welcome_en.png"
+        landing_image: str = "media/welcome_ru.png" if user.language in [
+            'kz', 'ru'] else "media/welcome_en.png"
         notification.answer_with_file(
             caption=f'{data["menu"][user.language]}',
             file=landing_image,
@@ -482,8 +468,7 @@ def option_12(notification: Notification) -> None:
         user: User | None = manager.check_user(notification.chat)
         if not user:
             return message_handler(Notification)
-        notification.api.sending.sendMessage(
-            notification.chat,
+        notification.answer(
             f'{data["send_quoted_message"][user.language]}'
             f'{data["links"][user.language]
                 ["send_quoted_message_documentation"]}',
@@ -502,9 +487,9 @@ def option_13(notification: Notification) -> None:
         if not user:
             return message_handler(Notification)
         notification.answer_with_file(
-            file="about.jpg",
+            file="media/about.jpg",
             file_name="about.jpg",
-            caption=f'{data["about_python_chatbot"][user.language]}'
+            caption=(f'{data["about_python_chatbot"][user.language]}'
             f'{data["link_to_docs"][user.language]}'
             f'{data["links"][user.language]["chatbot_documentation"]}'
             f'{data["link_to_source_code"][user.language]}'
@@ -514,7 +499,7 @@ def option_13(notification: Notification) -> None:
             f'{data["link_to_console"][user.language]}'
             f'{data["links"][user.language]["greenapi_console"]}'
             f'{data["link_to_youtube"][user.language]}'
-            f'{data["links"][user.language]["youtube_channel"]}'
+            f'{data["links"][user.language]["youtube_channel"]}')
         )
     except Exception:
         write_apology(notification)
