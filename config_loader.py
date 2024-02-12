@@ -10,15 +10,19 @@ logger = logging.getLogger(__name__)
 
 
 class ServerConfig:
-    def __init__(self, user_id: str, api_token_id: str, pool_id: str,
-                 server_id: str, app_name: str, link_1: str, link_2: str):
+    def __init__(self, user_id: str, api_token_id: str,
+                 link_pdf: str, link_jpg: str,
+                 link_audio_ru: str, link_video_ru: str,
+                 link_audio_en: str, link_video_en: str,
+                 link_group_image: str):
         self.user_id = user_id
         self.api_token_id = api_token_id
-        self.pool_id = pool_id
-        self.server_id = server_id
-        self.app_name = app_name
-        self.link_1 = link_1
-        self.link_2 = link_2
+        self.link_pdf = link_pdf
+        self.link_jpg = link_jpg
+        self.link_audio_ru = link_audio_ru
+        self.link_video_ru = link_video_ru
+        self.link_audio_en = link_audio_en
+        self.link_video_en = link_video_en
 
 
 def __none_if_empty_str(s: str):
@@ -32,22 +36,18 @@ def get_config():
     debug = int(os.environ.get("DEBUG", 0)) > 0 or False
 
     if not debug:
-        env_loaded = load_dotenv()
+        env_loaded = load_dotenv("config/.env")
         if not env_loaded:
             raise Exception(".env not found")
 
     app_name = "sw-chatbot-7103"
 
     active_profile = __none_if_empty_str(os.environ.get("ACTIVE_PROFILE"))
-    pool_id, server_id = active_profile.split(",")
 
     endpoint = __none_if_empty_str(os.environ.get("SPRING_CLOUD_CONFIG_URI"))
     if not debug and endpoint is None:
         raise Exception("SPRING_CLOUD_CONFIG_URI not set!")
 
-    if endpoint is None:
-        api_port = 0
-        sapi_params_dict = os.environ
     else:
         client_config = (
             ClientConfigurationBuilder()
@@ -61,21 +61,30 @@ def get_config():
 
     sapi_user_id = str(config_result.get("user_id"))
     sapi_user_token = str(config_result.get("api_token_id"))
-    slink_1 = str(config_result.get("link_1"))
-    slink_2 = str(config_result.get("link_2"))
+    slink_pdf = str(config_result.get("link_pdf"))
+    slink_jpg = str(config_result.get("link_jpg"))
+    slink_audio_en = str(config_result.get("link_audio_en"))
+    slink_video_en = str(config_result.get("link_video_en"))
+    slink_audio_ru = str(config_result.get("link_audio_ru"))
+    slink_video_ru = str(config_result.get("link_video_ru"))
 
     logger.info("user id is: " + sapi_user_id)
     logger.info("api token id is: " + sapi_user_token)
-    logger.info("link for pdf is: " + slink_1)
-    logger.info("link for jpg is: " + slink_2)
+    logger.info("link for pdf is: " + slink_pdf)
+    logger.info("link for jpg is: " + slink_jpg)
+    logger.info("link for audio (ru) is: " + slink_audio_ru)
+    logger.info("link for video (ru) is: " + slink_video_ru)
+    logger.info("link for audio (en) is: " + slink_audio_en)
+    logger.info("link for video (en) is: " + slink_video_en)
     logger.info("config loaded")
 
     return ServerConfig(
         user_id=sapi_user_id,
         api_token_id=sapi_user_token,
-        link_1=slink_1,
-        link_2=slink_2,
-        pool_id=pool_id,
-        server_id=server_id,
-        app_name=app_name,
+        link_pdf=slink_pdf,
+        link_jpg=slink_jpg,
+        link_audio_ru=slink_audio_ru,
+        link_video_ru=slink_video_ru,
+        link_audio_en=slink_audio_en,
+        link_video_en=slink_video_en,
     )
