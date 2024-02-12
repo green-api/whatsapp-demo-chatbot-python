@@ -128,8 +128,7 @@ def option_2(notification: Notification) -> None:
         if not user:
             return message_handler(Notification)
         url_file: str = server_config.link_pdf
-        notification.api.sending.sendFileByUrl(
-            chatId=notification.chat,
+        notification.answer_with_file(
             urlFile=url_file,
             fileName='corgi.pdf',
             caption=f'{data["send_file_message"][user.language]}'
@@ -148,8 +147,7 @@ def option_3(notification: Notification) -> None:
         if not user:
             return message_handler(Notification)
         url_file: str = server_config.link_jpg
-        notification.api.sending.sendFileByUrl(
-            chatId=notification.chat,
+        notification.answer_with_file(
             urlFile=url_file,
             fileName='corgi.jpg',
             caption=f'{data["send_image_message"][user.language]}'
@@ -174,8 +172,7 @@ def option_4(notification: Notification) -> None:
             f'{data["send_audio_message"][user.language]}'
             f'{data["links"][user.language]["send_file_documentation"]}',
         )
-        notification.api.sending.sendFileByUrl(
-            chatId=notification.chat,
+        notification.answer_with_file(
             urlFile=url_file,
             fileName='green-api.wov'
         )
@@ -194,8 +191,7 @@ def option_5(notification: Notification) -> None:
         url_file: str = server_config.link_video_en
         if user.language in ["kz", "ru"]:
             url_file: str = server_config.link_video_ru
-        notification.api.sending.sendFileByUrl(
-            chatId=notification.chat,
+        notification.answer_with_file(
             urlFile=url_file,
             fileName='green-api.mp4',
             caption=f'{data["send_video_message"][user.language]}'
@@ -318,8 +314,7 @@ def option_9(notification: Notification) -> None:
             mime_type = requests.head(
                 response.data["urlAvatar"]).headers.get('content-type')
             extension = mime_type.split('/')[-1]
-            notification.api.sending.sendFileByUrl(
-                notification.chat,
+            notification.answer_with_file(
                 urlFile=response.data["urlAvatar"],
                 fileName="your_avatar." + extension,
                 caption=f'{data["avatar_found"][user.language]}'
