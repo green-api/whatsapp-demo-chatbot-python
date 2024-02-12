@@ -58,9 +58,8 @@ def message_handler(notification: Notification) -> None:
             notification.sender,
             States.ACTIVE.value
         )
-        user: User | None = manager.check_user(notification.chat)
         notification.answer(data['select_language'])
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 
@@ -107,7 +106,7 @@ def set_language(notification: Notification) -> None:
             file=landing_image,
             file_name="welcome.png"
         )
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 
@@ -123,7 +122,7 @@ def option_1(notification: Notification) -> None:
             f'{data["send_text_message"][user.language]}'
             f'{data["links"][user.language]["send_text_documentation"]}'
         )
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 
@@ -143,7 +142,7 @@ def option_2(notification: Notification) -> None:
             caption=f'{data["send_file_message"][user.language]}'
             f'{data["links"][user.language]["send_file_documentation"]}',
         )
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 
@@ -158,12 +157,12 @@ def option_3(notification: Notification) -> None:
         urlFile: str = server_config.link_jpg
         notification.api.sending.sendFileByUrl(
             chatId=notification.chat,
-            urlFile=server_config.link_jpg,
+            urlFile=urlFile,
             fileName='corgi.jpg',
             caption=f'{data["send_image_message"][user.language]}'
             f'{data["links"][user.language]["send_file_documentation"]}',
         )
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 
@@ -187,7 +186,7 @@ def option_4(notification: Notification) -> None:
             urlFile=urlFile,
             fileName='green-api.wov'
         )
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 
@@ -209,7 +208,7 @@ def option_5(notification: Notification) -> None:
             caption=f'{data["send_video_message"][user.language]}'
             f'{data["links"][user.language]["send_file_documentation"]}',
         )
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 
@@ -232,7 +231,7 @@ def option_6(notification: Notification) -> None:
                 'firstName': notification.event['senderData']['senderName'],
             },
         )
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 
@@ -253,7 +252,7 @@ def option_7(notification: Notification) -> None:
             latitude=35.888171,
             longitude=14.440230,
         )
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 
@@ -278,7 +277,7 @@ def option_8(notification: Notification) -> None:
             ],
             multiple_answers=False
         )
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 
@@ -304,7 +303,7 @@ def polls_handler(notification: Notification) -> None:
                 elif option_name == f"{data["poll_option_3"][user.language]}":
                     notification.answer(
                         f'{data["poll_answer_3"][user.language]}')
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 
@@ -335,7 +334,7 @@ def option_9(notification: Notification) -> None:
         else:
             notification.api.sending.sendMessage(
                 notification.chat, f'{data["avatar_not_found"][user.language]}')
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 
@@ -359,7 +358,7 @@ def option_10(notification: Notification) -> None:
             f'{data["links"][user.language]["send_link_documentation"]}',
             linkPreview=False
         )
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 # To add user to a group that user's number must be in your phone numbers contact list!
@@ -389,7 +388,7 @@ def option_11(notification: Notification) -> None:
         )
         notification.state_manager.update_state(
             notification.sender, States.WAITING_RESPONSE.value)
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 
@@ -431,7 +430,7 @@ def option_11_1(notification: Notification) -> None:
                 f'{data["group_created_message"][user.language]}'
                 f'{group_response.data["groupInviteLink"]}'
             )
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 
@@ -453,7 +452,7 @@ def option_11_0(notification: Notification) -> None:
             file=landing_image,
             file_name="welcome.png"
         )
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 
@@ -472,7 +471,7 @@ def option_12(notification: Notification) -> None:
                 ["send_quoted_message_documentation"]}',
             quotedMessageId=notification.event["idMessage"]
         )
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 
@@ -499,7 +498,7 @@ def option_13(notification: Notification) -> None:
             f'{data["link_to_youtube"][user.language]}'
             f'{data["links"][user.language]["youtube_channel"]}'
         )
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 
@@ -518,7 +517,7 @@ def stop(notification: Notification) -> None:
             f'*{notification.event["senderData"]["senderName"]}*'
             f'!'
         )
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 
@@ -540,7 +539,7 @@ def menu(notification: Notification) -> None:
             file=landing_image,
             file_name="welcome.png"
         )
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 
@@ -553,7 +552,7 @@ def not_recognized_message1(notification: Notification) -> None:
         if not user:
             message_handler(Notification)
         notification.answer(data['specify_language'])
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 
@@ -567,7 +566,7 @@ def not_recognized_message2(notification: Notification) -> None:
         if not user:
             message_handler(Notification)
         notification.answer(data['not_recognized_message'][user.language])
-    except Exception as e:
+    except Exception:
         write_apology(notification)
 
 
