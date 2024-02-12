@@ -73,7 +73,7 @@ def get_config():
 
     try:
         urllib.request.urlretrieve(slink_group_image, "green_api.jpg")
-    except Exception as e:
+    except Exception:
         logger.error(
             "Failed to download group_image from: " +
             slink_group_image)
