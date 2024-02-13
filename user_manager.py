@@ -13,10 +13,10 @@ class Manager:
         user = User()
         self.users[chat] = user
         return user
-    
-    def check_user(self, chat: str):
+
+    def check_user(self, chat: str) -> Optional["User"]:
         if self.users.get(chat):
-            diff = (datetime.now()-self.users.get(chat).ts).total_seconds()
+            diff = (datetime.now() - self.users.get(chat).ts).total_seconds()
             if diff > 3600:
                 self.users.get(chat).set_language(None)
                 return None
@@ -29,11 +29,11 @@ class Manager:
 class User:
     language: Optional[str] = None
     ts: Optional[datetime] = None
-    
+
     def __init__(self):
         self.ts = datetime.now()
 
-    def set_language(self, language: str):
+    def set_language(self, language: Optional[str]):
         self.language = language
 
     def update_ts(self):

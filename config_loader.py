@@ -10,11 +10,17 @@ logger = logging.getLogger(__name__)
 
 
 class ServerConfig:
-    def __init__(self, user_id: str, api_token_id: str,
-                 link_pdf: str, link_jpg: str,
-                 link_audio_ru: str, link_video_ru: str,
-                 link_audio_en: str, link_video_en: str,
-                 link_group_image: str):
+    def __init__(
+            self,
+            user_id: str,
+            api_token_id: str,
+            link_pdf: str,
+            link_jpg: str,
+            link_audio_ru: str,
+            link_video_ru: str,
+            link_audio_en: str,
+            link_video_en: str
+    ):
         self.user_id = user_id
         self.api_token_id = api_token_id
         self.link_pdf = link_pdf
