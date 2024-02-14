@@ -330,13 +330,13 @@ def polls_handler(notification: Notification) -> None:
             voters = vote_data["optionVoters"]
             if voters:
                 option_name = vote_data["optionName"]
-                if option_name == f"{data["poll_option_1"][user.language]}":
+                if option_name == f'{data["poll_option_1"][user.language]}':
                     notification.answer(
                         f'{data["poll_answer_1"][user.language]}')
-                elif option_name == f"{data["poll_option_2"][user.language]}":
+                elif option_name == f'{data["poll_option_2"][user.language]}':
                     notification.answer(
                         f'{data["poll_answer_2"][user.language]}')
-                elif option_name == f"{data["poll_option_3"][user.language]}":
+                elif option_name == f'{data["poll_option_3"][user.language]}':
                     notification.answer(
                         f'{data["poll_answer_3"][user.language]}')
     except Exception:
