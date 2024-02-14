@@ -1,4 +1,6 @@
+from os.path import basename
 from re import IGNORECASE
+from urllib.parse import urlparse
 
 import requests
 from whatsapp_api_client_python.API import GreenAPIResponse
@@ -200,10 +202,13 @@ def option_4(notification: Notification) -> None:
             f'{data["links"][user.language]["send_file_documentation"]}'
         ))
 
+        url = urlparse(url_file)
+        file_name = basename(url.path)
+
         notification.api.sending.sendFileByUrl(
             notification.chat,
             url_file,
-            "green-api.wov"
+            file_name
         )
     except Exception:
         send_error_message(notification)
@@ -360,7 +365,7 @@ def option_9(notification: Notification) -> None:
         ))
 
         response: GreenAPIResponse = notification.api.serviceMethods.getAvatar(
-            notification.chat
+            notification.sender
         )
         if response.data["urlAvatar"]:
             mime_type = requests.head(
@@ -453,7 +458,7 @@ def option_11_1(notification: Notification) -> None:
             group_picture_response: GreenAPIResponse = (
                 notification.api.groups.setGroupPicture(
                     f'{group_response.data["chatId"]}',
-                    "media/green_api.jpg"
+                    "media/green-api-full.png"
                 )
             )
             if group_picture_response.data["setGroupPicture"]:
@@ -586,6 +591,11 @@ def stop(notification: Notification) -> None:
 @bot.router.message(
     type_message=TEXT_TYPES,
     state=States.LANGUAGE_SET.value,
+    text_message=["menu", "меню", "Menu", "Меню"]
+)
+@bot.router.message(
+    type_message=TEXT_TYPES,
+    state=States.WAITING_RESPONSE.value,
     text_message=["menu", "меню", "Menu", "Меню"]
 )
 def menu(notification: Notification) -> None:
