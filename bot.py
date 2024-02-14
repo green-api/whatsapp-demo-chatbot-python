@@ -465,9 +465,7 @@ def option_11_1(notification: Notification) -> None:
             else:
                 notification.api.sending.sendMessage(
                     f'{group_response.data["chatId"]}',
-                    f'{data["send_group_message_set_picture_false"][
-                        user.language
-                    ]}'
+                    f'{data["send_group_message_set_picture_false"][user.language]}'
                     f'{data["links"][user.language]["groups_documentation"]}',
                 )
             notification.answer(
@@ -524,9 +522,7 @@ def option_12(notification: Notification) -> None:
             return message_handler(notification)
         notification.answer(
             f'{data["send_quoted_message"][user.language]}'
-            f'{data["links"][user.language][
-                "send_quoted_message_documentation"
-            ]}',
+            f'{data["links"][user.language]["send_quoted_message_documentation"]}',
             quoted_message_id=notification.event["idMessage"]
         )
     except Exception:
@@ -581,8 +577,7 @@ def stop(notification: Notification) -> None:
 
         notification.answer((
             f'{data["stop_message"][user.language]}'
-            f'*{notification.event["senderData"]["senderName"]}*'
-            f'!'
+            f'*{notification.event["senderData"]["senderName"]}*!'
         ))
     except Exception:
         send_error_message(notification)
