@@ -25,6 +25,7 @@ API_TOKEN_INSTANCE: str = server_config.api_token_id
 
 bot = GreenAPIBot(
     ID_INSTANCE, API_TOKEN_INSTANCE,
+    debug_mode=True, bot_debug_mode=True,
 
     # https://green-api.com/en/docs/api/account/GetSettings/
     settings={
