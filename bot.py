@@ -4,6 +4,8 @@ from re import IGNORECASE
 from urllib.parse import urlparse
 
 import requests
+import configparser
+
 from whatsapp_api_client_python.API import GreenAPIResponse
 from whatsapp_chatbot_python import BaseStates, GreenAPIBot, Notification
 from whatsapp_chatbot_python.filters import TEXT_TYPES
@@ -17,8 +19,21 @@ def send_error_message(notification: Notification) -> None:
         "We are sorry, an error occurred while processing your request"
     )
 
-ID_INSTANCE: str = os.environ.get("INSTANCE")
-API_TOKEN_INSTANCE: str = os.environ.get("TOKEN")
+ID_INSTANCE: str
+API_TOKEN_INSTANCE: str
+
+config = configparser.ConfigParser()
+configExist = False
+if config.read('/Library/config.ini'):
+    configExist = True
+if config.read('C:/config.ini'):
+    configExist = True
+if configExist:
+    ID_INSTANCE = config['DEFAULT']['INSTANCE']
+    API_TOKEN_INSTANCE = config['DEFAULT']['TOKEN']
+else:
+    ID_INSTANCE: str = os.environ.get("INSTANCE")
+    API_TOKEN_INSTANCE: str = os.environ.get("TOKEN")
 
 bot = GreenAPIBot(
     ID_INSTANCE, API_TOKEN_INSTANCE,
