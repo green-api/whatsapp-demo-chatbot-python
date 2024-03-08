@@ -23,17 +23,16 @@ ID_INSTANCE: str
 API_TOKEN_INSTANCE: str
 
 config = configparser.ConfigParser()
-configExist = False
-if config.read('/Library/config.ini'):
-    configExist = True
-if config.read('C:/config.ini'):
-    configExist = True
-if configExist:
+
+if config.read('/app/instanceData/config.ini'):
     ID_INSTANCE = config['DEFAULT']['INSTANCE']
     API_TOKEN_INSTANCE = config['DEFAULT']['TOKEN']
 else:
+    print("instance config not found")
     ID_INSTANCE: str = os.environ.get("INSTANCE")
     API_TOKEN_INSTANCE: str = os.environ.get("TOKEN")
+if not ID_INSTANCE:
+    print("instance environments not found")
 
 bot = GreenAPIBot(
     ID_INSTANCE, API_TOKEN_INSTANCE,

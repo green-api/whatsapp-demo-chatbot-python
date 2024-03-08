@@ -27,6 +27,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # Copy the source code into the container.
 COPY . .
 
+RUN mkdir -p /app/instanceData
+VOLUME /app/instanceData
+
 # Expose the port that the application listens on.
 EXPOSE 8000
 
