@@ -365,9 +365,9 @@ current_last_interaction_ts = current_sender_state_data[LAST_INTERACTION_KEY]
 ```
 
 ## Управление сообщениями  
-Как и указывает чатбот в ответах, все сообщения отправлены через API. Документацию по методам отправки сообщений можно найти на сайте [green-api.com/docs/api/sending](https://green-api.com/docs/api/sending/).
+Как и указывает чатбот в ответах, все сообщения отправлены через API. Документацию по методам отправки сообщений можно найти на сайте в разделе [Методы отправки](https://green-api.com/docs/api/sending/).
 
-Что касается получения сообщений, то сообщения вычитываются через HTTP API. Документацию по методам получения сообщений можно найти на сайте [green-api.com/docs/api/receiving/technology-http-api](https://green-api.com/docs/api/receiving/technology-http-api/).
+Что касается получения сообщений, то сообщения вычитываются через HTTP API. Документацию по методам получения сообщений можно найти на [сайте](https://green-api.com/docs/api/receiving/technology-http-api/).
 
 Чатбот использует библиотеку [whatsapp-chatbot-python](https://github.com/green-api/whatsapp-chatbot-python), где уже интегрированы методы отправки и получения сообщений, поэтому сообщения вычитываются автоматически, а отправка обычных текстовых сообщений упрощена.
 

@@ -4,7 +4,7 @@
 
 - [Документация на русском языке](https://github.com/green-api/whatsapp-demo-chatbot-python/blob/main/README_RU.md).  
 
-Demo version of Whatsapp chatbot based on API service [GREEN-API](https://green-api.com).
+Demo version of Whatsapp chatbot based on API service [GREEN-API](https://green-api.com/en).
 Using API, the chatbot sends text messages, files, images, music, videos, contacts, geolocation, surveys, requests an avatar, sends links, creates a group with the bot, and quotes a message.  
 
 ## Table of contents
@@ -193,7 +193,7 @@ config.link_jpg,
 caption=third_option_answer_text,
 )
 ```
-All changes must be saved, after which you can launch the chatbot. Return to [step 2](#launch-chatbot) to launch the chatbot.  
+All changes must be saved, after which you can launch the chatbot. Return to [step 2](#launching-the-chatbot) to launch the chatbot.  
 
 ## Usage  
 After completing the previous steps, you can run the chatbot with your Whatsapp account. It is important to remember that you must be logged in to your [console](https://console.green-api.com/).
@@ -268,7 +268,7 @@ Each message sent to the chatbot is processed on line 45:
 def initial_handler(notification: Notification) -> None:
 ```
 
-The handler receives messages via incoming notifications of type [webhook](https://green-api.com/docs/api/receiving/notifications-format/incoming-message/Webhook-IncomingMessageReceived/).
+The handler receives messages via incoming notifications of type [webhook](https://green-api.com/en/docs/api/receiving/notifications-format/incoming-message/Webhook-IncomingMessageReceived/).
 The chatbot checks the details from the sender and then saves the sender using the **internal/utils.py** library.
 
 Returning to the `bot.py` file, after the user sends the first message to the chatbot, the chatbot checks if the user is already in the list of users. If not, a new user is created.
@@ -347,9 +347,9 @@ return sender_state_reset(notification)
 ```
 
 ## Message handling  
-The chatbot indicates in its responses, all messages are sent via API. Documentation on sending methods can be found at [green-api.com/en/docs/api/sending](https://green-api.com/docs/api/sending/).
+The chatbot indicates in its responses, all messages are sent via API. Documentation on sending methods can be found at [Sending methods](https://green-api.com/en/docs/api/sending/).
 
-As for receiving messages, messages are read via HTTP API. Documentation on receiving methods can be found at [green-api.com/docs/api/receiving/technology-http-api](https://green-api.com/docs/api/receiving/technology-http-api/).
+As for receiving messages, messages are read via HTTP API. Documentation on receiving methods can be found at [site](https://green-api.com/en/docs/api/receiving/technology-http-api/).
 
 The chatbot uses the [whatsapp-chatbot-python](https://github.com/green-api/whatsapp-chatbot-python) library, which already integrates sending and receiving methods, so messages are read automatically, and sending regular text messages is simplified.
 
@@ -369,6 +369,6 @@ contact={
 
 ## License
 
-Licensed under [Creative Commons Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)](https://creativecommons.org/licenses/by-nd/4.0/) terms.
+Licensed under [Creative Commons Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)](https://creativecommons.org/licenses/by-nd/4.0/).
 
 Please see file [LICENSE](https://github.com/green-api/whatsapp-demo-chatbot-python/blob/main/LICENCE).
