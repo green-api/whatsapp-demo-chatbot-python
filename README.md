@@ -1,320 +1,371 @@
-# whatsapp-demo-chatbot-python
+# whatsapp-demo-chatbot-python  
 
-![](https://img.shields.io/badge/license-CC%20BY--ND%204.0-green)
+![](https://img.shields.io/badge/license-CC%20BY--ND%204.0-green)  
 
-- [Документация на русском языке](https://github.com/green-api/whatsapp-demo-chatbot-python/blob/main/README_RU.md).
+- [Документация на русском языке](https://github.com/green-api/whatsapp-demo-chatbot-python/blob/main/README_RU.md).  
 
-Simple chatbot created with python based on API service [green-api.com](https://green-api.com/en/).
-The chatbot provides a demonstration of APIs available for users - sending messages of texts, images, locations, files, and contacts.
-
+Demo version of Whatsapp chatbot based on API service [GREEN-API](https://green-api.com).
+Using API, the chatbot sends text messages, files, images, music, videos, contacts, geolocation, surveys, requests an avatar, sends links, creates a group with the bot, and quotes a message.  
 
 ## Table of contents
 * [Installation](#installation)
-* [Launching a chatbot](#launching-a-chatbot)
+* [Authorization in GREEN-API](#authorization-in-green-api)
+* [Launching the chatbot](#launching-the-chatbot)
+* [Launch the chatbot in debug mode](#launch-the-chatbot-in-debug-mode)
 * [Setup](#setup)
 * [Usage](#usage)
 * [Code structure](#code-structure)
 * [Message handling](#message-handling)
 
+## Installation  
 
-## Installation
-Preparing the python environment to run the project is required. To set up an environment one should go to the [python](https://www.python.org/) official website and download the latest release compatible for the OS.
+To run the chatbot, you need to have the Python interpreter installed. It is already installed on Linux and MacOS. For Windows, download the latest stable version from the [official website](https://www.python.org/), run the installer and follow the recommendations.  
 
-This action will download the installer, which one will need to open and start. Follow the guidelines in the installer and complete the installation.
+Check the Python version by entering the command line (PowerShell - for Windows) and entering the query:  ``` python --version ```  
+The response to the entered query should be the Python version in the following format: ``` Python 3.N.N ```. You must have installed Python version 3.8 or higher.  
 
-To check if the environment was established correct, run the following command in cmd / bash:
-```
-python --version
-```
-The returning statement should contain the version of python installed on your machine similar to:
-```
-Python 3.N.N
-```
-After ensuring that environment is set up, copy the project on your local machine by downloading the zip file from [whatsapp-demo-chatbot-python](https://github.com/green-api/whatsapp-demo-chatbot-python) and unpacking it.
+Make a copy of the bot chat with ``` git clone https://github.com/green-api/whatsapp-demo-chatbot-python.git ``` or download the archive [whatsapp-demo-chatbot-python](https ://github.com/green-api/whatsapp-demo-chatbot-python).  
 
-Or if one's familiar with distributed version control system s/he can clone the project by running:
-```
-git clone https://github.com/green-api/whatsapp-demo-chatbot-python.git
-```
-Open the directory containing the project and call the cmd / bash from the current directory. To do this one must add `cmd` to the path and type in `Enter`.
+The list of necessary libraries is in the requirements.txt file. Run the following command to install them: ``` python -m pip install -r requirements.txt ```. The environment and necessary libraries are installed and ready for running chatbot. You can set up and launch the chatbot on the Whatsapp account.
 
-Then, use the package manager [pip](https://pip.pypa.io/en/stable/) to install the [whatsapp-chatbot-python](https://github.com/green-api/whatsapp-chatbot-python) and other modules required to run the code.
+## Authorization in GREEN-API  
 
-The following command calls the pip package manager and installs the modules to the environment. The package manager is installed in the environment by default.
-```
-python -m pip install -r requirements.txt
-```
-Environment for running chatbot is ready, now one must set up and launch the chatbot on the Whatsapp account.
-
-
-## Launching a chatbot
-To use the chatbot on Whatsapp account one must sign up to [personal cabinet](https://console.green-api.com/), as the chatbot is based on the APIs provided. There's a [guideline](https://green-api.com/en/docs/before-start/) available for new users how to set up the account and get parameters for working with API, mainly:
+To set up the chatbot on your Whatsapp account you must sign up to [console](https://console.green-api.com/) and register. For new users, [instructions](https://green-api.com/en/docs/before-start/) are provided for setting up an account and obtaining the parameters necessary for the chatbot to work, namely:  
 ```bash
 idInstance
 apiTokenInstance
+```  
+
+## Launching the chatbot  
+
+The bot can be launched on the server or locally. To start chatbot local deployment, you must enable DEBUG MODE or start a local server to transfer the necessary data.
+
+The configuration file *.env* is located in the *config* directory. When receiving data from the server, the configuration file looks like this:
+
 ```
-After obtaining the mentioned parameters, one has to open the `bot.py` file and fill up the account's parameters with `idInstance` and `apiTokenInstance` values correspondingly in the 17th line.
-Initialization is essential to synchronize with one's Whatsapp account:
-```python
-id_instance = ''
-api_token_instance = ''
+active_profile=GreenAPI
+spring_cloud_config_uri=http://localhost:8000
 ```
-Then the chatbot will get access to one's Whatsapp account via these parameters:
-```python
-bot = GreenAPIBot(id_instance, api_token_instance)
+
+Where active_profile is your profile ID, it takes a string as a value.
+spring_cloud_config_uri is the address to the server with the port from where JSON with parameters is received.
+
+You can write a small local server to transfer data to your bot.
+
+Server example:
+
+```python3
+#!/usr/bin/env python3
+
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import urlparse
+import json
+
+class RequestHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        parsed_path = urlparse(self.path)
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(json.dumps({
+            'user_id': 'Your ID',
+            'api_token_id': 'Your TOKEN',
+            'link_pdf': 'url LINK TO FILE',
+            'link_jpg': 'url LINK TO IMAGE',
+            'link_audio_ru': 'url LINK TO audio file',
+            'link_video_ru': 'url LINK TO video file',
+            'link_audio_en': 'url LINK TO audio file',
+            'link_video_en': 'url LINK TO video file'
+        }).encode())
+        return
+
+if __name__ == '__main__':
+    server = HTTPServer(('localhost', 8000), RequestHandler)
+    print('Starting server at http://localhost:8000')
+    server.serve_forever()
 ```
-Save the changes to the file and run the following command in the cmd / bash from the current directory:
+
+Enter the required values ​​in the GET request. First, start the server and then start your bot in another console.
+
 ```
 python bot.py
 ```
-This command will launch the bot. The process of launching starts with the initialization of the bot, which includes the setting up the associated account.
+This request will start the chatbot. The process begins with the initialization of the chatbot, which includes changing the settings of the associated instance.
 
-The parent library of the chatbot [whatsapp-chatbot-python](https://github.com/green-api/whatsapp-chatbot-python) will change the settings of the associated account by calling [SetSettings](https://green-api.com/en/docs/api/account/SetSettings/) API to.
+The [whatsapp-chatbot-python](https://github.com/green-api/whatsapp-chatbot-python) library contains a mechanism for changing the instance settings using the [SetSettings](https://green-api.com/en/docs/api/account/SetSettings/) method, which is launched when the chatbot is running.
 
-The following settings will turned, namely:
+All settings for receiving notifications are disabled by default, the chatbot turn on the following settings:
 ```
 "incomingWebhook": "yes",
 "outgoingMessageWebhook": "yes",
 "outgoingAPIMessageWebhook": "yes",
 ```
-making the instance getting the notifications about the outgoing and incoming messages.
+which are responsible for receiving notifications about incoming and outgoing messages.  
 
-The settings update will take a few minutes, so the associated instance will be unavailable during the time. The messages sent to the chatbot meanwhile will not be processed.
+The settings changing process takes several minutes, the instance will be unavailable during which times. Messages sent to the chatbot during this time will not be processed.  
 
 Then there will be deletion of the old notifications, another process invoked by the parent library [whatsapp-chatbot-python](https://github.com/green-api/whatsapp-chatbot-python), which is essential to make sure chatbot will not process the messages from the already opened chats.
 
 After the initialization is completed, chatbot is ready to answer the messages. The whole process of initialization will take up to 5 minutes.
 
-To stop the chatbot hover the cmd / bash from the current directory and click `Ctrl + C`
+To stop the chatbot hover the cmd / bash from the current directory and click `Ctrl + C`  
 
+### Launch the chatbot in debug mode  
 
-## Setup
-The chatbot has default values for links to send files and images, but users can change them to their liking.
+To run the bot locally, use the environment variable `DEBUG=True`. All other necessary variables are presented below (create a `.env` file and insert your actual values):
 
-To do that, provide one link to the pdf/any other format file and one to jpg. Links can lead to cloud storage or open source. In the 81th line in the bot.py file:
+```
+DEBUG=True
+DEBUG_USER_ID=<Your Instance ID>
+DEBUG_API_TOKEN_ID=<Your Api token ID>
+DEBUG_LINK_PDF=<Full URL string for .pdf file>
+DEBUG_LINK_JPG=<Full URL string for .jpg file>
+DEBUG_LINK_AUDIO_RU=<Full URL string for .mp3 file (RU)>
+DEBUG_LINK_VIDEO_RU=<Full URL string for .mp4 file (RU)>
+DEBUG_LINK_AUDIO_EN=<Full URL string for .mp3 file (EN)>
+DEBUG_LINK_VIDEO_EN=<Full URL string for .mp4 file (EN)>
+
+ACTIVE_PROFILE=<Any name>
+SPRING_CLOUD_CONFIG_URI=http://localhost:8000
+```
+
+Link example
+```
+DEBUG_LINK_JPG="https://google.com/i/db/2022/11/1817828/image.jpg"
+```
+
+The ACTIVE_PROFILE and SPRING_CLOUD_CONFIG_URI values ​​are used for compatibility.
+
+Then the chatbot will access your account using these details:
 ```python
-elif message == "2":
-    notification.api.sending.sendFileByUrl(
-        chatId=notification.chat,
-        urlFile="https://....png",
-        fileName="corgi.png",
-        caption=f'{data["send_file_message"][user.language]}'
-                f'{data["links"][user.language]["send_file_documentation"]}',
-    )
+bot = GreenAPIBot(id_instance, api_token_instance)
 ```
-Fill url of the file to the `urlFile=""` and give it a name in the `fileName=""`.
+Save the changes to the file.
 
-Then it should look similar to the following:
+```
+python bot.py
+```
+This request will start the chatbot. The process begins with the initialization of the chatbot, which includes changing the settings of the associated instance.
+
+## Setup  
+
+By default, the chatbot uses links to download files from the network, but users can add their links to files, one for a file of any extension pdf / docx / ... and one for an image.
+
+Links must lead to files from cloud storage or open access. You can write them directly in the *.env* file or transmit them over the network.
+
+```
+'link_pdf': 'url LINK TO FILE',
+'link_jpg': 'url LINK TO image',
+'link_audio_ru': 'url LINK TO audio file',
+'link_video_ru': 'url LINK TO video file',
+'link_audio_en': 'url LINK TO audio file',
+'link_video_en': 'url LINK TO video file'
+```
+
+For more in-depth customization, go through all the menu items, see the functions - def main_menu_option_1_handler to main_menu_option_13_handler.
+
+All changes must be saved, after which you can launch the chatbot.
+
+Links must lead to files from cloud storage or open access and are written in .env. Text information is contained in data.yml. On line 159 in bot.py is def main_menu_option_2_handler in the function there is the following code:
 ```python
-elif message == "2":
-    notification.api.sending.sendFileByUrl(
-        chatId=notification.chat,
-        urlFile="https://...somefile.pdf",
-        fileName="somefile.pdf",
-        caption=f'{data["send_file_message"][user.language]}'
-                f'{data["links"][user.language]["send_file_documentation"]}',
-    )
+try:
+sender_lang_code = sender_state_data[LANGUAGE_CODE_KEY]
+second_option_answer_text = (
+f'{answers_data["send_file_message"][sender_lang_code]}'
+f'{answers_data["links"][sender_lang_code]["send_file_documentation"]}'
+)
+except KeyError as e:
+logger.exception(e)
+return
+notification.api.sending.sendFileByUrl(
+notification.chat,
+config.link_pdf,
+"corgi.pdf",
+caption=second_option_answer_text,
 ```
-In the same fashion fill the link and the name for the jpg image in the 89th line
+You can choose the name for your file.
+
+Likewise enter the link and name for the image on line 221:
 ```python
-elif message == "3":
-    notification.api.sending.sendFileByUrl(
-        chatId=notification.chat,
-        urlFile="https://...someimage.jpg",
-        fileName="someimage.jpg",
-        caption=f'{data["send_image_message"][user.language]}'
-                f'{data["links"][user.language]["send_file_documentation"]}',
-    )
+notification.api.sending.sendFileByUrl(
+notification.chat,
+config.link_jpg,
+"corgi.jpg",
+caption=third_option_answer_text,
+)
 ```
-All the changes must be saved, then the chatbot can be launched. To see how to launch chatbot return to the [section 2](#launching-a-chatbot)
+All changes must be saved, after which you can launch the chatbot. Return to [step 2](#launch-chatbot) to launch the chatbot.  
 
+## Usage  
+After completing the previous steps, you can run the chatbot with your Whatsapp account. It is important to remember that you must be logged in to your [console](https://console.green-api.com/).
 
-## Usage
-If everything was set up correct, the code is running and the Whatsapp chatbot should be working on the number associated with instance. Importantly, instance must be authorized in the [personal cabinet](https://console.green-api.com/) for code to work.
+Now you can send messages to the chatbot!
 
-Let's try to send a message to chatbot!
+The chatbot will respond to any message sent to the account.
+This chatbot version supports 5 languages ​​- English, Kazakh, Russian, Español, עברית.
+Before greeting a user, the chatbot will ask to select the language of communication:
+```
+*1* - English
+*2* - Kazakh
+*3* - Russian
+*4* - Español
+*5* - עברית
+```
+Send from 1 to 5 to select the language for communication. After you send 3, the chatbot will send a greeting message in Russian:
+```
+GREEN API provides the following kinds of message services.
 
-Any message will invoke the bot to start a conversation.
-As bot provides the service on two languages - English and Russian - even before welcoming a user, a choice of language is encouraged:
-```
-1 - English
-2 - Русский
-```
-Then, one must answer with either 1 or 2 to set up a language of conversation. Type in, for example, 2 to choose English. The welcome message alongside menu pops up in the dialogue:
-```
-Welcome the to the GREEN-API chatbot, user! GREEN-API provides the following kinds of message services. Type in a number to see how the corresponding method works
+Select a number from the list to check how the sending method works!
 
-1. Text message 📩
-2. File 📋
-3. Image 🖼
-4. Contact 📱
-5. Location 🌎
+*1*. Text message 📩
+*2*. File 📋
+*3*. Image 🖼\
+*4*. Audio 🎵
+*5*. Video 📽
+*6*. Contact 📱
+*7*. Location 🌎
+*8*. Poll ✔
+*9*. Get image of my avatar👤
+*10*. Send link 🔗
+*11*. Create a group with the bot 👥
+*12*. Quote message ©️
+*13*. About PYTHON GREEN API chatbot 🦎
 
-To restart the conversation type stop
+To return to the beginning, write *stop* or *0*
 ```
-By typing in item number in menu, the chatbot answers by using specific API assigned for the task and attaches a link for a detailed information page.
 
-For exapmle, by sending 1 to chatbot the user will get:
-```
-This message is sent via sendMessage method
+By selecting a number from the list and sending it, the chatbot will respond to which API sent this type of message and share a link to information about the API.
 
-If you want to know how the method works, follow the link
-https://green-api.com/en/docs/api/sending/SendMessage/
+For example, by sending 1, the user will receive in response:
 ```
-By sending anything other from digits 1-5, the chatbot will answer gracefully:
+This message was sent via the sendMessage method
+
+To find out how the method works, follow the link
+https://green-api.com/docs/api/sending/SendMessage/
 ```
-Sorry, I cannot understand what you are talking about, type menu to see the available options
+If you send something other than numbers 1-13, the chatbot will briefly respond:
 ```
-One also can send a message 'menu' to call back to menu to see the available options. Lastly, by sending 'stop', the user will forcefully stop the conversation and chatbot will send goodbye message:
+Sorry, I didn't quite understand you, write a menu to see the possible options
+```
+The user can also call the menu by sending a message containing "menu". And by sending "stop", the user will end the conversation with the chatbot and receive a message:
 ```
 Thank you for using the GREEN-API chatbot, user!
 ```
 
-
-## Code structure
-The main part of the code is contained within the `bot.py` file.
-It imports the chatbot library, on which the chatbot is based:
+## Code structure  
+The functional part of the chatbot is in the `bot.py` file.
+Here the `GreenAPIBot` chatbot class and the `Notification` incoming notification are imported to handle messages:
 ```python
 from whatsapp_chatbot_python import GreenAPIBot, Notification
 ```
-There is initialization of chatbot on 20th line:
+The chatbot is initialized on line 31:
 ```python
 bot = GreenAPIBot(id_instance, api_token_instance)
 ```
-Then, there is router on 26th line that listens to notifications that is invoked everytime the text message is sent to the chatbot:
+Each message sent to the chatbot is processed on line 45:
 ```python
-@bot.router.message(type_message=filters.TEXT_TYPES)
-def message_handler(notification: Notification) -> None:
+@bot.router.message(type_message=TEXT_TYPES, state=None)
+@debug_profiler(logger=logger)
+def initial_handler(notification: Notification) -> None:
 ```
-Once the message handler got the notification it retrieves the data from the inside, which is dictionary of type [webhook](https://green-api.com/en/docs/api/receiving/notifications-format/).
-Getting the user's data, the chatbot saves that in the object of the same named class. The `user` class is within the `user.py` file and has 4 fields:
-```python
-class User:
-    def __init__(
-        self,
-        id: str,
-        language: str = None,
-        authorized: bool = None,
-        last_updated: datetime = None,
-    ):
-        self.id = id
-        self.language = language
-        self.authorized = authorized
-        self.last_updated = last_updated
-```
-The fields correspond to the user's phone number `id`, chosen language, authorization status, and timestamp of last interaction with bot. Every field has a role in the logic, which will be explained later.
 
-So, returning to `bot.py`, after the user sends a first message to the chatbot, there's checking if the user has active chat with the bot on the server side. If not, new user is created.
+The handler receives messages via incoming notifications of type [webhook](https://green-api.com/docs/api/receiving/notifications-format/incoming-message/Webhook-IncomingMessageReceived/).
+The chatbot checks the details from the sender and then saves the sender using the **internal/utils.py** library.
 
-Then, the bot sets up the authorized field to `True` to indicate that current chat is active and asks for the language choice from user:
-```python
-if not user.authorized:
-    user.authorize()
-    notification.answer(data['select_language'])
-```
-The ```notification.answer()``` is the function of the chatbot library, it takes the parameters of user and sends a text message to the assigned user. The ```data['select_language']``` is the text we prepared for the chatbots answers, which is:
-```
-"1 - English\n2 - Русский"
-```
-So, then the user sends either 1 or 2 to set up English or Russian as the text of conversation.
+Returning to the `bot.py` file, after the user sends the first message to the chatbot, the chatbot checks if the user is already in the list of users. If not, a new user is created.
 
-The chatbot sees that user with such number has active chat by checking the authorized field and forwards the notification to the `set_language` function. The function checks the message and sets the user's language field correspondingly:
+Then, the chatbot sets the user's authorization status to `True` to indicate that the chat is active and asks the user to select a language for communication:
 ```python
-if message == "1":
-    user.set_language("eng")
-    notification.answer(
-        f'{data["welcome_message"][user.language]}'
-        f'{notification.event["senderData"]["senderName"]}'
-        f'! '
-        f'{data["menu"][user.language]}'
-    )
+def initial_handler(notification: Notification) -> None:
+sender_state_data_updater(notification)
+notification.answer(answers_data["select_language"])
 ```
-However, even if message contains extra slash or space like "/1", the chatbot will recognize it as there's regular expression that removes the all the redundant characters:
-```python
-message = "".join(
-    i
-    for i in notification.message_text
-    if i not in ["/", ".", " ", "<", ">", "[", "]"]
-).lower()
+```notification.answer()``` is a chatbot library function that checks the user data from the incoming notification and sends a response to the user. ```data['select_language']``` is one of the chatbot's pre-prepared text responses:
 ```
-The next messages from user, that already is authorized and has language set up, are forwarded to the `options` function.
+*1* - English
+*2* - Қазақша
+*3* - Русский
+*4* - Español
+*5* - עברית
+```
+The user sends from 1 to 5 to select the language of communication with the chatbot.
 
-So, if user sends 1, router will proceed to the following line:
+The chatbot receives an incoming notification and sees that the chat with this user is active by checking the authorization status. After that, the chatbot passes the incoming notification to the local function `chosen_language_code`, and sets the language of communication with the user:
 ```python
-if message == "1":
-    notification.answer(
-        f'{data["send_text_message"][user.language]}'
-        f'{data["links"][user.language]["send_text_documentation"]}'
-    )
+try:
+answer_text = (
+f'{answers_data["welcome_message"][chosen_language_code]}'
+f'*{notification.event["senderData"]["senderName"]}*!'
+f'{answers_data["menu"][chosen_language_code]}'
+)
 ```
-And this part of code will send the corresponding message to user:
-```
-This message is sent via sendMessage method
+The chatbot removes unnecessary characters from all received messages so that if the user answers "/1" or makes an extra space, the chatbot can still recognize it, for this purpose, regxp is used.
 
-If you want to know how the method works, follow the link
+After the communication language is set, all incoming notifications go to the `options` function, which responds to commands 1-13, stop, menu.
+
+For example, if the user sends 1, the following code will be run:
+```python
+try:
+sender_lang_code = sender_state_data[LANGUAGE_CODE_KEY]
+first_option_answer_text = (
+f'{answers_data["send_text_message"][sender_lang_code]}'
+f'{answers_data["links"][sender_lang_code]["send_text_documentation"]}'
+)
+```
+and send the following response to the user:
+
+```
+This message is sent via the sendMessage method.
+How to the method works, follow the link
 https://green-api.com/en/docs/api/sending/SendMessage/
 ```
-All the answers are prepared in the `data.yml` file and loaded to the `bot.py` by following:
+All chatbot responses are stored in the `data.yml` file and loaded into `bot.py`:
 ```python
-with open("data.yml", 'r', encoding='utf8') as stream:
-    data = safe_load(stream)
+YAML_DATA_RELATIVE_PATH = "config/data.yml"
+
+with open(YAML_DATA_RELATIVE_PATH, encoding="utf8") as f:
+answers_data = safe_load(f)
 ```
-Then one can access the answers from the data dictionary, which has, for example, `data['welcome_message']['eng']` as the welcome message in English, and `data['welcome_message']['ru']` as in Russian:
+The chatbot responses are stored in the following format, where `data['welcome_message']['ru']` will return a welcome message in Russian, and `data['welcome_message']['eng']` - in English:
 ```yml
 welcome_message:
-  ru: "Добро пожаловать в GREEN-API чатбот, "
-  eng: "Welcome the to the GREEN-API chatbot, "
+en: "Welcome the to the GREEN API chatbot, "
+kz: "GREEN API chat-bot, "
+ru: "Welcome to the GREEN API chat-bot, "
+es: "Bienvenido al chatbot GREEN API, "
+he: "GREEN API for Chatbots,"
 ```
-Lastly, everytime there's a message from user, the timestamp called ```last_updated``` is updated:
+Also, every time a user sends a new message, the ```current_last_interaction_ts``` field is updated with a new time:
 ```python
-user.last_updated = datetime.now()
+current_last_interaction_ts = current_sender_state_data[LAST_INTERACTION_KEY]
 ```
-This must be done in order to compare the time between last timestamp and new one, so if there's time interval more than 2 minutes between ones, the user authorization and language are reset:
+This is done to check when the user connected last time. If more than 5 minutes have passed since the last contact, then the chatbot will reset authorization and language of communication, and start the chat again:
 ```python
-diff = datetime.now() - user.last_updated
-if diff.seconds > 120:
-    user.unauthorize()
+MAX_INACTIVITY_TIME_SECONDS = 300
+
+if now_ts - current_last_interaction_ts > MAX_INACTIVITY_TIME_SECONDS:
+return sender_state_reset(notification)
 ```
 
+## Message handling  
+The chatbot indicates in its responses, all messages are sent via API. Documentation on sending methods can be found at [green-api.com/en/docs/api/sending](https://green-api.com/docs/api/sending/).
 
-## Message handling
-As chatbot states, all the messages were sent by API. Documentation of the mentioned methods can be found at [green-api.com/docs/api/sending](https://green-api.com/en/docs/api/sending/).
+As for receiving messages, messages are read via HTTP API. Documentation on receiving methods can be found at [green-api.com/docs/api/receiving/technology-http-api](https://green-api.com/docs/api/receiving/technology-http-api/).
 
-When it comes to receiving messages, they've been handled by HTTP API. Documentation of the methods of receving messages can be found at [green-api.com/docs/api/receiving/technology-http-api](https://green-api.com/en/docs/api/receiving/technology-http-api/).
+The chatbot uses the [whatsapp-chatbot-python](https://github.com/green-api/whatsapp-chatbot-python) library, which already integrates sending and receiving methods, so messages are read automatically, and sending regular text messages is simplified.
 
-The chatbot uses library [whatsapp-chatbot-python](https://github.com/green-api/whatsapp-chatbot-python), where methods of sending and receiving messages is already intergarted, that's why the process of receiving messages is automated, and sending text messages is simplified.
-
-For example, chatbot answers the person who sent a message by following:
+For example, the chatbot automatically sends a message to the contact from whom it received a message:
 ```python
-notification.answer(data["select_language"])
+notification.answer(answers_data["select_language"])
 ```
-However, the API can be accessed directly from [whatsapp-api-client-python](https://github.com/green-api/whatsapp-api-client-python), as, for example, when sending a contact:
+However, other sending methods can be called directly from the [whatsapp-api-client-python](https://github.com/green-api/whatsapp-api-client-python) library. For example, when sending a contact:
 ```python
 notification.api.sending.sendContact(
-    chatId=notification.chat,
-    contact={
-        "phoneContact": notification.chat.split("@")[0],
-        "firstName": notification.event["senderData"]["senderName"],
-    },
-```
-
-## How to local development & debug
-
-For debug mode, you need to launch bot with `DEBUG=True` enviroment variable. All ENVs for debug (you can create `debug.env` in root repo directory and provide valid values.
-After that use the command `source debug.env` for applying ENVs):
-```
-export DEBUG=True
-export DEBUG_USER_ID=<Your Instance ID>
-export DEBUG_API_TOKEN_ID=<Your Api token ID>
-export DEBUG_LINK_PDF=<Full URL string for .pdf file>
-export DEBUG_LINK_JPG=<Full URL string for .jpg file>
-export DEBUG_LINK_AUDIO_RU=<Full URL string for .mp3 file (RU)>
-export DEBUG_LINK_VIDEO_RU=<Full URL string for .mp4 file (RU)>
-export DEBUG_LINK_AUDIO_EN=<Full URL string for .mp3 file (EN)>
-export DEBUG_LINK_VIDEO_EN=<Full URL string for .mp4 file (EN)>
-
-```
-
+chatId=notification.chat,
+contact={
+"phoneContact": notification.chat.split("@")[0],
+"firstName": notification.event["senderData"]["senderName"],
+},
+```  
 
 ## License
 

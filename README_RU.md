@@ -11,6 +11,7 @@
 * [Установка среды для запуска чатбота](#установка-среды-для-запуска-чатбота)  
 * [Авторизация в GREEN-API](#авторизация-в-green-api)  
 * [Запуск чатбота](#запуск-чатбота)  
+* [Как запустить чатбота локально в debug-режиме](#как-запустить-чатбота-локально-в-debug-режиме)
 * [Настройка чатбота](#настройка-чатбота)  
 * [Использование](#использование)  
 * [Структура кода](#структура-кода)  
@@ -130,12 +131,12 @@ python bot.py
 
 Чтобы остановить работу чатбота, наведите курсор на командную строку и используйте сочетание клавиш `Ctrl + C`
 
-### Как запустить бота локально в debug-режиме
+### Как запустить чатбота локально в debug-режиме
 
 Для того, чтобы запустить бота локально, используйте переменную окружения `DEBUG=True`. Все прочие необходимые переменные представлены ниже (создайте файл `.env` и вставить свои действительные значения):
 ```
 DEBUG=True
-EBUG_USER_ID=<Your Instance ID>
+DEBUG_USER_ID=<Your Instance ID>
 DEBUG_API_TOKEN_ID=<Your Api token ID>
 DEBUG_LINK_PDF=<Full URL string for .pdf file>
 DEBUG_LINK_JPG=<Full URL string for .jpg file>
@@ -148,6 +149,11 @@ ACTIVE_PROFILE=<Any name>
 SPRING_CLOUD_CONFIG_URI=http://localhost:8000
 ```
 
+Пример ссылки  
+```
+DEBUG_LINK_JPG="https://google.com/i/db/2022/11/1817828/image.jpg"
+```
+
 Значения ACTIVE_PROFILE и SPRING_CLOUD_CONFIG_URI - используются для совместимости.  
 
 Далее чатбот получит доступ к Вашему аккаунту через эти данные:
@@ -155,7 +161,6 @@ SPRING_CLOUD_CONFIG_URI=http://localhost:8000
 bot = GreenAPIBot(id_instance, api_token_instance)
 ```
 Сохраните изменения в файле. 
-
 ```
 python bot.py
 ```
@@ -280,8 +285,7 @@ bot = GreenAPIBot(id_instance, api_token_instance)
 @bot.router.message(type_message=TEXT_TYPES, state=None)
 @debug_profiler(logger=logger)
 def initial_handler(notification: Notification) -> None:
-```
-
+```  
 
 Обработчик получает сообщения через входящие уведомления типа [webhook](https://green-api.com/docs/api/receiving/notifications-format/incoming-message/Webhook-IncomingMessageReceived/).
 Проверив данные о пользователе, который отправил сообщение, чатбот сохраняет отправителя используя библиотеку **internal/utils.py**.
@@ -352,7 +356,7 @@ welcome_message:
 ```python
 current_last_interaction_ts = current_sender_state_data[LAST_INTERACTION_KEY]
 ```
-Это сделано для того, чтобы проверять когда пользователь обращался в последний раз. Если прошло более 2 минут с последнего обращения, значит чатбот сбросит авторизацию и язык общения, и начнет чат заново:
+Это сделано для того, чтобы проверять когда пользователь обращался в последний раз. Если прошло более 5 минут с последнего обращения, значит чатбот сбросит авторизацию и язык общения, и начнет чат заново:
 ```python
  MAX_INACTIVITY_TIME_SECONDS = 300
 
