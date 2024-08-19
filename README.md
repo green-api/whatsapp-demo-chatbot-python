@@ -193,7 +193,7 @@ config.link_jpg,
 caption=third_option_answer_text,
 )
 ```
-All changes must be saved, after which you can launch the chatbot. Return to [step 2](#launching-the-chatbot) to launch the chatbot.  
+All changes must be saved, after which you can launch the chatbot. Return to [step 3](#launching-the-chatbot) to launch the chatbot.  
 
 ## Usage  
 After completing the previous steps, you can run the chatbot with your Whatsapp account. It is important to remember that you must be logged in to your [console](https://console.green-api.com/).
@@ -210,7 +210,7 @@ Before greeting a user, the chatbot will ask to select the language of communica
 *4* - Español
 *5* - עברית
 ```
-Send from 1 to 5 to select the language for communication. After you send 3, the chatbot will send a greeting message in Russian:
+Send from 1 to 5 to select the language for communication. After you send 1, the chatbot will send a greeting message in English:
 ```
 GREEN API provides the following kinds of message services.
 
