@@ -17,6 +17,9 @@ class ServerConfig:
         self,
         user_id: str,
         api_token_id: str,
+        link_greenapi_ru: str,
+        link_greenapi_en: str,
+        link_python_chatbot: str,
         link_pdf: str,
         link_jpg: str,
         link_audio_ru: str,
@@ -26,6 +29,9 @@ class ServerConfig:
     ):
         self.user_id = user_id
         self.api_token_id = api_token_id
+        self.link_greenapi_ru = link_greenapi_ru
+        self.link_greenapi_en = link_greenapi_en
+        self.link_python_chatbot = link_python_chatbot
         self.link_pdf = link_pdf
         self.link_jpg = link_jpg
         self.link_audio_ru = link_audio_ru
@@ -43,6 +49,9 @@ def init_config(envs: Envs, logger: logging.Logger):
         server_config = ServerConfig(
             user_id=envs.debug_user_id,
             api_token_id=envs.debug_api_token_id,
+            link_greenapi_ru = envs.debug_link_greenapi_ru,
+            link_greenapi_en = envs.debug_link_greenapi_en,
+            link_python_chatbot = envs.debug_link_python_chatbot,
             link_pdf=envs.debug_link_pdf,
             link_jpg=envs.debug_link_jpg,
             link_audio_ru=envs.debug_link_audio_ru,
@@ -67,6 +76,9 @@ def init_config(envs: Envs, logger: logging.Logger):
         server_config = ServerConfig(
             user_id=str(config_result.get("user_id")),
             api_token_id=str(config_result.get("api_token_id")),
+            link_greenapi_ru=str(config_result.get("link_greenapi_ru")) if config_result.get("link_greenapi_ru") and len(str(config_result.get("link_greenapi_ru"))) > 0 else str(envs.debug_link_greenapi_ru),
+            link_greenapi_en=str(config_result.get("link_greenapi_en")) if config_result.get("link_greenapi_en") and len(str(config_result.get("link_greenapi_en"))) > 0 else str(envs.debug_link_greenapi_en),
+            link_python_chatbot=str(config_result.get("link_python_chatbot")) if config_result.get("link_python_chatbot") and len(str(config_result.get("link_python_chatbot"))) > 0 else str(envs.debug_link_python_chatbot),
             link_pdf=str(config_result.get("link_pdf")),
             link_jpg=str(config_result.get("link_jpg")),
             link_audio_ru=str(config_result.get("link_audio_ru")),
@@ -77,6 +89,9 @@ def init_config(envs: Envs, logger: logging.Logger):
 
     logger.info(f"User ID: {server_config.user_id}")
     logger.info(f"API token: {api_token_log_hider(server_config.api_token_id)}")
+    logger.debug(f"Green API RU url: {server_config.link_greenapi_ru}")
+    logger.debug(f"Green API EN url: {server_config.link_greenapi_en}")
+    logger.debug(f"Python Chatbot: {server_config.link_python_chatbot}")
     logger.debug(f"PDF url: {server_config.link_pdf}")
     logger.debug(f"JPG url: {server_config.link_jpg}")
     logger.debug(f"RU Audio url: {server_config.link_audio_ru}")
