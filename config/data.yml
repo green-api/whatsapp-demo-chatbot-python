@@ -1,29 +1,20 @@
-select_language: |-
-  *1* - English
-  *2* - Қазақша
-  *3* - Русский
-  *4* - Español
-  *5* - עברית
-incorrect_language: |-
-  Please choose a language for further conversation
-
-  *1* - English
-  *2* - Қазақша
-  *3* - Русский
-  *4* - Español
-  *5* - עברית
+select_language: "*1* - English \n*2* - Қазақша\n*3* - Русский\n*4* - Español\n*5* - עברית"
+specify_language: "Please choose a language for further conversation\n*1* - English \n*2* - Қазақша\n*3* - Русский\n*4* - Español\n*5* - עברית"
+please_use_text: "Please enter a text message for further conversation with bot\n"
 welcome_message:
-  en: "Welcome the to the GREEN API chatbot, "
-  kz: "GREEN API чат-ботына қош келдіңіз, "
   ru: "Добро пожаловать в GREEN API чат-бот, "
-  es: "Bienvenido al chatbot GREEN API, "
+  en: "Welcome the to the GREEN API chatbot, "
   he: "ברוכים הבאים לצ'אטבוט GREEN API, "
+  es: "Bienvenido al chatbot GREEN API, "
+  ar: ""
+  kz: "GREEN API чат-ботына қош келдіңіз, "
 stop_message:
-  en: "Thank you for using the GREEN API chatbot, "
-  kz: "GREEN API чат-ботты пайдаланғаныңыз үшін рақмет, "
   ru: "Спасибо за использование чат-бота GREEN API, "
-  es: "Gracias por utilizar el chatbot GREEN API, "
+  en: "Thank you for using the GREEN API chatbot, "
   he: "תודה על השימוש בצ'אטבוט GREEN API, "
+  es: "Gracias por utilizar el chatbot GREEN API, "
+  ar: ""
+  kz: "GREEN API чат-ботты пайдаланғаныңыз үшін рақмет, "
 menu:
   ru: "\n\nGREEN API предоставляет отправку данных следующих видов. \nВыберите цифру из списка, чтобы проверить как работает метод отправки!\n\n*1*. Текстовое сообщение 📩\n*2*. Файл 📋\n*3*. Картинка 🖼\n*4*. Аудио 🎵\n*5*. Видео 📽\n*6*. Контакт 📱\n*7*. Геолокация 🌎\n*8*. Опрос ✔\n*9*. Получить картинку моего аватара 👤\n*10*. Отправить ссылку 🔗\n*11*. Создать группу с ботом 👥\n*12*. Цитировать сообщение ©️\n*13*. О PYTHON GREEN API чат-боте 🦎\n\nЧтобы вернуться в начало напишите *стоп* или *0*"
   en: "\n\nGREEN API provides the following kinds of message services. \nType in a number to see how the corresponding method works!\n\n*1*. Text message 📩\n*2*. File 📋\n*3*. Image 🖼\n*4*. Audio 🎵\n*5*. Video 📽\n*6*. Contact 📱\n*7*. Location 🌎\n*8*. Poll ✔\n*9*. Get image of my avatar 👤\n*10*. Send link 🔗\n*11*. Create group with bot 👥\n*12*. Quote message ©️\n*13*. About PYTHON GREEN API chatbot 🦎\n\nTo restart the conversation type *stop* or *0*"
@@ -102,7 +93,7 @@ send_poll_message_1:
   ar: ""
   kz: "\nӘдіс жұмысы туралы білу үшін сілтеме бойынша өтіңіз\n"
 poll_question:
-  ru: "Выберите вариант ответа\nВам нравиться работа демо чатбота?"
+  ru: "Выберите вариант ответа\nВам нравится работа демо чатбота?"
   en: "Select an answer\nDo you like the work of the demo chat bot?"
   he: "בחר תשובה\nהאם אתה אוהב את העבודה של בוט הצ'אט ההדגמה?"
   es: "Seleccione una respuesta\n¿Te gusta el trabajo del chatbot de demostración?"
@@ -179,7 +170,7 @@ send_link_message_preview:
   ar: ""
   kz: "*Бұл хабарлама превьюмен бірге* sendMessage әдісі арқылы жіберілген.\n*SendMessage* әдісі текст және сілтемеci бар хабарламаларды жіберуге мүмкіндік береді\n\nӘдіс жұмысы туралы білу үшін сілтеме бойынша өтіңіз\n"
 send_link_message_no_preview:
-  ru: "*Cообщение без превью* отправлено через метод sendMessage.\nДля отключение превью, необходимо при запросе метода *sendMessage* указать поле linkPreview: false\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
+  ru: "*Cообщение без превью* отправлено через метод sendMessage.\nДля отключения превью, необходимо при запросе метода *sendMessage* указать поле linkPreview: false\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
   en: "*This message without preview* was sent via the sendMessage method.\nTo disable preview, when requesting the *sendMessage* method, you must specify the linkPreview field: false\n\nIf you want to know how the method works, follow the link\n"
   he: "הודעה זו היא ללא תצוגה מקדימה GREEN API - שלח טקסט, כדי להשבית את התצוגה המקדימה עליך לציין את שדה ה-linkPreview: false\n"
   es: "Este mensaje sin vista previa* fue enviado mediante el método sendMessage, para deshabilitar la vista previa debe especificar el campo linkPreview: false\n"

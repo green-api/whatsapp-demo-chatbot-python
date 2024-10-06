@@ -114,13 +114,23 @@ def set_language_handler(notification: Notification) -> None:
         notification.sender,
         States.MENU.value,
     )
-
+    
     # Sending main menu answer
-    notification.answer_with_file(
-        file=menu_image_path,
-        file_name=menu_image_name,
+    link = config.link_greenapi_en
+    if chosen_language_code=='ru':
+        link = config.link_greenapi_ru
+    notification.api.sending.sendFileByUrl(
+        notification.chat,
+        link,
+        "welcome.jpg",
         caption=answer_text,
     )
+
+    #notification.answer_with_file(
+    #    file=menu_image_path,
+    #    file_name=menu_image_name,
+    #    caption=answer_text,
+    #)
 
 
 @bot.router.message(
@@ -150,7 +160,7 @@ def main_menu_option_1_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    notification.answer(first_option_answer_text)
+    notification.answer(first_option_answer_text, link_preview=False)
 
 
 @bot.router.message(
@@ -261,7 +271,7 @@ def main_menu_option_4_handler(notification: Notification) -> None:
     url = urlparse(url_file)
     file_name = basename(url.path)
 
-    notification.answer(fourth_option_answer_text)
+    notification.answer(fourth_option_answer_text, link_preview=False)
     notification.api.sending.sendFileByUrl(
         notification.chat,
         url_file,
@@ -341,7 +351,7 @@ def main_menu_option_6_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    notification.answer(sixth_option_answer_text)
+    notification.answer(sixth_option_answer_text, link_preview=False)
     notification.api.sending.sendContact(
         notification.chat,
         contact={
@@ -379,7 +389,7 @@ def main_menu_option_7_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    notification.answer(seventh_option_answer_text)
+    notification.answer(seventh_option_answer_text, link_preview=False)
     notification.api.sending.sendLocation(
         notification.chat,
         latitude=35.888171,
@@ -423,7 +433,7 @@ def main_menu_option_8_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    notification.answer(eighth_option_answer_text)
+    notification.answer(eighth_option_answer_text, link_preview=False)
     notification.answer_with_poll(
         message=poll_question_text,
         options=poll_options,
@@ -464,7 +474,7 @@ def main_menu_option_9_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    notification.answer(ninth_option_answer_text)
+    notification.answer(ninth_option_answer_text, link_preview=False)
     green_api_response = notification.api.serviceMethods.getAvatar(notification.sender)
 
     try:
@@ -618,6 +628,7 @@ def main_menu_option_12_handler(notification: Notification) -> None:
     notification.answer(
         twelfth_option_answer_text,
         quoted_message_id=quoted_message_id,
+        link_preview=False
     )
 
 
@@ -658,11 +669,18 @@ def main_menu_option_13_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    notification.answer_with_file(
-        file="media/about.jpg",
-        file_name="about.jpg",
+    notification.api.sending.sendFileByUrl(
+        notification.chat,
+        config.link_python_chatbot,
+        "bot.jpg",
         caption=thirteenth_option_answer_text,
     )
+
+    #notification.answer_with_file(
+    #    file="media/about.jpg",
+    #    file_name="about.jpg",
+    #    caption=thirteenth_option_answer_text,
+    #)
 
 
 @bot.router.message(
@@ -728,12 +746,22 @@ def main_menu_menu_handler(notification: Notification) -> None:
         sender_lang_code
     )
 
-    # Sending main menu answer
-    notification.answer_with_file(
-        file=menu_image_path,
-        file_name=menu_image_name,
+    link = config.link_greenapi_en
+    if sender_lang_code=='ru':
+        link = config.link_greenapi_ru
+    notification.api.sending.sendFileByUrl(
+        notification.chat,
+        link,
+        "welcome.jpg",
         caption=answer_text,
     )
+
+    # Sending main menu answer
+    #notification.answer_with_file(
+    #    file=menu_image_path,
+    #    file_name=menu_image_name,
+    #    caption=answer_text,
+    #)
 
 
 @bot.router.poll_update_message()
