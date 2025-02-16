@@ -3,7 +3,7 @@ specify_language: "Please choose a language for further conversation\n*1* - Engl
 please_use_text: "Please enter a text message for further conversation with bot\n"
 welcome_message:
   ru: "Добро пожаловать в GREEN API чат-бот, "
-  en: "Welcome the to the GREEN API chatbot, "
+  en: "Welcome to the GREEN API chatbot, "
   he: "ברוכים הבאים לצ'אטבוט GREEN API, "
   es: "Bienvenido al chatbot GREEN API, "
   ar: ""
