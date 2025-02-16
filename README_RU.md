@@ -144,6 +144,7 @@ DEBUG_LINK_AUDIO_RU=<Full URL string for .mp3 file (RU)>
 DEBUG_LINK_VIDEO_RU=<Full URL string for .mp4 file (RU)>
 DEBUG_LINK_AUDIO_EN=<Full URL string for .mp3 file (EN)>
 DEBUG_LINK_VIDEO_EN=<Full URL string for .mp4 file (EN)>
+LINK_PREVIEW=True
 
 ACTIVE_PROFILE=<Any name>
 SPRING_CLOUD_CONFIG_URI=http://localhost:8000

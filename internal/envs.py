@@ -31,6 +31,7 @@ class Envs(BaseSettings):
     # Envs from config/.env file (Just for backwards compability)
     active_profile: str = Field("", env="ACTIVE_PROFILE")
     spring_cloud_config_uri: str = Field("", env="SPRING_CLOUD_CONFIG_URI")
+    link_preview: bool = Field(True, env="LINK_PREVIEW")
 
     @model_validator(mode="after")
     def debug_mode_validator(self):

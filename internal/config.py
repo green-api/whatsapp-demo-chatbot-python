@@ -26,6 +26,7 @@ class ServerConfig:
         link_video_ru: str,
         link_audio_en: str,
         link_video_en: str,
+        link_preview: bool
     ):
         self.user_id = user_id
         self.api_token_id = api_token_id
@@ -38,6 +39,7 @@ class ServerConfig:
         self.link_video_ru = link_video_ru
         self.link_audio_en = link_audio_en
         self.link_video_en = link_video_en
+        self.link_preview = link_preview
 
 
 def init_config(envs: Envs, logger: logging.Logger):
@@ -58,6 +60,7 @@ def init_config(envs: Envs, logger: logging.Logger):
             link_video_ru=envs.debug_link_video_ru,
             link_audio_en=envs.debug_link_audio_en,
             link_video_en=envs.debug_link_video_en,
+            link_preview=envs.link_preview
         )
 
     else:
@@ -85,6 +88,7 @@ def init_config(envs: Envs, logger: logging.Logger):
             link_video_ru=str(config_result.get("link_video_ru")),
             link_audio_en=str(config_result.get("link_audio_en")),
             link_video_en=str(config_result.get("link_video_en")),
+            link_preview=False if config_result.get("link_preview") and (str(config_result.get("link_preview")).lower()) == "false" else True,
         )
 
     logger.info(f"User ID: {server_config.user_id}")
@@ -98,5 +102,7 @@ def init_config(envs: Envs, logger: logging.Logger):
     logger.debug(f"RU Video url: {server_config.link_video_ru}")
     logger.debug(f"EN Audio url: {server_config.link_audio_en}")
     logger.debug(f"EN Video url: {server_config.link_video_en}")
+    logger.debug(f"LinkPreview: {server_config.link_preview}")
+
 
     return server_config

@@ -160,7 +160,7 @@ def main_menu_option_1_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    notification.answer(first_option_answer_text, link_preview=False)
+    notification.answer(first_option_answer_text, link_preview=config.link_preview)
 
 
 @bot.router.message(
@@ -271,7 +271,7 @@ def main_menu_option_4_handler(notification: Notification) -> None:
     url = urlparse(url_file)
     file_name = basename(url.path)
 
-    notification.answer(fourth_option_answer_text, link_preview=False)
+    notification.answer(fourth_option_answer_text, link_preview=config.link_preview)
     notification.api.sending.sendFileByUrl(
         notification.chat,
         url_file,
@@ -351,7 +351,7 @@ def main_menu_option_6_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    notification.answer(sixth_option_answer_text, link_preview=False)
+    notification.answer(sixth_option_answer_text, link_preview=config.link_preview)
     notification.api.sending.sendContact(
         notification.chat,
         contact={
@@ -389,7 +389,7 @@ def main_menu_option_7_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    notification.answer(seventh_option_answer_text, link_preview=False)
+    notification.answer(seventh_option_answer_text, link_preview=config.link_preview)
     notification.api.sending.sendLocation(
         notification.chat,
         latitude=35.888171,
@@ -433,7 +433,7 @@ def main_menu_option_8_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    notification.answer(eighth_option_answer_text, link_preview=False)
+    notification.answer(eighth_option_answer_text, link_preview=config.link_preview)
     notification.answer_with_poll(
         message=poll_question_text,
         options=poll_options,
@@ -474,7 +474,7 @@ def main_menu_option_9_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    notification.answer(ninth_option_answer_text, link_preview=False)
+    notification.answer(ninth_option_answer_text, link_preview=config.link_preview)
     green_api_response = notification.api.serviceMethods.getAvatar(notification.sender)
 
     try:
@@ -628,7 +628,7 @@ def main_menu_option_12_handler(notification: Notification) -> None:
     notification.answer(
         twelfth_option_answer_text,
         quoted_message_id=quoted_message_id,
-        link_preview=False
+        link_preview=config.link_preview
     )
 
 
