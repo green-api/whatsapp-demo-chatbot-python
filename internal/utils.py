@@ -14,6 +14,7 @@ class States(BaseStates):
     INITIAL = "INITIAL"
     MENU = "MENU"
     GROUP_CREATION = "GROUP_CREATION"
+    CHAT_GPT = "CHAT_GPT"
 
 
 AVAILABLE_LANGUAGES = {

@@ -1,9 +1,9 @@
 from os.path import basename
 from re import IGNORECASE
 from urllib.parse import urlparse
-
 from whatsapp_chatbot_python import GreenAPIBot, Notification
 from whatsapp_chatbot_python.filters import TEXT_TYPES
+from whatsapp_chatgpt_python import WhatsappGptBot
 from yaml import safe_load
 
 from internal.config import init_config
@@ -25,9 +25,18 @@ envs = init_envs()
 logger = init_logger(debug=envs.debug)
 config = init_config(envs=envs, logger=logger)
 
-
 with open(YAML_DATA_RELATIVE_PATH, encoding="utf8") as f:
     answers_data = safe_load(f)
+
+gpt_bot = WhatsappGptBot(
+    id_instance=config.user_id,
+    api_token_instance=config.api_token_id,
+    openai_api_key=config.openai_api_key,
+    model="gpt-4o",
+    system_message="You are a helpful assistant in a WhatsApp chat. Be concise and accurate in your responses.",
+    max_history_length=10,
+    temperature=0.7
+)
 
 bot = GreenAPIBot(
     config.user_id,
@@ -114,10 +123,10 @@ def set_language_handler(notification: Notification) -> None:
         notification.sender,
         States.MENU.value,
     )
-    
+
     # Sending main menu answer
     link = config.link_greenapi_en
-    if chosen_language_code=='ru':
+    if chosen_language_code == 'ru':
         link = config.link_greenapi_ru
     notification.api.sending.sendFileByUrl(
         notification.chat,
@@ -125,12 +134,6 @@ def set_language_handler(notification: Notification) -> None:
         "welcome.jpg",
         caption=answer_text,
     )
-
-    #notification.answer_with_file(
-    #    file=menu_image_path,
-    #    file_name=menu_image_name,
-    #    caption=answer_text,
-    #)
 
 
 @bot.router.message(
@@ -331,7 +334,7 @@ def main_menu_option_5_handler(notification: Notification) -> None:
 @debug_profiler(logger=logger)
 def main_menu_option_6_handler(notification: Notification) -> None:
     """
-    "Send video" option handler for senders with `MENU` state.
+    "Send contact" option handler for senders with `MENU` state.
     """
 
     if sender_state_data_updater(notification):
@@ -635,6 +638,47 @@ def main_menu_option_12_handler(notification: Notification) -> None:
 @bot.router.message(
     type_message=TEXT_TYPES,
     state=States.MENU.value,
+    regexp=r"^\s*14\s*$",
+)
+@debug_profiler(logger=logger)
+def main_menu_option_14_handler(notification: Notification) -> None:
+    """
+    "Conversation with ChatGPT" option handler for senders with `MENU` state.
+    """
+    if sender_state_data_updater(notification):
+        return initial_handler(notification)
+
+    sender = notification.sender
+    sender_state_data = notification.state_manager.get_state_data(sender)
+
+    try:
+        sender_lang_code = sender_state_data[LANGUAGE_CODE_KEY]
+        chat_gpt_intro_text = (
+            f'{answers_data["chat_gpt_intro"][sender_lang_code]}'
+        )
+    except KeyError as e:
+        logger.exception(e)
+        return
+
+    if not config.openai_api_key:
+        try:
+            error_message = answers_data["chat_gpt_error"][sender_lang_code]
+            notification.answer(error_message)
+        except KeyError:
+            notification.answer("OpenAI API key is not configured. ChatGPT feature is unavailable.")
+        return
+
+    notification.state_manager.update_state(
+        notification.sender,
+        States.CHAT_GPT.value,
+    )
+
+    notification.answer(chat_gpt_intro_text)
+
+
+@bot.router.message(
+    type_message=TEXT_TYPES,
+    state=States.MENU.value,
     regexp=r"^\s*13\s*$",
 )
 @debug_profiler(logger=logger)
@@ -651,7 +695,7 @@ def main_menu_option_13_handler(notification: Notification) -> None:
 
     try:
         sender_lang_code = sender_state_data[LANGUAGE_CODE_KEY]
-        thirteenth_option_answer_text = (
+        about_text = (
             f'{answers_data["about_python_chatbot"][sender_lang_code]}'
             f'{answers_data["link_to_docs"][sender_lang_code]}'
             f'{answers_data["links"][sender_lang_code]["chatbot_documentation"]}'
@@ -673,14 +717,8 @@ def main_menu_option_13_handler(notification: Notification) -> None:
         notification.chat,
         config.link_python_chatbot,
         "bot.jpg",
-        caption=thirteenth_option_answer_text,
+        caption=about_text,
     )
-
-    #notification.answer_with_file(
-    #    file="media/about.jpg",
-    #    file_name="about.jpg",
-    #    caption=thirteenth_option_answer_text,
-    #)
 
 
 @bot.router.message(
@@ -747,7 +785,7 @@ def main_menu_menu_handler(notification: Notification) -> None:
     )
 
     link = config.link_greenapi_en
-    if sender_lang_code=='ru':
+    if sender_lang_code == 'ru':
         link = config.link_greenapi_ru
     notification.api.sending.sendFileByUrl(
         notification.chat,
@@ -756,12 +794,49 @@ def main_menu_menu_handler(notification: Notification) -> None:
         caption=answer_text,
     )
 
-    # Sending main menu answer
-    #notification.answer_with_file(
-    #    file=menu_image_path,
-    #    file_name=menu_image_name,
-    #    caption=answer_text,
-    #)
+
+@bot.router.message(
+    state=States.CHAT_GPT.value,
+)
+@debug_profiler(logger=logger)
+def chat_gpt_handler(notification: Notification) -> None:
+    """
+    Handler for messages in the CHAT_GPT state.
+    Simply forwards the message to your WhatsappGptBot for processing.
+    """
+    if sender_state_data_updater(notification):
+        return initial_handler(notification)
+
+    sender = notification.sender
+    sender_state_data = notification.state_manager.get_state_data(sender)
+    message_text = notification.message_text
+
+    try:
+        sender_lang_code = sender_state_data[LANGUAGE_CODE_KEY]
+    except KeyError as e:
+        logger.exception(e)
+        return
+
+    if notification.message_text:
+        exit_keywords = {
+            "en": ["exit", "menu", "stop", "back"],
+            "ru": ["выход", "меню", "стоп", "назад"],
+            "kz": ["шығу", "мәзір", "тоқта", "артқа", "menu", "меню"],
+            "es": ["salir", "menú", "parar", "atrás", "menu", "exit"],
+            "he": ["יציאה", "תפריט", "עצור", "exit", "menu","חזור"],
+        }
+
+        lang_exit_keywords = exit_keywords.get(sender_lang_code, exit_keywords["en"])
+
+        if any(keyword.lower() in message_text.lower() for keyword in lang_exit_keywords):
+            notification.state_manager.update_state(
+                notification.sender,
+                States.MENU.value,
+            )
+
+            return main_menu_menu_handler(notification)
+
+    gpt_bot.process_chat_sync(notification)
 
 
 @bot.router.poll_update_message()
@@ -798,14 +873,14 @@ def polls_handler(notification: Notification) -> None:
                     )
 
                 elif (
-                    option_name == f'{answers_data["poll_option_2"][sender_lang_code]}'
+                        option_name == f'{answers_data["poll_option_2"][sender_lang_code]}'
                 ):
                     notification.answer(
                         f'{answers_data["poll_answer_2"][sender_lang_code]}'
                     )
 
                 elif (
-                    option_name == f'{answers_data["poll_option_3"][sender_lang_code]}'
+                        option_name == f'{answers_data["poll_option_3"][sender_lang_code]}'
                 ):
                     notification.answer(
                         f'{answers_data["poll_answer_3"][sender_lang_code]}'
@@ -952,7 +1027,7 @@ def set_language_incorrect_message_handler(notification: Notification) -> None:
 @bot.router.message(
     type_message=TEXT_TYPES,
     state=States.MENU.value,
-    regexp=(r"^(?!\s*(?:1[0-3]|[0-9]|stop|стоп|menu|меню)\s*$).*$", IGNORECASE),
+    regexp=(r"^(?!\s*(?:1[0-4]|[0-9]|stop|стоп|menu|меню)\s*$).*$", IGNORECASE),
 )
 @debug_profiler(logger=logger)
 def main_menu_incorrect_message_handler(notification: Notification) -> None:
@@ -1005,4 +1080,6 @@ def group_creation_incorrect_message_handler(notification: Notification) -> None
         return
 
 
-bot.run_forever()
+if __name__ == "__main__":
+    logger.info("Starting WhatsApp Demo Chatbot")
+    bot.run_forever()

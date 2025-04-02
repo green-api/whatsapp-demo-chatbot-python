@@ -368,6 +368,61 @@ contact={
 },
 ```  
 
+## ChatGPT Integration
+
+The chatbot now includes integration with ChatGPT (option 14 in the main menu), which allows users to have interactive conversations with OpenAI's GPT models directly within the WhatsApp chat.
+
+### Setup
+
+To enable the ChatGPT functionality, you need to set up your OpenAI API key:
+
+1. Obtain an API key from [OpenAI](https://platform.openai.com/api-keys)
+2. Add the key to your environment variables or `.env` file:
+
+```
+OPENAI_API_KEY=your_openai_api_key_here
+```
+
+If the OpenAI API key is not configured, the chatbot will display an error message when a user tries to use the ChatGPT feature.
+
+### Configuration
+
+The ChatGPT integration is configured in the bot initialization:
+
+```python
+gpt_bot = WhatsappGptBot(
+    id_instance=config.user_id,
+    api_token_instance=config.api_token_id,
+    openai_api_key=config.openai_api_key,
+    model="gpt-4o",
+    system_message="You are a helpful assistant in a WhatsApp chat. Be concise and accurate in your responses.",
+    max_history_length=10,
+    temperature=0.7
+)
+```
+
+You can customize the following parameters:
+- `model`: The OpenAI model to use (default is "gpt-4o")
+- `system_message`: The system prompt that guides ChatGPT's behavior
+- `max_history_length`: Number of previous messages to maintain in context
+- `temperature`: Controls randomness in responses (0.0-1.0)
+
+### Usage
+
+Users can access the ChatGPT feature by sending "14" when in the main menu. The chatbot will enter a special ChatGPT conversation mode where all messages are forwarded to the GPT model for processing.
+
+To exit the ChatGPT conversation and return to the main menu, users can type one of the following keywords (depending on their selected language):
+- English: "exit", "menu", "stop", "back"
+- Russian: "выход", "меню", "стоп", "назад"
+- Kazakh: "шығу", "мәзір", "тоқта", "артқа", "menu", "меню"
+- Spanish: "salir", "menú", "parar", "atrás", "menu", "exit"
+- Hebrew: "יציאה", "תפריט", "עצור", "exit", "menu", "חזור"
+
+### Limitations
+
+- API usage may incur costs depending on your OpenAI subscription plan
+- Response times may vary based on OpenAI API latency and your internet connection
+
 ## License
 
 Licensed under [Creative Commons Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)](https://creativecommons.org/licenses/by-nd/4.0/).

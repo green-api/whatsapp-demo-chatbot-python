@@ -3,7 +3,6 @@ from pydantic_settings import BaseSettings
 
 
 class Envs(BaseSettings):
-
     # Debug mode. Can be extracted from DEBUG env, default == True
     # Use it for local development
     debug: bool | None = True
@@ -24,7 +23,10 @@ class Envs(BaseSettings):
     debug_link_audio_en: str | None = 'https://storage.yandexcloud.net/sw-prod-03-test/ChatBot/Audio_bot_eng.mp3'
     debug_link_video_ru: str | None = 'https://storage.yandexcloud.net/sw-prod-03-test/ChatBot/Video_bot_ru.mp4'
     debug_link_video_en: str | None = 'https://storage.yandexcloud.net/sw-prod-03-test/ChatBot/Video_bot_eng.mp4'
-    
+
+    # OpenAI API key
+    openai_api_key: str = Field("", env="OPENAI_API_KEY")
+
     # App name. Can be extracted from APP_NAME env, default == "sw-chatbot-7103"
     app_name: str | None = "sw-chatbot-7103"
 
@@ -48,21 +50,28 @@ class Envs(BaseSettings):
             )
 
         if self.debug and not all(
-            (
-                self.debug_link_greenapi_ru,
-                self.debug_link_greenapi_en,
-                self.debug_link_python_chatbot,
-                self.debug_link_pdf,
-                self.debug_link_jpg,
-                self.debug_link_audio_ru,
-                self.debug_link_video_ru,
-                self.debug_link_audio_en,
-                self.debug_link_video_en,
-            )
+                (
+                        self.debug_link_greenapi_ru,
+                        self.debug_link_greenapi_en,
+                        self.debug_link_python_chatbot,
+                        self.debug_link_pdf,
+                        self.debug_link_jpg,
+                        self.debug_link_audio_ru,
+                        self.debug_link_video_ru,
+                        self.debug_link_audio_en,
+                        self.debug_link_video_en,
+                )
         ):
             raise ValueError(
                 "When debug mode is enabled, you must pass all "
                 "required links for correct bot functionality (DEBUG_LINK_*)"
+            )
+
+        if not self.openai_api_key:
+            import warnings
+            warnings.warn(
+                "OpenAI API key is not set. "
+                "ChatGPT functionality will not work properly."
             )
 
         return self

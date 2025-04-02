@@ -26,7 +26,8 @@ class ServerConfig:
         link_video_ru: str,
         link_audio_en: str,
         link_video_en: str,
-        link_preview: bool
+        link_preview: bool,
+        openai_api_key: str = ""
     ):
         self.user_id = user_id
         self.api_token_id = api_token_id
@@ -40,6 +41,7 @@ class ServerConfig:
         self.link_audio_en = link_audio_en
         self.link_video_en = link_video_en
         self.link_preview = link_preview
+        self.openai_api_key = openai_api_key
 
 
 def init_config(envs: Envs, logger: logging.Logger):
@@ -60,7 +62,8 @@ def init_config(envs: Envs, logger: logging.Logger):
             link_video_ru=envs.debug_link_video_ru,
             link_audio_en=envs.debug_link_audio_en,
             link_video_en=envs.debug_link_video_en,
-            link_preview=envs.link_preview
+            link_preview=envs.link_preview,
+            openai_api_key=envs.openai_api_key
         )
 
     else:
@@ -89,6 +92,7 @@ def init_config(envs: Envs, logger: logging.Logger):
             link_audio_en=str(config_result.get("link_audio_en")),
             link_video_en=str(config_result.get("link_video_en")),
             link_preview=False if config_result.get("link_preview") and (str(config_result.get("link_preview")).lower()) == "false" else True,
+            openai_api_key=str(config_result.get("openai_api_key", "")) or envs.openai_api_key
         )
 
     logger.info(f"User ID: {server_config.user_id}")
@@ -103,6 +107,7 @@ def init_config(envs: Envs, logger: logging.Logger):
     logger.debug(f"EN Audio url: {server_config.link_audio_en}")
     logger.debug(f"EN Video url: {server_config.link_video_en}")
     logger.debug(f"LinkPreview: {server_config.link_preview}")
+    logger.debug(f"OpenAI API Key: {api_token_log_hider(server_config.openai_api_key)}")
 
 
     return server_config
