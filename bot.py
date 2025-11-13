@@ -720,6 +720,88 @@ def main_menu_option_13_handler(notification: Notification) -> None:
         caption=about_text,
     )
 
+@bot.router.message(
+    type_message=TEXT_TYPES,
+    state=States.MENU.value,
+    regexp=r"^\s*15\s*$",
+)
+@debug_profiler(logger=logger)
+def main_menu_option_15_handler(notification: Notification) -> None:
+    """
+    "Send interactive buttons" option handler for senders with `MENU` state.
+    """
+    if sender_state_data_updater(notification):
+        return initial_handler(notification)
+
+    sender = notification.sender
+    sender_state_data = notification.state_manager.get_state_data(sender)
+
+    try:
+        sender_lang_code = sender_state_data[LANGUAGE_CODE_KEY]
+
+        message_text = (
+            f'{answers_data["sending_buttons_notice"][sender_lang_code]}'
+            f'{answers_data["buttons_warning"][sender_lang_code]}'
+            f'{answers_data["send_poll_message_1"][sender_lang_code]}'
+            f'{answers_data["links"][sender_lang_code]["send_interactive_buttons_documentation"]}\n'
+            f'{answers_data["links"][sender_lang_code]["send_interactive_buttons_reply_documentation"]}'
+        )
+        
+        buttons_demo_title = answers_data["buttons_demo_title"][sender_lang_code]
+
+        buttons_demo_message_text = answers_data["buttons_demo_message"][sender_lang_code]
+        buttons_demo_message_1 = answers_data["send_poll_message_1"][sender_lang_code]
+        buttons_demo_message_link = answers_data["links"][sender_lang_code]["send_interactive_buttons_documentation"]
+        buttons_demo_message = buttons_demo_message_text + buttons_demo_message_1 + buttons_demo_message_link
+
+        buttons_demo_footer = answers_data["buttons_demo_footer"][sender_lang_code]
+        
+        reply_buttons_title = answers_data["reply_buttons_title"][sender_lang_code]
+
+        reply_buttons_message_text = answers_data["reply_buttons_message"][sender_lang_code]
+        reply_buttons_message_1 = answers_data["send_poll_message_1"][sender_lang_code]
+        reply_buttons_message_link = answers_data["links"][sender_lang_code]["send_interactive_buttons_reply_documentation"]
+        reply_buttons_message = reply_buttons_message_text + reply_buttons_message_1 + reply_buttons_message_link
+
+        reply_buttons_footer = answers_data["reply_buttons_footer"][sender_lang_code]
+
+    except KeyError as e:
+        logger.exception(e)
+        return
+
+    notification.answer(message_text)
+
+    notification.answer_with_interactive_buttons(
+        buttons_demo_message,
+        [{
+            "type": "call",
+            "buttonId": "1",
+            "buttonText": answers_data["call_me_button"][sender_lang_code],
+            "phoneNumber": "79123456789"
+        },
+        {
+            "type": "url", 
+            "buttonId": "2",
+            "buttonText": answers_data["link_button"][sender_lang_code],
+            "url": answers_data["links"][sender_lang_code]["send_interactive_buttons_documentation"]
+        }],
+        buttons_demo_title,
+        buttons_demo_footer
+    )
+
+    notification.answer_with_interactive_buttons_reply(
+        reply_buttons_message,
+        [{
+            "buttonId": "menu_button",
+            "buttonText": answers_data["menu_button"][sender_lang_code]
+        },
+        {
+            "buttonId": "stop_button", 
+            "buttonText": answers_data["stop_button"][sender_lang_code]
+        }],
+        reply_buttons_title,
+        reply_buttons_footer
+    )
 
 @bot.router.message(
     type_message=TEXT_TYPES,
@@ -794,6 +876,50 @@ def main_menu_menu_handler(notification: Notification) -> None:
         caption=answer_text,
     )
 
+@bot.router.message(type_message="templateButtonsReplyMessage")
+@debug_profiler(logger=logger)
+def template_buttons_reply_handler(notification: Notification) -> None:
+    """
+    Handler for template buttons replies
+    """
+    if sender_state_data_updater(notification):
+        return initial_handler(notification)
+
+    sender = notification.sender
+    sender_state_data = notification.state_manager.get_state_data(sender)
+    
+    try:
+        event = notification.event
+        message_data = event.get("messageData", {})
+        
+        template_button_data  = message_data.get("templateButtonsReplyMessage", {})
+        if not template_button_data:
+            template_button_data = message_data
+        
+        selected_button_id = template_button_data.get("selectedId", "unknown")
+
+        if selected_button_id == "unknown" and "templateButtonReplyMessage" in message_data:
+            button_data = message_data["templateButtonReplyMessage"]
+            selected_button_id = button_data.get("selectedId", "unknown")
+        
+        sender_lang_code = sender_state_data.get(LANGUAGE_CODE_KEY, "en")
+
+        if selected_button_id == "menu_button":
+            notification.state_manager.update_state(sender, States.MENU.value)
+            return main_menu_menu_handler(notification)
+        elif selected_button_id == "stop_button":
+            notification.state_manager.update_state(sender, States.MENU.value)
+            return main_menu_stop_handler(notification)
+        else:
+            unknown_button_answer = answers_data.get("unknown_button", {}).get(sender_lang_code, "Unknown button clicked")
+            notification.answer(unknown_button_answer)
+            
+    except KeyError as e:
+        logger.exception(f"KeyError in template_buttons_reply_handler: {e}")
+        notification.answer("Error processing button click")
+    except Exception as e:
+        logger.exception(f"Error in template_buttons_reply_handler: {e}")
+        notification.answer("Error processing button click")
 
 @bot.router.message(
     state=States.CHAT_GPT.value,
