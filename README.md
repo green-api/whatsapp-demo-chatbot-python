@@ -230,6 +230,8 @@ Select a number from the list to check how the sending method works!
 *11*. Create a group with the bot 👥
 *12*. Quote message ©️
 *13*. About PYTHON GREEN API chatbot 🦎
+*14*. 🔥 Conversation with ChatGPT 🤖
+*15*. Interactive buttons 📌
 
 To return to the beginning, write *stop* or *0*
 ```
@@ -243,7 +245,7 @@ This message was sent via the sendMessage method
 To find out how the method works, follow the link
 https://green-api.com/docs/api/sending/SendMessage/
 ```
-If you send something other than numbers 1-13, the chatbot will briefly respond:
+If you send something other than numbers 1-15, the chatbot will briefly respond:
 ```
 Sorry, I didn't quite understand you, write a menu to see the possible options
 ```
