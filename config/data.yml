@@ -166,7 +166,7 @@ send_link_message_preview:
   ru: "*Сообщение с превью* отправлено через метод sendMessage.\nМетод *sendMessage* позволяет отправлять текст и сообщения с ссылкой.\n\nЧтобы узнать как работает метод, пройдите по ссылке\n"
   en: "*This message with preview* was sent via sendMessage method.\nThe *sendMessage* method allows you to send text and messages with a link.\n\nIf you want to know how the method works, follow the link\n"
   he: "הודעה זו נשלחה בשיטת *sendMessage*.\n\nה-*sendMessage* GREEN API - שיטת שלח טקסט מאפשרת לך לשלוח הודעות עם קישור, הודעה זו עם תצוגה מקדימה\nאם אתה רוצה לדעת איך השיטה עובדת, לחץ על הקישור \n"
-  es: "Este mensaje fue enviado através del método *sendMessage*.\n\nMétodo *sendMessage* GREEN API - El método de envío de texto le permite enviar mensajes con un enlace, este mensaje con una vista previa\n\nSi quieres saber cómo funciona el método, sigue el enlace\n"
+  es: "Este mensaje fue enviado a través del método *sendMessage*.\n\nMétodo *sendMessage* GREEN API - El método de envío de texto le permite enviar mensajes con un enlace, este mensaje con una vista previa\n\nSi quieres saber cómo funciona el método, sigue el enlace\n"
   ar: ""
   kz: "*Бұл хабарлама превьюмен бірге* sendMessage әдісі арқылы жіберілген.\n*SendMessage* әдісі текст және сілтемеci бар хабарламаларды жіберуге мүмкіндік береді\n\nӘдіс жұмысы туралы білу үшін сілтеме бойынша өтіңіз\n"
 send_link_message_no_preview:
@@ -226,12 +226,12 @@ about_python_chatbot:
   ar: ""
   kz: "*PYTHON GREEN API чат-боты* WhatsApp API мүмкіндіктерін көрсетуге арналған.\nPYTHON GREEN API чат-боттың коды ашық, оның негізінде сіз өзіңіздің ботыңызды оңай жаза аласыз."
 buttons_demo_message:
-  ru: "Это сообщение отправлено через *SendInteractiveButtons* метод.\n"
-  en: "This message was sent via the *SendInteractiveButtons* method.\n"
-  he: "הודעה זו נשלחה באמצעות השיטה *SendInteractiveButtons*.\n"
-  es: "Este mensaje se envió mediante el método *SendInteractiveButtons*.\n"
+  ru: "Это сообщение отправлено через *SendInteractiveButtons* метод.\nЧтобы узнать как работает метод, пройдите по ссылке\n"
+  en: "This message was sent via the *SendInteractiveButtons* method.\nIf you want to know how the method works, follow the link\n"
+  he: "הודעה זו נשלחה באמצעות השיטה *SendInteractiveButtons*.\nאם אתה רוצה לדעת איך השיטה עובדת, עקוב אחר הקישור\n"
+  es: "Este mensaje se envió mediante el método *SendInteractiveButtons*.\nSi quieres saber cómo funciona el método, sigue el enlace\n"
   ar: ""
-  kz: "Бұл хабарлама *SendInteractiveButtons* әдісі арқылы жіберілді.\n"
+  kz: "Бұл хабарлама *SendInteractiveButtons* әдісі арқылы жіберілді.\nдіс жұмысы туралы білу үшін сілтеме бойынша өтіңіз\n"
 buttons_demo_title:
   ru: "*Интерактивные кнопки*"
   en: "*Interactive Buttons*"
@@ -254,12 +254,12 @@ reply_buttons_title:
   ar: ""
   kz: "*Жылдам жауап беру түймелерді*"
 reply_buttons_message:
-  ru: "Это сообщение отправлено через *SendInteractiveButtonsReply* метод.\n"
-  en: "This message was sent via the *SendInteractiveButtonsReply* method.\n"
-  he: "הודעה זו נשלחה באמצעות השיטה *SendInteractiveButtonsReply*.\n"
-  es: "*Este mensaje se envía mediante el método *SendInteractiveButtonsReply*.*"
+  ru: "Это сообщение отправлено через *SendInteractiveButtonsReply* метод.\nЧтобы узнать как работает метод, пройдите по ссылке\n"
+  en: "This message was sent via the *SendInteractiveButtonsReply* method.\nIf you want to know how the method works, follow the link\n"
+  he: "הודעה זו נשלחה באמצעות השיטה *SendInteractiveButtonsReply*.\nאם אתה רוצה לדעת איך השיטה עובדת, עקוב אחר הקישור\n"
+  es: "Este mensaje se envía mediante el método *SendInteractiveButtonsReply*.\nSi quieres saber cómo funciona el método, sigue el enlace\n"
   ar: ""
-  kz: "Бұл хабарлама *SendInteractiveButtonsReply* әдісі арқылы жіберілді.\n"
+  kz: "Бұл хабарлама *SendInteractiveButtonsReply* әдісі арқылы жіберілді.\nдіс жұмысы туралы білу үшін сілтеме бойынша өтіңіз\n"
 reply_buttons_footer:
   ru: "*Выберите вариант ниже*"
   en: "*Select an option below*"
@@ -282,19 +282,19 @@ link_button:
   ar: ""
   kz: "Документацияға сілтеме"
 menu_button:
-  ru: "меню"
-  en: "menu"
+  ru: "Меню"
+  en: "Menu"
   he: "תפריט"
-  es: "menú"
+  es: "Menú"
   ar: ""
-  kz: "мәзір"
+  kz: "Мәзір"
 stop_button:
-  ru: "стоп"
-  en: "stop"
+  ru: "Стоп"
+  en: "Stop"
   he: "עצור"
-  es: "parar"
+  es: "Parar"
   ar: ""
-  kz: "тоқта"
+  kz: "Тоқта"
 sending_buttons_notice:
   ru: "Следующие сообщения будут отправлены с использованием методов *SendInteractiveButtons* и *SendInteractiveButtonsReplay*.\nМы будем отправлять интерактивные кнопки и интерактивные кнопки с ответом!\n\n"
   en: "The following messages will be sent using the *SendInteractiveButtons* and *SendInteractiveButtonsReplay* methods.\nWe will send interactive buttons and interactive buttons with a reply in them!\n\n"
@@ -355,7 +355,7 @@ chat_gpt_intro:
   ru: "🤖 Вы начали разговор с ChatGPT.\n\nЗадавайте любые вопросы, и ChatGPT постарается на них ответить.\n\nЧтобы вернуться в главное меню, напишите *меню*, *выход*, *стоп* или *назад*."
   en: "🤖 You have started a conversation with ChatGPT.\n\nAsk any questions, and ChatGPT will try to answer them.\n\nTo return to the main menu, type *menu*, *exit*, *stop*, or *back*."
   he: "🤖 התחלת שיחה עם ChatGPT.\n\nשאל כל שאלה, ו-ChatGPT ינסה לענות עליה.\n\nכדי לחזור לתפריט הראשי, הקלד *תפריט*, *יציאה*, *עצור*, *חזור*, *exit* או *menu*."
-  es: "🤖 Has iniciado una conversación con ChatGPT.\n\nHaz cualquier pregunta, y ChatGPT intentará responderla.\n\nPara volver al menú principal, escribe *menú*, *salir*, *parar*, *atrás*, *menu* или *exit*."
+  es: "🤖 Has iniciado una conversación con ChatGPT.\n\nHaz cualquier pregunta, y ChatGPT intentará responderla.\n\nPara volver al menú principal, escribe *menú*, *salir*, *parar*, *atrás*, *menu* o *exit*."
   ar: ""
   kz: "🤖 Сіз ChatGPT-мен әңгімені бастадыңыз.\n\nКез келген сұрақ қойыңыз, және ChatGPT оларға жауап беруге тырысады.\n\nНегізгі мәзірге оралу үшін *меню*, *мәзір*, *шығу*, *тоқта*, *артқа* деп жазыңыз."
 chat_gpt_error:
@@ -365,18 +365,19 @@ chat_gpt_error:
   es: "Lo siento, hubo un error al procesar tu mensaje. Por favor, inténtalo de nuevo o vuelve al menú escribiendo *menu*."
   ar: ""
   kz: "Кешіріңіз, сіздің хабарламаңызды өңдеу кезінде қате орын алды. Қайталап көріңіз немесе *меню* деп жазу арқылы мәзірге оралыңыз."
-# Новые поля для кнопок меню и стоп на разных языках
 menu_button_text:
   ru: "меню"
   en: "menu"
   he: "תפריט"
   es: "menú"
+  ar: ""
   kz: "мәзір"
 stop_button_text:
   ru: "стоп"
   en: "stop"
   he: "עצור"
   es: "parar"
+  ar: ""
   kz: "тоқта"
 links:
   ru:

@@ -748,60 +748,49 @@ def main_menu_option_15_handler(notification: Notification) -> None:
         )
         
         buttons_demo_title = answers_data["buttons_demo_title"][sender_lang_code]
-
-        buttons_demo_message_text = answers_data["buttons_demo_message"][sender_lang_code]
-        buttons_demo_message_1 = answers_data["send_poll_message_1"][sender_lang_code]
-        buttons_demo_message_link = answers_data["links"][sender_lang_code]["send_interactive_buttons_documentation"]
-        buttons_demo_message = buttons_demo_message_text + buttons_demo_message_1 + buttons_demo_message_link
-
+        buttons_demo_message = answers_data["buttons_demo_message"][sender_lang_code] + answers_data["links"][sender_lang_code]["send_interactive_buttons_documentation"]
         buttons_demo_footer = answers_data["buttons_demo_footer"][sender_lang_code]
         
         reply_buttons_title = answers_data["reply_buttons_title"][sender_lang_code]
-
-        reply_buttons_message_text = answers_data["reply_buttons_message"][sender_lang_code]
-        reply_buttons_message_1 = answers_data["send_poll_message_1"][sender_lang_code]
-        reply_buttons_message_link = answers_data["links"][sender_lang_code]["send_interactive_buttons_reply_documentation"]
-        reply_buttons_message = reply_buttons_message_text + reply_buttons_message_1 + reply_buttons_message_link
-
+        reply_buttons_message = answers_data["reply_buttons_message"][sender_lang_code] + answers_data["links"][sender_lang_code]["send_interactive_buttons_reply_documentation"]
         reply_buttons_footer = answers_data["reply_buttons_footer"][sender_lang_code]
 
-    except KeyError as e:
+        notification.answer(message_text)
+
+        notification.answer_with_interactive_buttons(
+            buttons_demo_message,
+            [{
+                "type": "call",
+                "buttonId": "1",
+                "buttonText": answers_data["call_me_button"][sender_lang_code],
+                "phoneNumber": "79123456789"
+            },
+            {
+                "type": "url", 
+                "buttonId": "2",
+                "buttonText": answers_data["link_button"][sender_lang_code],
+                "url": answers_data["links"][sender_lang_code]["send_interactive_buttons_documentation"]
+            }],
+            buttons_demo_title,
+            buttons_demo_footer
+        )
+
+        notification.answer_with_interactive_buttons_reply(
+            reply_buttons_message,
+            [{
+                "buttonId": "menu_button",
+                "buttonText": answers_data["menu_button"][sender_lang_code]
+            },
+            {
+                "buttonId": "stop_button", 
+                "buttonText": answers_data["stop_button"][sender_lang_code]
+            }],
+            reply_buttons_title,
+            reply_buttons_footer
+        )
+    except Exception as e:
         logger.exception(e)
         return
-
-    notification.answer(message_text)
-
-    notification.answer_with_interactive_buttons(
-        buttons_demo_message,
-        [{
-            "type": "call",
-            "buttonId": "1",
-            "buttonText": answers_data["call_me_button"][sender_lang_code],
-            "phoneNumber": "79123456789"
-        },
-        {
-            "type": "url", 
-            "buttonId": "2",
-            "buttonText": answers_data["link_button"][sender_lang_code],
-            "url": answers_data["links"][sender_lang_code]["send_interactive_buttons_documentation"]
-        }],
-        buttons_demo_title,
-        buttons_demo_footer
-    )
-
-    notification.answer_with_interactive_buttons_reply(
-        reply_buttons_message,
-        [{
-            "buttonId": "menu_button",
-            "buttonText": answers_data["menu_button"][sender_lang_code]
-        },
-        {
-            "buttonId": "stop_button", 
-            "buttonText": answers_data["stop_button"][sender_lang_code]
-        }],
-        reply_buttons_title,
-        reply_buttons_footer
-    )
 
 @bot.router.message(
     type_message=TEXT_TYPES,
@@ -913,10 +902,7 @@ def template_buttons_reply_handler(notification: Notification) -> None:
         else:
             unknown_button_answer = answers_data.get("unknown_button", {}).get(sender_lang_code, "Unknown button clicked")
             notification.answer(unknown_button_answer)
-            
-    except KeyError as e:
-        logger.exception(f"KeyError in template_buttons_reply_handler: {e}")
-        notification.answer("Error processing button click")
+
     except Exception as e:
         logger.exception(f"Error in template_buttons_reply_handler: {e}")
         notification.answer("Error processing button click")
