@@ -7,6 +7,16 @@
 Demo version of Whatsapp chatbot based on API service [GREEN-API](https://green-api.com/en).
 Using API, the chatbot sends text messages, files, images, music, videos, contacts, geolocation, surveys, requests an avatar, sends links, creates a group with the bot, and quotes a message.  
 
+## Features  
+
+You could build an AI WhatsApp chatbot powered by the OpenAI GPT model and the WhatsApp API by GREEN-API. Try our demo, or build your one with [WhatsApp GPT Bot Library for Python](https://github.com/green-api/whatsapp-chatgpt-python).
+
+- GREEN-API: Just for 12$ and less for one month, or try the free plan  
+- Python  3.8 or higher  
+- Support various OpenAI models  
+- Self-hosting or running locally  
+- Don't need WABA  
+
 ## Table of contents
 * [Installation](#installation)
 * [Authorization in GREEN-API](#authorization-in-green-api)
