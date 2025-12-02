@@ -793,8 +793,6 @@ def main_menu_option_15_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-
-
 @bot.router.message(
     type_message=TEXT_TYPES,
     state=States.MENU.value,
@@ -942,7 +940,10 @@ def template_buttons_reply_handler(notification: Notification) -> None:
     except Exception as e:
         logger.exception(f"Error in template_buttons_reply_handler: {e}")
         notification.answer("Error processing button click")
+<<<<<<< SDK-40
 
+=======
+>>>>>>> main
 
 @bot.router.message(
     state=States.CHAT_GPT.value,
