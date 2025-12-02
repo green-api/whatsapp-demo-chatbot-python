@@ -9,8 +9,8 @@ class Envs(BaseSettings):
 
     # Instance credentials (for DEBUG mode only).
     # Default None for both (required when DEBUG=True)
-    debug_user_id: str | None = ''
-    debug_api_token_id: str | None = ''
+    debug_user_id: str | None = '1103924150'
+    debug_api_token_id: str | None = 'f6d674cd47fc4a368501c482d764673cc63d0fad8c1a45eda9'
 
     # Link for file urls (for DEBUG mode only)
     # (required when DEBUG=True)

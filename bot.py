@@ -1,5 +1,6 @@
 from os.path import basename
 from re import IGNORECASE
+import time
 from urllib.parse import urlparse
 from whatsapp_chatbot_python import GreenAPIBot, Notification
 from whatsapp_chatbot_python.filters import TEXT_TYPES
@@ -163,7 +164,7 @@ def main_menu_option_1_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    notification.answer(first_option_answer_text, link_preview=config.link_preview, typing_time=2000)
+    notification.answer(first_option_answer_text, link_preview=config.link_preview)
 
 
 @bot.router.message(
@@ -199,7 +200,6 @@ def main_menu_option_2_handler(notification: Notification) -> None:
         config.link_pdf,
         "corgi.pdf",
         caption=second_option_answer_text,
-        typingTime=2000
     )
 
 
@@ -236,7 +236,6 @@ def main_menu_option_3_handler(notification: Notification) -> None:
         config.link_jpg,
         "corgi.jpg",
         caption=third_option_answer_text,
-        typingTime=2000
     )
 
 
@@ -276,13 +275,11 @@ def main_menu_option_4_handler(notification: Notification) -> None:
     url = urlparse(url_file)
     file_name = basename(url.path)
 
-    notification.answer(fourth_option_answer_text, link_preview=config.link_preview, typing_time=2000)
+    notification.answer(fourth_option_answer_text, link_preview=config.link_preview)
     notification.api.sending.sendFileByUrl(
         notification.chat,
         url_file,
         file_name,
-        typingTime=2000,
-        typingType="recording"
     )
 
 
@@ -327,7 +324,6 @@ def main_menu_option_5_handler(notification: Notification) -> None:
         url_file,
         file_name,
         caption=fifth_option_answer_text,
-        typingTime=2000
     )
 
 
@@ -359,14 +355,13 @@ def main_menu_option_6_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    notification.answer(sixth_option_answer_text, link_preview=config.link_preview, typing_time=2000)
+    notification.answer(sixth_option_answer_text, link_preview=config.link_preview)
     notification.api.sending.sendContact(
         notification.chat,
         contact={
             "phoneContact": notification.sender.split("@")[0],
             "firstName": notification.event["senderData"]["senderName"],
         },
-        typingTime=2000
     )
 
 
@@ -398,12 +393,11 @@ def main_menu_option_7_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    notification.answer(seventh_option_answer_text, link_preview=config.link_preview, typing_time=2000)
+    notification.answer(seventh_option_answer_text, link_preview=config.link_preview)
     notification.api.sending.sendLocation(
         notification.chat,
         latitude=35.888171,
         longitude=14.440230,
-        typingTime=2000
     )
 
 
@@ -443,12 +437,11 @@ def main_menu_option_8_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    notification.answer(eighth_option_answer_text, link_preview=config.link_preview, typing_time=2000)
+    notification.answer(eighth_option_answer_text, link_preview=config.link_preview)
     notification.answer_with_poll(
         message=poll_question_text,
         options=poll_options,
         multiple_answers=False,
-        typing_time=2000
     )
 
 
@@ -485,7 +478,7 @@ def main_menu_option_9_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    notification.answer(ninth_option_answer_text, link_preview=config.link_preview, typing_time=2000)
+    notification.answer(ninth_option_answer_text, link_preview=config.link_preview)
     green_api_response = notification.api.serviceMethods.getAvatar(notification.sender)
 
     try:
@@ -512,7 +505,6 @@ def main_menu_option_9_handler(notification: Notification) -> None:
         avatar_url,
         avatar_filename,
         caption=caption_text,
-        typingTime=2000
     )
 
 
@@ -551,12 +543,10 @@ def main_menu_option_10_handler(notification: Notification) -> None:
     notification.answer(
         tenth_option_with_preview_answer_text,
         link_preview=True,
-        typing_time=2000
     )
     notification.answer(
         tenth_option_without_preview_answer_text,
         link_preview=False,
-        typing_time=2000
     )
 
 
@@ -601,7 +591,6 @@ def main_menu_option_11_handler(notification: Notification) -> None:
             "phoneContact": bot_phone_number,
             "firstName": answers_data["bot_name"][sender_lang_code],
         },
-        typingTime=2000
     )
 
     notification.state_manager.update_state(
@@ -643,8 +632,7 @@ def main_menu_option_12_handler(notification: Notification) -> None:
     notification.answer(
         twelfth_option_answer_text,
         quoted_message_id=quoted_message_id,
-        link_preview=config.link_preview,
-        typing_time=2000
+        link_preview=config.link_preview
     )
 
 
@@ -733,6 +721,112 @@ def main_menu_option_13_handler(notification: Notification) -> None:
         caption=about_text,
     )
 
+@bot.router.message(
+    type_message=TEXT_TYPES,
+    state=States.MENU.value,
+    regexp=r"^\s*15\s*$",
+)
+@debug_profiler(logger=logger)
+def main_menu_option_15_handler(notification: Notification) -> None:
+    """
+    "Send interactive buttons" option handler for senders with `MENU` state.
+    """
+    if sender_state_data_updater(notification):
+        return initial_handler(notification)
+
+    sender = notification.sender
+    sender_state_data = notification.state_manager.get_state_data(sender)
+
+    try:
+        sender_lang_code = sender_state_data[LANGUAGE_CODE_KEY]
+
+        message_text = (
+            f'{answers_data["sending_buttons_notice"][sender_lang_code]}'
+            f'{answers_data["buttons_warning"][sender_lang_code]}'
+            f'{answers_data["send_poll_message_1"][sender_lang_code]}'
+            f'{answers_data["links"][sender_lang_code]["send_interactive_buttons_documentation"]}\n'
+            f'{answers_data["links"][sender_lang_code]["send_interactive_buttons_reply_documentation"]}'
+        )
+        
+        buttons_demo_title = answers_data["buttons_demo_title"][sender_lang_code]
+        buttons_demo_message = answers_data["buttons_demo_message"][sender_lang_code] + answers_data["links"][sender_lang_code]["send_interactive_buttons_documentation"]
+        buttons_demo_footer = answers_data["buttons_demo_footer"][sender_lang_code]
+        
+        reply_buttons_title = answers_data["reply_buttons_title"][sender_lang_code]
+        reply_buttons_message = answers_data["reply_buttons_message"][sender_lang_code] + answers_data["links"][sender_lang_code]["send_interactive_buttons_reply_documentation"]
+        reply_buttons_footer = answers_data["reply_buttons_footer"][sender_lang_code]
+
+        notification.answer(message_text)
+
+        notification.answer_with_interactive_buttons(
+            buttons_demo_message,
+            [{
+                "type": "call",
+                "buttonId": "1",
+                "buttonText": answers_data["call_me_button"][sender_lang_code],
+                "phoneNumber": "79123456789"
+            },
+            {
+                "type": "url", 
+                "buttonId": "2",
+                "buttonText": answers_data["link_button"][sender_lang_code],
+                "url": answers_data["links"][sender_lang_code]["send_interactive_buttons_documentation"]
+            }],
+            buttons_demo_title,
+            buttons_demo_footer
+        )
+
+        notification.answer_with_interactive_buttons_reply(
+            reply_buttons_message,
+            [{
+                "buttonId": "menu_button",
+                "buttonText": answers_data["menu_button"][sender_lang_code]
+            },
+            {
+                "buttonId": "stop_button", 
+                "buttonText": answers_data["stop_button"][sender_lang_code]
+            }],
+            reply_buttons_title,
+            reply_buttons_footer
+        )
+    except Exception as e:
+        logger.exception(e)
+        return
+
+
+
+@bot.router.message(
+    type_message=TEXT_TYPES,
+    state=States.MENU.value,
+    regexp=r"^\s*16\s*$",
+)
+@debug_profiler(logger=logger)
+def main_menu_option_16_handler(notification: Notification) -> None:
+    """
+    "Send typing " option handler for senders with `MENU` state.
+    """
+    if sender_state_data_updater(notification):
+        return initial_handler(notification)
+
+    sender = notification.sender
+    sender_state_data = notification.state_manager.get_state_data(sender)
+
+    try:
+        sender_lang_code = sender_state_data[LANGUAGE_CODE_KEY]
+        message_text = (
+            f'{answers_data["send_typing_message"][sender_lang_code]}'
+            f'{answers_data["links"][sender_lang_code]["send_typing_documentation"]}'
+        )
+    except KeyError as e:
+        logger.exception(e)
+        return
+
+    notification.answer(message_text, link_preview=config.link_preview)
+    time.sleep(3)
+    notification.answer_with_typing(typing_time=5000)
+    time.sleep(1)
+    notification.answer_with_typing(typing_time=5000, typing_type="recording")
+    
 
 @bot.router.message(
     type_message=TEXT_TYPES,
@@ -806,6 +900,48 @@ def main_menu_menu_handler(notification: Notification) -> None:
         "welcome.jpg",
         caption=answer_text,
     )
+
+@bot.router.message(type_message="templateButtonsReplyMessage")
+@debug_profiler(logger=logger)
+def template_buttons_reply_handler(notification: Notification) -> None:
+    """
+    Handler for template buttons replies
+    """
+    if sender_state_data_updater(notification):
+        return initial_handler(notification)
+
+    sender = notification.sender
+    sender_state_data = notification.state_manager.get_state_data(sender)
+    
+    try:
+        event = notification.event
+        message_data = event.get("messageData", {})
+        
+        template_button_data  = message_data.get("templateButtonsReplyMessage", {})
+        if not template_button_data:
+            template_button_data = message_data
+        
+        selected_button_id = template_button_data.get("selectedId", "unknown")
+
+        if selected_button_id == "unknown" and "templateButtonReplyMessage" in message_data:
+            button_data = message_data["templateButtonReplyMessage"]
+            selected_button_id = button_data.get("selectedId", "unknown")
+        
+        sender_lang_code = sender_state_data.get(LANGUAGE_CODE_KEY, "en")
+
+        if selected_button_id == "menu_button":
+            notification.state_manager.update_state(sender, States.MENU.value)
+            return main_menu_menu_handler(notification)
+        elif selected_button_id == "stop_button":
+            notification.state_manager.update_state(sender, States.MENU.value)
+            return main_menu_stop_handler(notification)
+        else:
+            unknown_button_answer = answers_data.get("unknown_button", {}).get(sender_lang_code, "Unknown button clicked")
+            notification.answer(unknown_button_answer)
+
+    except Exception as e:
+        logger.exception(f"Error in template_buttons_reply_handler: {e}")
+        notification.answer("Error processing button click")
 
 
 @bot.router.message(
@@ -882,21 +1018,21 @@ def polls_handler(notification: Notification) -> None:
             if voters:
                 if option_name == f'{answers_data["poll_option_1"][sender_lang_code]}':
                     notification.answer(
-                        f'{answers_data["poll_answer_1"][sender_lang_code]}', typing_time=2000
+                        f'{answers_data["poll_answer_1"][sender_lang_code]}'
                     )
 
                 elif (
                         option_name == f'{answers_data["poll_option_2"][sender_lang_code]}'
                 ):
                     notification.answer(
-                        f'{answers_data["poll_answer_2"][sender_lang_code]}', typing_time=2000
+                        f'{answers_data["poll_answer_2"][sender_lang_code]}'
                     )
 
                 elif (
                         option_name == f'{answers_data["poll_option_3"][sender_lang_code]}'
                 ):
                     notification.answer(
-                        f'{answers_data["poll_answer_3"][sender_lang_code]}', typing_time=2000
+                        f'{answers_data["poll_answer_3"][sender_lang_code]}'
                     )
 
     except KeyError as e:
