@@ -793,8 +793,6 @@ def main_menu_option_15_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-
-
 @bot.router.message(
     type_message=TEXT_TYPES,
     state=States.MENU.value,
@@ -803,7 +801,7 @@ def main_menu_option_15_handler(notification: Notification) -> None:
 @debug_profiler(logger=logger)
 def main_menu_option_16_handler(notification: Notification) -> None:
     """
-    "Send typing " option handler for senders with `MENU` state.
+    "Send typing notification" option handler for senders with `MENU` state.
     """
     if sender_state_data_updater(notification):
         return initial_handler(notification)
@@ -817,16 +815,51 @@ def main_menu_option_16_handler(notification: Notification) -> None:
             f'{answers_data["send_typing_message"][sender_lang_code]}'
             f'{answers_data["links"][sender_lang_code]["send_typing_documentation"]}'
         )
-    except KeyError as e:
+
+        notification.answer(message=message_text, typing_time=5000)
+        
+    except Exception as e:
         logger.exception(e)
         return
 
-    notification.answer(message_text, link_preview=config.link_preview)
-    time.sleep(3)
-    notification.answer_with_typing(typing_time=5000)
-    time.sleep(1)
-    notification.answer_with_typing(typing_time=5000, typing_type="recording")
-    
+@bot.router.message(
+    type_message=TEXT_TYPES,
+    state=States.MENU.value,
+    regexp=r"^\s*17\s*$",
+)
+@debug_profiler(logger=logger)
+def main_menu_option_17_handler(notification: Notification) -> None:
+    """
+    "Send recording notification" option handler for senders with `MENU` state.
+    """
+    if sender_state_data_updater(notification):
+        return initial_handler(notification)
+
+    sender = notification.sender
+    sender_state_data = notification.state_manager.get_state_data(sender)
+
+    try:
+        sender_lang_code = sender_state_data[LANGUAGE_CODE_KEY]
+        message_text = (
+            f'{answers_data["send_recording_message"][sender_lang_code]}'
+            f'{answers_data["links"][sender_lang_code]["send_typing_documentation"]}'
+        )
+        notification.answer(message_text)
+        
+        url_file = config.link_audio_ru if sender_lang_code in ("kz", "ru") else config.link_audio_en
+        url = urlparse(url_file)
+        file_name = basename(url.path)
+        notification.api.sending.sendFileByUrl(
+            notification.chat,
+            url_file,
+            file_name,
+            typingTime=5000, 
+            typingType="recording"
+        )
+
+    except Exception as e:
+        logger.exception(e)
+        return
 
 @bot.router.message(
     type_message=TEXT_TYPES,
@@ -942,7 +975,6 @@ def template_buttons_reply_handler(notification: Notification) -> None:
     except Exception as e:
         logger.exception(f"Error in template_buttons_reply_handler: {e}")
         notification.answer("Error processing button click")
-
 
 @bot.router.message(
     state=States.CHAT_GPT.value,
