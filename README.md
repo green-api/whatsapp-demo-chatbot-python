@@ -7,6 +7,16 @@
 Demo version of Whatsapp chatbot based on API service [GREEN-API](https://green-api.com/en).
 Using API, the chatbot sends text messages, files, images, music, videos, contacts, geolocation, surveys, requests an avatar, sends links, creates a group with the bot, and quotes a message.  
 
+## Features  
+
+You could build an AI WhatsApp chatbot powered by the OpenAI GPT model and the WhatsApp API by GREEN-API. Try our demo, or build your one with [WhatsApp GPT Bot Library for Python](https://github.com/green-api/whatsapp-chatgpt-python).
+
+- GREEN-API: Just for 12$ and less for one month, or try the free plan  
+- Python  3.8 or higher  
+- Support various OpenAI models  
+- Self-hosting or running locally  
+- Don't need WABA  
+
 ## Table of contents
 * [Installation](#installation)
 * [Authorization in GREEN-API](#authorization-in-green-api)
@@ -217,19 +227,23 @@ GREEN API provides the following kinds of message services.
 
 Select a number from the list to check how the sending method works!
 
-*1*. Text message 📩
-*2*. File 📋
-*3*. Image 🖼\
-*4*. Audio 🎵
+*1*. Text message 📩        
+*2*. File 📋    
+*3*. Image 🖼   
+*4*. Audio 🎵   
 *5*. Video 📽
-*6*. Contact 📱
+*6*. Contact 📱 
 *7*. Location 🌎
-*8*. Poll ✔
-*9*. Get image of my avatar👤
-*10*. Send link 🔗
-*11*. Create a group with the bot 👥
-*12*. Quote message ©️
-*13*. About PYTHON GREEN API chatbot 🦎
+*8*. Poll ✔    
+*9*. Get image of my avatar👤   
+*10*. Send link 🔗  
+*11*. Create a group with the bot 👥    
+*12*. Quote message ©️   
+*13*. About PYTHON GREEN API chatbot 🦎 
+*14*. 🔥 Conversation with ChatGPT 🤖   
+*15*. Interactive buttons 📌    
+*16*. Typing notification ✒️    
+*17*. Audio recording notification 🎙️   
 
 To return to the beginning, write *stop* or *0*
 ```
@@ -243,7 +257,7 @@ This message was sent via the sendMessage method
 To find out how the method works, follow the link
 https://green-api.com/docs/api/sending/SendMessage/
 ```
-If you send something other than numbers 1-13, the chatbot will briefly respond:
+If you send something other than numbers 1-17, the chatbot will briefly respond:
 ```
 Sorry, I didn't quite understand you, write a menu to see the possible options
 ```
