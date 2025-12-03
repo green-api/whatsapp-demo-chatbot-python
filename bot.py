@@ -1,6 +1,5 @@
 from os.path import basename
 from re import IGNORECASE
-import time
 from urllib.parse import urlparse
 from whatsapp_chatbot_python import GreenAPIBot, Notification
 from whatsapp_chatbot_python.filters import TEXT_TYPES
@@ -1264,3 +1263,4 @@ def group_creation_incorrect_message_handler(notification: Notification) -> None
 if __name__ == "__main__":
     logger.info("Starting WhatsApp Demo Chatbot")
     bot.run_forever()
+    

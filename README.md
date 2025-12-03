@@ -227,23 +227,23 @@ GREEN API provides the following kinds of message services.
 
 Select a number from the list to check how the sending method works!
 
-*1*. Text message 📩        
-*2*. File 📋    
-*3*. Image 🖼   
-*4*. Audio 🎵   
+*1*. Text message 📩
+*2*. File 📋
+*3*. Image 🖼
+*4*. Audio 🎵
 *5*. Video 📽
-*6*. Contact 📱 
+*6*. Contact 📱
 *7*. Location 🌎
-*8*. Poll ✔    
-*9*. Get image of my avatar👤   
-*10*. Send link 🔗  
-*11*. Create a group with the bot 👥    
-*12*. Quote message ©️   
-*13*. About PYTHON GREEN API chatbot 🦎 
-*14*. 🔥 Conversation with ChatGPT 🤖   
-*15*. Interactive buttons 📌    
-*16*. Typing notification ✒️    
-*17*. Audio recording notification 🎙️   
+*8*. Poll ✔
+*9*. Get image of my avatar👤
+*10*. Send link 🔗
+*11*. Create a group with the bot 👥
+*12*. Quote message ©️
+*13*. About PYTHON GREEN API chatbot 🦎
+*14*. 🔥 Conversation with ChatGPT 🤖
+*15*. Interactive buttons 📌
+*16*. Typing notification ✒️
+*17*. Audio recording notification 🎙️
 
 To return to the beginning, write *stop* or *0*
 ```
