@@ -229,7 +229,7 @@ Select a number from the list to check how the sending method works!
 
 *1*. Text message 📩
 *2*. File 📋
-*3*. Image 🖼\
+*3*. Image 🖼
 *4*. Audio 🎵
 *5*. Video 📽
 *6*. Contact 📱
@@ -242,6 +242,8 @@ Select a number from the list to check how the sending method works!
 *13*. About PYTHON GREEN API chatbot 🦎
 *14*. 🔥 Conversation with ChatGPT 🤖
 *15*. Interactive buttons 📌
+*16*. Typing notification ✒️
+*17*. Audio recording notification 🎙️
 
 To return to the beginning, write *stop* or *0*
 ```
@@ -255,7 +257,7 @@ This message was sent via the sendMessage method
 To find out how the method works, follow the link
 https://green-api.com/docs/api/sending/SendMessage/
 ```
-If you send something other than numbers 1-15, the chatbot will briefly respond:
+If you send something other than numbers 1-17, the chatbot will briefly respond:
 ```
 Sorry, I didn't quite understand you, write a menu to see the possible options
 ```

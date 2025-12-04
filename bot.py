@@ -795,6 +795,74 @@ def main_menu_option_15_handler(notification: Notification) -> None:
 @bot.router.message(
     type_message=TEXT_TYPES,
     state=States.MENU.value,
+    regexp=r"^\s*16\s*$",
+)
+@debug_profiler(logger=logger)
+def main_menu_option_16_handler(notification: Notification) -> None:
+    """
+    "Send typing notification" option handler for senders with `MENU` state.
+    """
+    if sender_state_data_updater(notification):
+        return initial_handler(notification)
+
+    sender = notification.sender
+    sender_state_data = notification.state_manager.get_state_data(sender)
+
+    try:
+        sender_lang_code = sender_state_data[LANGUAGE_CODE_KEY]
+        message_text = (
+            f'{answers_data["send_typing_message"][sender_lang_code]}'
+            f'{answers_data["links"][sender_lang_code]["send_typing_documentation"]}'
+        )
+
+        notification.answer(message=message_text, typing_time=5000)
+        
+    except Exception as e:
+        logger.exception(e)
+        return
+
+@bot.router.message(
+    type_message=TEXT_TYPES,
+    state=States.MENU.value,
+    regexp=r"^\s*17\s*$",
+)
+@debug_profiler(logger=logger)
+def main_menu_option_17_handler(notification: Notification) -> None:
+    """
+    "Send recording notification" option handler for senders with `MENU` state.
+    """
+    if sender_state_data_updater(notification):
+        return initial_handler(notification)
+
+    sender = notification.sender
+    sender_state_data = notification.state_manager.get_state_data(sender)
+
+    try:
+        sender_lang_code = sender_state_data[LANGUAGE_CODE_KEY]
+        message_text = (
+            f'{answers_data["send_recording_message"][sender_lang_code]}'
+            f'{answers_data["links"][sender_lang_code]["send_typing_documentation"]}'
+        )
+        notification.answer(message_text)
+        
+        url_file = config.link_audio_ru if sender_lang_code in ("kz", "ru") else config.link_audio_en
+        url = urlparse(url_file)
+        file_name = basename(url.path)
+        notification.api.sending.sendFileByUrl(
+            notification.chat,
+            url_file,
+            file_name,
+            typingTime=5000, 
+            typingType="recording"
+        )
+
+    except Exception as e:
+        logger.exception(e)
+        return
+
+@bot.router.message(
+    type_message=TEXT_TYPES,
+    state=States.MENU.value,
     regexp=(r"^(?:0|stop|стоп)$", IGNORECASE),
 )
 @debug_profiler(logger=logger)
@@ -1195,3 +1263,4 @@ def group_creation_incorrect_message_handler(notification: Notification) -> None
 if __name__ == "__main__":
     logger.info("Starting WhatsApp Demo Chatbot")
     bot.run_forever()
+    
