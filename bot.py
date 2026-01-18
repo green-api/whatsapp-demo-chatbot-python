@@ -163,7 +163,7 @@ def main_menu_option_1_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    notification.answer(first_option_answer_text, link_preview=config.link_preview)
+    notification.answer(first_option_answer_text, link_preview=config.link_preview, typing_time=1000)
 
 
 @bot.router.message(
@@ -199,6 +199,7 @@ def main_menu_option_2_handler(notification: Notification) -> None:
         config.link_pdf,
         "corgi.pdf",
         caption=second_option_answer_text,
+        typingTime=1000
     )
 
 
@@ -235,6 +236,7 @@ def main_menu_option_3_handler(notification: Notification) -> None:
         config.link_jpg,
         "corgi.jpg",
         caption=third_option_answer_text,
+        typingTime=1000,
     )
 
 
@@ -274,11 +276,13 @@ def main_menu_option_4_handler(notification: Notification) -> None:
     url = urlparse(url_file)
     file_name = basename(url.path)
 
-    notification.answer(fourth_option_answer_text, link_preview=config.link_preview)
+    notification.answer(fourth_option_answer_text, link_preview=config.link_preview, typing_time=1000)
     notification.api.sending.sendFileByUrl(
         notification.chat,
         url_file,
         file_name,
+        typingTime=2000,
+        typingType="recording",
     )
 
 
@@ -323,6 +327,7 @@ def main_menu_option_5_handler(notification: Notification) -> None:
         url_file,
         file_name,
         caption=fifth_option_answer_text,
+        typingTime=1000,
     )
 
 
@@ -354,13 +359,14 @@ def main_menu_option_6_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    notification.answer(sixth_option_answer_text, link_preview=config.link_preview)
+    notification.answer(sixth_option_answer_text, link_preview=config.link_preview, typing_time=1000)
     notification.api.sending.sendContact(
         notification.chat,
         contact={
             "phoneContact": notification.sender.split("@")[0],
             "firstName": notification.event["senderData"]["senderName"],
         },
+        typingTime=1000,
     )
 
 
@@ -392,11 +398,12 @@ def main_menu_option_7_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    notification.answer(seventh_option_answer_text, link_preview=config.link_preview)
+    notification.answer(seventh_option_answer_text, link_preview=config.link_preview, typing_time=1000)
     notification.api.sending.sendLocation(
         notification.chat,
         latitude=35.888171,
         longitude=14.440230,
+        typingTime=1000,
     )
 
 
@@ -436,11 +443,12 @@ def main_menu_option_8_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    notification.answer(eighth_option_answer_text, link_preview=config.link_preview)
+    notification.answer(eighth_option_answer_text, link_preview=config.link_preview, typing_time=1000)
     notification.answer_with_poll(
         message=poll_question_text,
         options=poll_options,
         multiple_answers=False,
+        typingTime=1000,
     )
 
 
@@ -477,7 +485,7 @@ def main_menu_option_9_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    notification.answer(ninth_option_answer_text, link_preview=config.link_preview)
+    notification.answer(ninth_option_answer_text, link_preview=config.link_preview, typing_time=1000)
     green_api_response = notification.api.serviceMethods.getAvatar(notification.sender)
 
     try:
@@ -504,6 +512,7 @@ def main_menu_option_9_handler(notification: Notification) -> None:
         avatar_url,
         avatar_filename,
         caption=caption_text,
+        typingTime=1000,
     )
 
 
@@ -542,10 +551,12 @@ def main_menu_option_10_handler(notification: Notification) -> None:
     notification.answer(
         tenth_option_with_preview_answer_text,
         link_preview=True,
+        typingTime=1000,
     )
     notification.answer(
         tenth_option_without_preview_answer_text,
         link_preview=False,
+        typingTime=1000,
     )
 
 
@@ -590,6 +601,7 @@ def main_menu_option_11_handler(notification: Notification) -> None:
             "phoneContact": bot_phone_number,
             "firstName": answers_data["bot_name"][sender_lang_code],
         },
+        typingTime=1000,
     )
 
     notification.state_manager.update_state(
@@ -631,7 +643,8 @@ def main_menu_option_12_handler(notification: Notification) -> None:
     notification.answer(
         twelfth_option_answer_text,
         quoted_message_id=quoted_message_id,
-        link_preview=config.link_preview
+        link_preview=config.link_preview,
+        typingTime=1000,
     )
 
 
@@ -718,6 +731,7 @@ def main_menu_option_13_handler(notification: Notification) -> None:
         config.link_python_chatbot,
         "bot.jpg",
         caption=about_text,
+        typingTime=1000,
     )
 
 @bot.router.message(
@@ -1049,21 +1063,21 @@ def polls_handler(notification: Notification) -> None:
             if voters:
                 if option_name == f'{answers_data["poll_option_1"][sender_lang_code]}':
                     notification.answer(
-                        f'{answers_data["poll_answer_1"][sender_lang_code]}'
+                        f'{answers_data["poll_answer_1"][sender_lang_code]}', typing_time=1000
                     )
 
                 elif (
                         option_name == f'{answers_data["poll_option_2"][sender_lang_code]}'
                 ):
                     notification.answer(
-                        f'{answers_data["poll_answer_2"][sender_lang_code]}'
+                        f'{answers_data["poll_answer_2"][sender_lang_code]}', typing_time=1000
                     )
 
                 elif (
                         option_name == f'{answers_data["poll_option_3"][sender_lang_code]}'
                 ):
                     notification.answer(
-                        f'{answers_data["poll_answer_3"][sender_lang_code]}'
+                        f'{answers_data["poll_answer_3"][sender_lang_code]}', typing_time=1000
                     )
 
     except KeyError as e:
