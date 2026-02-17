@@ -753,14 +753,6 @@ def main_menu_option_15_handler(notification: Notification) -> None:
     try:
         sender_lang_code = sender_state_data[LANGUAGE_CODE_KEY]
 
-        message_text = (
-            f'{answers_data["sending_buttons_notice"][sender_lang_code]}'
-            f'{answers_data["buttons_warning"][sender_lang_code]}'
-            f'{answers_data["send_poll_message_1"][sender_lang_code]}'
-            f'{answers_data["links"][sender_lang_code]["send_interactive_buttons_documentation"]}\n'
-            f'{answers_data["links"][sender_lang_code]["send_interactive_buttons_reply_documentation"]}'
-        )
-        
         buttons_demo_title = answers_data["buttons_demo_title"][sender_lang_code]
         buttons_demo_message = answers_data["buttons_demo_message"][sender_lang_code] + answers_data["links"][sender_lang_code]["send_interactive_buttons_documentation"]
         buttons_demo_footer = answers_data["buttons_demo_footer"][sender_lang_code]
@@ -768,8 +760,6 @@ def main_menu_option_15_handler(notification: Notification) -> None:
         reply_buttons_title = answers_data["reply_buttons_title"][sender_lang_code]
         reply_buttons_message = answers_data["reply_buttons_message"][sender_lang_code] + answers_data["links"][sender_lang_code]["send_interactive_buttons_reply_documentation"]
         reply_buttons_footer = answers_data["reply_buttons_footer"][sender_lang_code]
-
-        notification.answer(message_text)
 
         notification.answer_with_interactive_buttons(
             buttons_demo_message,
