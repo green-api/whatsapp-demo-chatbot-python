@@ -448,7 +448,7 @@ def main_menu_option_8_handler(notification: Notification) -> None:
         message=poll_question_text,
         options=poll_options,
         multiple_answers=False,
-        typingTime=1000,
+        typing_time = 1000
     )
 
 
@@ -551,12 +551,12 @@ def main_menu_option_10_handler(notification: Notification) -> None:
     notification.answer(
         tenth_option_with_preview_answer_text,
         link_preview=True,
-        typingTime=1000,
+        typing_time=1000,
     )
     notification.answer(
         tenth_option_without_preview_answer_text,
         link_preview=False,
-        typingTime=1000,
+        typing_time=1000,
     )
 
 
@@ -644,7 +644,7 @@ def main_menu_option_12_handler(notification: Notification) -> None:
         twelfth_option_answer_text,
         quoted_message_id=quoted_message_id,
         link_preview=config.link_preview,
-        typingTime=1000,
+        typing_time=1000,
     )
 
 
@@ -782,12 +782,12 @@ def main_menu_option_15_handler(notification: Notification) -> None:
         notification.answer_with_interactive_buttons_reply(
             reply_buttons_message,
             [{
-                "buttonId": "menu_button",
-                "buttonText": answers_data["menu_button"][sender_lang_code]
+                "buttonId": "1",
+                "buttonText": "Menu"
             },
             {
-                "buttonId": "stop_button", 
-                "buttonText": answers_data["stop_button"][sender_lang_code]
+                "buttonId": "2", 
+                "buttonText": "Stop"
             }],
             reply_buttons_title,
             reply_buttons_footer
@@ -937,9 +937,9 @@ def main_menu_menu_handler(notification: Notification) -> None:
         caption=answer_text,
     )
 
-@bot.router.message(type_message="templateButtonsReplyMessage")
+@bot.router.message(type_message="interactiveButtonsResponse")
 @debug_profiler(logger=logger)
-def template_buttons_reply_handler(notification: Notification) -> None:
+def interactive_buttons_handler(notification: Notification) -> None:
     """
     Handler for template buttons replies
     """
@@ -948,36 +948,35 @@ def template_buttons_reply_handler(notification: Notification) -> None:
 
     sender = notification.sender
     sender_state_data = notification.state_manager.get_state_data(sender)
+
+    event = notification.event
     
     try:
-        event = notification.event
-        message_data = event.get("messageData", {})
-        
-        template_button_data  = message_data.get("templateButtonsReplyMessage", {})
-        if not template_button_data:
-            template_button_data = message_data
-        
-        selected_button_id = template_button_data.get("selectedId", "unknown")
+        if "interactiveButtonsResponse" in event:
+            button_data = event["interactiveButtonsResponse"]
+        elif "messageData" in event and "interactiveButtonsResponse" in event["messageData"]:
+            button_data = event["messageData"]["interactiveButtonsResponse"]
+        else:
+            logger.error(f"Не найдены данные кнопки в событии: {event}")
+            return
 
-        if selected_button_id == "unknown" and "templateButtonReplyMessage" in message_data:
-            button_data = message_data["templateButtonReplyMessage"]
-            selected_button_id = button_data.get("selectedId", "unknown")
-        
-        sender_lang_code = sender_state_data.get(LANGUAGE_CODE_KEY, "en")
+        selected_id = button_data.get("selectedId")
+        selected_text = button_data.get("selectedDisplayText")
 
-        if selected_button_id == "menu_button":
+        if selected_id == "1":
             notification.state_manager.update_state(sender, States.MENU.value)
             return main_menu_menu_handler(notification)
-        elif selected_button_id == "stop_button":
+            
+        elif selected_id == "2":
             notification.state_manager.update_state(sender, States.MENU.value)
             return main_menu_stop_handler(notification)
+            
         else:
-            unknown_button_answer = answers_data.get("unknown_button", {}).get(sender_lang_code, "Unknown button clicked")
-            notification.answer(unknown_button_answer)
+            logger.info(f"Нажата кнопка: {selected_text} (ID: {selected_id})")
 
     except Exception as e:
-        logger.exception(f"Error in template_buttons_reply_handler: {e}")
-        notification.answer("Error processing button click")
+        logger.exception(f"Error in interactive_buttons_handler: {e}")
+        notification.answer("Ошибка обработки кнопки")
 
 @bot.router.message(
     state=States.CHAT_GPT.value,
