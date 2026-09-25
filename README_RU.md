@@ -5,7 +5,7 @@
 - [Documentation in English](https://github.com/green-api/whatsapp-demo-chatbot-python/blob/main/README.md).  
 
 Демонстрационная версия Whatsapp чатбота основанного на API сервиса [GREEN-API](https://green-api.com). 
-При помощи API чатбот отправляет текстовые сообщения, файлы, изображения, музыку, видео, контакты, геолокацию, проводит опросы, запрашивает аватар, отправляет ссылки, создает группу с ботом, цитирует сообщение.  
+При помощи API чатбот отправляет текстовые сообщения, файлы, изображения, музыку, видео, контакты, геолокацию, проводит опросы, запрашивает аватар, отправляет ссылки, создает группу с ботом, цитирует сообщение и выполняет демонстрационный голосовой звонок.
 
 ## Содержание
 * [Установка среды для запуска чатбота](#установка-среды-для-запуска-чатбота)  
@@ -32,7 +32,7 @@ python --version
 Python 3.N.N
 ```
 
-у вас должен быть Python версии 3.8 и выше.
+у вас должен быть Python версии 3.11 и выше.
 
 Сделайте копию чат бота с помощью:
 ```
@@ -43,7 +43,7 @@ git clone https://github.com/green-api/whatsapp-demo-chatbot-python.git
 
 Перейдите в папку с чатботом в командной строке и установите необходимые библиотеки Python. Убедитесь, что у вас установлен пакетный менеджер [pip](https://pip.pypa.io/en/stable/).
 
-Перечень необходимых библиотек находится в файле requirements.txt. Выполните следующую команду для их установки:  
+Клонируйте проект с подмодулями (`git clone --recurse-submodules ...`) либо выполните `git submodule update --init --recursive` в уже созданной копии. Перечень необходимых библиотек находится в файле requirements.txt. Выполните следующую команду для их установки:
 ```
 python -m pip install -r requirements.txt
 ```  
@@ -138,6 +138,12 @@ python bot.py
 DEBUG=True
 DEBUG_USER_ID=<Your Instance ID>
 DEBUG_API_TOKEN_ID=<Your Api token ID>
+API_URL=<API URL Вашего инстанса, например https://1234.api.green-api.com>
+CALL_RING_TIMEOUT_SECONDS=30
+CALL_TALK_TIMEOUT_SECONDS=180
+OPENAI_API_KEY=<Ваш API-ключ OpenAI>
+CALL_REALTIME_MODEL=gpt-realtime-2.1
+CALL_REALTIME_VOICE=marin
 DEBUG_LINK_PDF=<Full URL string for .pdf file>
 DEBUG_LINK_JPG=<Full URL string for .jpg file>
 DEBUG_LINK_AUDIO_RU=<Full URL string for .mp3 file (RU)>

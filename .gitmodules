@@ -1,0 +1,3 @@
+[submodule "external/greenapi-wa-voip-client-python"]
+	path = external/greenapi-wa-voip-client-python
+	url = https://github.com/kennyromanov/greenapi-wa-voip-client-python.git

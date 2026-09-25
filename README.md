@@ -5,14 +5,14 @@
 - [Документация на русском языке](https://github.com/green-api/whatsapp-demo-chatbot-python/blob/main/README_RU.md).  
 
 Demo version of Whatsapp chatbot based on API service [GREEN-API](https://green-api.com/en).
-Using API, the chatbot sends text messages, files, images, music, videos, contacts, geolocation, surveys, requests an avatar, sends links, creates a group with the bot, and quotes a message.  
+Using API, the chatbot sends text messages, files, images, music, videos, contacts, geolocation, surveys, requests an avatar, sends links, creates a group with the bot, quotes a message, and places a demo voice call.
 
 ## Features  
 
 You could build an AI WhatsApp chatbot powered by the OpenAI GPT model and the WhatsApp API by GREEN-API. Try our demo, or build your one with [WhatsApp GPT Bot Library for Python](https://github.com/green-api/whatsapp-chatgpt-python).
 
 - GREEN-API: Just for 12$ and less for one month, or try the free plan  
-- Python  3.8 or higher  
+- Python 3.11 or higher
 - Support various OpenAI models  
 - Self-hosting or running locally  
 - Don't need WABA  
@@ -32,11 +32,11 @@ You could build an AI WhatsApp chatbot powered by the OpenAI GPT model and the W
 To run the chatbot, you need to have the Python interpreter installed. It is already installed on Linux and MacOS. For Windows, download the latest stable version from the [official website](https://www.python.org/), run the installer and follow the recommendations.  
 
 Check the Python version by entering the command line (PowerShell - for Windows) and entering the query:  ``` python --version ```  
-The response to the entered query should be the Python version in the following format: ``` Python 3.N.N ```. You must have installed Python version 3.8 or higher.  
+The response to the entered query should be the Python version in the following format: ``` Python 3.N.N ```. You must have installed Python version 3.11 or higher.
 
 Make a copy of the bot chat with ``` git clone https://github.com/green-api/whatsapp-demo-chatbot-python.git ``` or download the archive [whatsapp-demo-chatbot-python](https ://github.com/green-api/whatsapp-demo-chatbot-python).  
 
-The list of necessary libraries is in the requirements.txt file. Run the following command to install them: ``` python -m pip install -r requirements.txt ```. The environment and necessary libraries are installed and ready for running chatbot. You can set up and launch the chatbot on the Whatsapp account.
+Clone with submodules (`git clone --recurse-submodules ...`), or run `git submodule update --init --recursive` in an existing clone. The list of necessary libraries is in the requirements.txt file. Run ``` python -m pip install -r requirements.txt ```. The environment and necessary libraries are installed and ready for running chatbot. You can set up and launch the chatbot on the Whatsapp account.
 
 ## Authorization in GREEN-API  
 
@@ -127,6 +127,12 @@ To run the bot locally, use the environment variable `DEBUG=True`. All other nec
 DEBUG=True
 DEBUG_USER_ID=<Your Instance ID>
 DEBUG_API_TOKEN_ID=<Your Api token ID>
+API_URL=<Your instance API URL, for example https://1234.api.green-api.com>
+CALL_RING_TIMEOUT_SECONDS=30
+CALL_TALK_TIMEOUT_SECONDS=180
+OPENAI_API_KEY=<Your OpenAI API key>
+CALL_REALTIME_MODEL=gpt-realtime-2.1
+CALL_REALTIME_VOICE=marin
 DEBUG_LINK_PDF=<Full URL string for .pdf file>
 DEBUG_LINK_JPG=<Full URL string for .jpg file>
 DEBUG_LINK_AUDIO_RU=<Full URL string for .mp3 file (RU)>
