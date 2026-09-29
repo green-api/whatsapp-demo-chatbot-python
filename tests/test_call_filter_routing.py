@@ -2,7 +2,7 @@ from unittest.mock import Mock
 from whatsapp_chatbot_python.filters import TEXT_TYPES, filters
 from whatsapp_chatbot_python.manager.router import Router
 from internal.calls.coordinator import CallCoordinator
-from internal.calls.filters import register_call_filters
+from internal.calls.integration import register_call_filters
 import logging
 import unittest
 

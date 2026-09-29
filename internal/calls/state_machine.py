@@ -52,6 +52,7 @@ def _ending_target(session: CallSession) -> CallState:
 _TRANSITION_RULES: dict[tuple[CallState, CallEvent], TransitionRule] = {
     (CallState.TRIGGERED, CallEvent.ENQUEUED): TransitionRule(CallState.QUEUED),
     (CallState.QUEUED, CallEvent.DEQUEUED): TransitionRule(CallState.DIALING),
+    (CallState.QUEUED, CallEvent.CANCEL_REQUESTED): TransitionRule(CallState.CANCELLED),
     (CallState.DIALING, CallEvent.DIAL_ACCEPTED): TransitionRule(CallState.RINGING),
     (CallState.DIALING, CallEvent.REMOTE_IDLE): TransitionRule(CallState.REJECTED),
 
@@ -71,6 +72,8 @@ _TRANSITION_RULES: dict[tuple[CallState, CallEvent], TransitionRule] = {
 
     (CallState.CONNECTING, CallEvent.BRIDGE_READY): TransitionRule(CallState.IN_CALL),
 
+    # The remote party already answered; report a completed call even if the
+    # bridge never became ready. No recording is created until IN_CALL.
     (CallState.CONNECTING, CallEvent.REMOTE_IDLE): TransitionRule(
         CallState.REMOTE_ENDED
     ),
@@ -165,6 +168,8 @@ class CallStateMachine:
             session.queued_at = now
         elif event == CallEvent.DEQUEUED:
             session.dialing_at = now
+        elif event == CallEvent.CANCEL_REQUESTED:
+            session.end_reason = CallEndReason.USER_CANCELLED
         elif event == CallEvent.REMOTE_ACCEPTED:
             session.remote_accepted = True
             session.answered_at = session.answered_at or now

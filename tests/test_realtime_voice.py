@@ -121,6 +121,28 @@ class VoiceSessionTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual([a for a, _ in actions], ["update", "greet"])
         self.assertEqual(actions[0][1]["session"]["audio"]["input"]["format"]["rate"], 24_000)
 
+    async def test_supported_languages_configure_voice_and_greeting(self):
+        for code, language in {
+            "ru": "Russian", "en": "English", "he": "Hebrew",
+            "es": "Spanish", "kz": "Kazakh",
+        }.items():
+            with self.subTest(code=code):
+                voice = VoiceBotSession(
+                    api_key="test", model="gpt-realtime-2.1", voice="marin",
+                    language=code, on_error=self.failures.append,
+                )
+
+                try:
+                    await voice.start()
+                    await voice.greet_once()
+
+                    actions = self.client.connection.actions
+
+                    self.assertIn(language, actions[0][1]["session"]["instructions"])
+                    self.assertIn(language, actions[1][1]["response"]["instructions"])
+                finally:
+                    await voice.close()
+
     async def test_audio_frames_are_paced_and_timestamped(self):
         await self.voice.start()
 
@@ -191,6 +213,60 @@ class VoiceSessionTest(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(appended)
         self.assertEqual(len(base64.b64decode(appended[0]["audio"])), FRAME_BYTES)
         self.assertEqual(self.failures, [])
+
+    async def test_recording_taps_tracks_and_ignores_old_bridge(self):
+        class Recorder:
+            def __init__(self):
+                self.generation = 0
+                self.caller = []
+                self.bot = []
+
+            def set_generation(self, generation):
+                self.generation = generation
+
+            def add_caller(self, pcm, generation):
+                if generation == self.generation:
+                    self.caller.append(pcm)
+
+            def add_bot(self, pcm, generation):
+                if generation == self.generation:
+                    self.bot.append(pcm)
+
+        recorder = Recorder()
+
+        voice = VoiceBotSession(
+            api_key="test",
+            model="gpt-realtime-2.1",
+            voice="marin",
+            language="ru",
+            on_error=self.failures.append,
+            recorder=recorder,
+        )
+
+        try:
+            await voice.start()
+
+            old_track = voice.new_output_track()
+            sink = voice.new_input_sink()
+
+            await sink.attach(OneFrameTrack())
+
+            for _ in range(20):
+                if recorder.caller:
+                    break
+
+                await asyncio.sleep(0.01)
+
+            await sink.close()
+            voice._queue_audio("item-1", bytes([1, 2]) * 480)
+            await old_track.recv()
+            self.assertEqual(recorder.caller, [bytes(FRAME_BYTES)])
+            self.assertEqual(recorder.bot, [bytes([1, 2]) * 480])
+            voice.new_output_track()
+            await old_track.recv()
+            self.assertEqual(len(recorder.bot), 1)
+        finally:
+            await voice.close()
 
     async def test_failed_realtime_response_reports_call_error(self):
         await self.voice.start()

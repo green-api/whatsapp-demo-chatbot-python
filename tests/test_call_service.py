@@ -1,8 +1,10 @@
+from pathlib import Path
+from tempfile import NamedTemporaryFile
+from types import SimpleNamespace
+from unittest.mock import patch
 import asyncio
 import logging
 import unittest
-from types import SimpleNamespace
-from unittest.mock import patch
 
 from internal.calls.models import CallEndReason, CallEvent, CallSession, CallState
 from internal.calls.service import WhatsAppCallService
@@ -142,7 +144,10 @@ class CallServiceTest(unittest.IsolatedAsyncioTestCase):
     def make_session(self):
         fsm = CallStateMachine()
         session = CallSession("sender@c.us", "sender@c.us", "ru")
+
         fsm.apply(session, CallEvent.ENQUEUED)
+        fsm.apply(session, CallEvent.DEQUEUED)
+
         return session, fsm.apply
 
     def make_service(self, ring=1, talk=1):
@@ -251,3 +256,45 @@ class CallServiceTest(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(session.end_reason, CallEndReason.SHUTDOWN)
         self.assertEqual(FakeClient.instances[0].actions.count("hangup"), 1)
+
+    async def test_failed_conversation_discards_partial_recording(self):
+        FakeClient.remote_hangup = False
+        FakeVoice.fail_greeting = True
+        session, transition = self.make_session()
+
+        with NamedTemporaryFile(suffix=".mp3", delete=False) as file:
+            path = Path(file.name)
+
+        self.addCleanup(path.unlink, missing_ok=True)
+
+        class FakeRecorder:
+            def __init__(self, logger):
+                pass
+
+            def start(self):
+                pass
+
+            def finish(self):
+                return path
+
+        with patch("internal.calls.service.CallRecorder", FakeRecorder):
+            result = await self.make_service().execute(session, transition)
+
+        self.assertEqual(session.end_reason, CallEndReason.ERROR)
+        self.assertIsNone(result.recording_path)
+        self.assertFalse(path.exists())
+
+    async def test_stop_before_execute_does_not_start_a_call(self):
+        session, transition = self.make_session()
+
+        service = self.make_service()
+
+        service.request_stop()
+
+        result = await service.execute(session, transition)
+
+        self.assertEqual(session.end_reason, CallEndReason.SHUTDOWN)
+        self.assertEqual(session.state, CallState.FAILED)
+        self.assertIsNone(result.recording_path)
+        self.assertEqual(FakeClient.instances, [])
+        self.assertEqual(FakeVoice.instances, [])

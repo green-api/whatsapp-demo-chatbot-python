@@ -6,7 +6,8 @@ from whatsapp_chatbot_python.filters import TEXT_TYPES
 from whatsapp_chatgpt_python import WhatsappGptBot
 from yaml import safe_load
 from internal.calls.integration import create_call_coordinator
-from internal.calls.models import ACTIVE_STATES, EnqueueResult
+from internal.calls.integration import handle_call_message
+from internal.calls.models import EnqueueResult
 from internal.config import init_config
 from internal.envs import init_envs
 from internal.logger import init_logger
@@ -65,15 +66,18 @@ call_coordinator = create_call_coordinator(config, answers_data, logger)
 @debug_profiler(logger=logger)
 def call_in_progress_handler(notification: Notification) -> None:
     """Intercept chat commands while this sender has a queued or active call."""
-    session = call_coordinator.get_session(notification.sender)
-    if session is None:
+    action = handle_call_message(
+        call_coordinator, notification.sender, notification.message_text,
+    )
+
+    if action.message_key is None:
         return
 
-    message_key = (
-        "call_in_progress" if session.state in ACTIVE_STATES else "call_waiting"
-    )
-    translations = answers_data[message_key]
-    notification.answer(translations.get(session.language, translations["en"]))
+    translations = answers_data[action.message_key]
+    notification.answer(translations.get(action.language, translations["en"]))
+
+    if action.show_menu:
+        send_main_menu(notification, action.language)
 
 
 @bot.router.message(type_message=TEXT_TYPES, state=None)
@@ -932,9 +936,9 @@ def main_menu_option_18_handler(notification: Notification) -> None:
         language=sender_lang_code,
     )
 
-    message_key = (
-        "call_queued" if result == EnqueueResult.CREATED else
-        "call_waiting"
+    message_key = "call_queued" if result == EnqueueResult.CREATED else (
+        handle_call_message(call_coordinator, notification.sender, "18").message_key
+        or "call_queued"
     )
 
     notification.answer(
@@ -996,18 +1000,19 @@ def main_menu_menu_handler(notification: Notification) -> None:
 
     try:
         sender_lang_code = sender_state_data[LANGUAGE_CODE_KEY]
-        answer_text = f'{answers_data["menu"][sender_lang_code]}'.lstrip()
     except KeyError as e:
         logger.exception(e)
         return
 
-    # Get main menu image based on chosen language
-    menu_image_path, menu_image_name = get_main_menu_image_by_lang_code(
-        sender_lang_code
-    )
+    send_main_menu(notification, sender_lang_code)
 
+
+def send_main_menu(notification: Notification, language: str) -> None:
+    # Shared by the menu command and queued-call cancellation.
+    answer_text = f'{answers_data["menu"][language]}'.lstrip()
     link = config.link_greenapi_en
-    if sender_lang_code == 'ru':
+
+    if language == 'ru':
         link = config.link_greenapi_ru
     notification.api.sending.sendFileByUrl(
         notification.chat,

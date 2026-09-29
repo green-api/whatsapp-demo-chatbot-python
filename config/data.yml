@@ -40,7 +40,7 @@ menu:
     *15*. Интерактивные кнопки 📌
     *16*. Уведомление о наборе текстового сообщения ✒️
     *17*. Уведомление о записи аудиосообщения 🎙️
-    *18*. Демонстрационный звонок 📞
+    *18*. Демо звонок 📞
 
     Чтобы вернуться в начало напишите *стоп* или *0*
   en: |-
@@ -149,7 +149,7 @@ menu:
     *15*. Интерактивті түймелер 📌
     *16*. Мәтіндік хабарлама теріліп жатқанда хабарландыру жіберу ✒️
     *17*. Аудиохабарлама жазылып жатқанда хабарландыру жіберу 🎙️
-    *18*. Демонстрациялық қоңырау 📞
+    *18*. Демо қоңырау 📞
 
     Басына оралу үшін *стоп* немесе *0* деп жазыңыз
 send_text_message:
@@ -510,17 +510,23 @@ stop_button_text:
   ar: ""
   kz: "тоқта"
 call_queued:
-  ru: "Запрос на звонок принят. Пожалуйста, подождите."
-  en: "Your call request has been queued. Please wait."
-  he: "בקשת השיחה התקבלה. נא להמתין."
-  es: "La solicitud de llamada está en cola. Por favor, espere."
-  kz: "Қоңырау сұрауы қабылданды. Күте тұрыңыз."
-call_waiting:
-  ru: "Звонок в процессе. Пожалуйста, подождите..."
-  en: "The call is being processed. Please wait..."
-  he: "השיחה בתהליך. נא להמתין..."
-  es: "La llamada está en proceso. Por favor, espere..."
-  kz: "Қоңырау өңделуде. Күте тұрыңыз..."
+  ru: "Запрос на звонок принят. Пожалуйста, подождите. Отправьте *0*, чтобы отменить."
+  en: "Your call request has been queued. Please wait. Send *0* to cancel."
+  he: "בקשת השיחה התקבלה. נא להמתין. שלחו *0* כדי לצאת מהתור."
+  es: "La solicitud de llamada está en cola. Espere. Envíe *0* para salir de la cola."
+  kz: "Қоңырау сұрауы қабылданды. Күте тұрыңыз. Кезектен шығу үшін *0* жіберіңіз."
+call_cancelled:
+  ru: "Звонок отменён."
+  en: "Call cancelled."
+  he: "יצאתם מתור השיחות."
+  es: "Ha salido de la cola de llamadas."
+  kz: "Сіз қоңырау кезегінен шықтыңыз."
+call_processing:
+  ru: "Идёт обработка. Пожалуйста, подождите."
+  en: "Processing is in progress. Please wait."
+  he: "העיבוד מתבצע. נא להמתין."
+  es: "El procesamiento está en curso. Espere."
+  kz: "Өңдеу жүріп жатыр. Күте тұрыңыз."
 call_in_progress:
   ru: "Звонок в процессе."
   en: "The call is in progress."

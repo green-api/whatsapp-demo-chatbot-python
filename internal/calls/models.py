@@ -2,6 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import StrEnum
+from pathlib import Path
 from uuid import uuid4
 
 
@@ -12,6 +13,7 @@ def utc_now() -> datetime:
 class CallState(StrEnum):
     TRIGGERED = "triggered"
     QUEUED = "queued"
+    CANCELLED = "cancelled"
     DIALING = "dialing"
     RINGING = "ringing"
     CONNECTING = "connecting"
@@ -27,6 +29,7 @@ class CallState(StrEnum):
 class CallEvent(StrEnum):
     ENQUEUED = "enqueued"
     DEQUEUED = "dequeued"
+    CANCEL_REQUESTED = "cancel_requested"
     DIAL_ACCEPTED = "dial_accepted"
     REMOTE_ACCEPTED = "remote_accepted"
     BRIDGE_READY = "bridge_ready"
@@ -45,6 +48,7 @@ class CallEndReason(StrEnum):
     TALK_TIMEOUT = "talk_timeout"
     ERROR = "error"
     SHUTDOWN = "shutdown"
+    USER_CANCELLED = "user_cancelled"
 
 
 class EnqueueResult(StrEnum):
@@ -64,6 +68,7 @@ TERMINAL_STATES = frozenset(
         CallState.REMOTE_ENDED,
         CallState.TALK_TIMEOUT,
         CallState.FAILED,
+        CallState.CANCELLED,
     }
 )
 
@@ -114,3 +119,8 @@ class StateTransition:
     @property
     def changed(self) -> bool:
         return self.current != self.previous
+
+
+@dataclass(frozen=True, slots=True)
+class CallExecutionResult:
+    recording_path: Path | None = None

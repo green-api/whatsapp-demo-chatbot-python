@@ -7,6 +7,7 @@ from typing import Callable
 from aiortc import AudioStreamTrack, MediaStreamTrack
 from aiortc.mediastreams import MediaStreamError
 from openai import AsyncOpenAI
+from .recording import CallRecorder
 import asyncio
 import base64
 import av
@@ -21,6 +22,14 @@ FRAME_SAMPLES = 480  # 20 ms of mono PCM16
 FRAME_BYTES = 2 * FRAME_SAMPLES
 
 MAX_BUFFER_FRAMES = 500  # 10 seconds, excess audio is a call error
+
+LANGUAGE_NAMES = {
+    "ru": "Russian",
+    "en": "English",
+    "he": "Hebrew",
+    "es": "Spanish",
+    "kz": "Kazakh",
+}
 
 
 class BotOutputTrack(AudioStreamTrack):
@@ -42,6 +51,10 @@ class BotOutputTrack(AudioStreamTrack):
         self._next_frame_at = max(self._next_frame_at + 0.02, loop.time())
 
         pcm = self._voice.take_frame(self._generation)
+
+        if self._voice.recorder is not None:
+            self._voice.recorder.add_bot(pcm, self._generation)
+
         frame = av.AudioFrame(format="s16", layout="mono", samples=FRAME_SAMPLES)
 
         frame.planes[0].update(pcm)
@@ -79,6 +92,9 @@ class CallerAudioSink:
 
                     pcm = bytes(converted.planes[0])[:converted.samples * 2]
 
+                    if self._voice.recorder is not None:
+                        self._voice.recorder.add_caller(pcm, self._generation)
+
                     await self._voice.append_input(pcm)
         except MediaStreamError:
             pass
@@ -104,12 +120,14 @@ class VoiceBotSession:
         voice: str,
         language: str,
         on_error: Callable[[Exception], None],
+        recorder: CallRecorder | None = None,
     ) -> None:
         self._client = AsyncOpenAI(api_key=api_key)
         self._model = model
         self._voice = voice
         self._language = language
         self._on_error = on_error
+        self.recorder = recorder
         self._manager = None
         self._connection = None
         self._reader: asyncio.Task | None = None
@@ -137,7 +155,7 @@ class VoiceBotSession:
                 "output_modalities": ["audio"],
                 "instructions": (
                     "You are a helpful voice assistant in a WhatsApp phone call. "
-                    f"Speak in {'Russian' if self._language == 'ru' else 'English'}. "
+                    f"Speak in {LANGUAGE_NAMES.get(self._language, 'English')}. "
                     "Speak naturally and briefly. Do not use markdown."
                 ),
                 "audio": {
@@ -174,13 +192,15 @@ class VoiceBotSession:
 
         await self._connection.response.create(response={
             "instructions": (
-                "Greet the caller briefly in Russian."
-                if self._language == "ru" else "Greet the caller briefly in English."
+                f"Greet the caller briefly in {LANGUAGE_NAMES.get(self._language, 'English')}."
             ),
         })
 
     def new_output_track(self) -> BotOutputTrack:
         self.generation += 1
+
+        if self.recorder is not None:
+            self.recorder.set_generation(self.generation)
 
         self._frames.clear()
         self._partial.clear()
