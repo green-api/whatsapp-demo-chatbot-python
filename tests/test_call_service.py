@@ -1,6 +1,5 @@
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from types import SimpleNamespace
 from unittest.mock import patch
 import asyncio
 import logging
@@ -39,10 +38,39 @@ class FakeVoice:
             self.options["on_error"](RuntimeError("OpenAI failed"))
 
     def new_output_track(self):
-        return object()
+        self.tracks = getattr(self, "tracks", [])
+        track = FakeTrack()
+
+        self.tracks.append(track)
+
+        return track
 
     def new_input_sink(self):
-        return object()
+        self.sinks = getattr(self, "sinks", [])
+        sink = FakeSink()
+
+        self.sinks.append(sink)
+
+        return sink
+
+
+class FakeTrack:
+    def __init__(self):
+        self.stopped = False
+
+    def stop(self):
+        self.stopped = True
+
+
+class FakeSink:
+    def __init__(self):
+        self.closed = False
+
+    async def attach(self, track):
+        pass
+
+    async def close(self):
+        self.closed = True
 
 
 class FakeCalls:
@@ -53,36 +81,61 @@ class FakeCalls:
         self.audio_factory = None
         self.devices = []
 
-    def addEventListener(self, name, callback):
+    def on(self, name, callback):
         self.listeners.setdefault(name, []).append(callback)
 
     def emit(self, name, detail=None):
         for callback in self.listeners.get(name, []):
-            callback(SimpleNamespace(detail=detail))
+            callback(detail)
 
-    async def startAudioBridge(self):
+    async def open(self, *, timeout):
+        self.client.actions.append("open")
+
+        if self.client.open_error:
+            raise RuntimeError("callsRtc connection refused")
+
+        asyncio.get_running_loop().call_soon(
+            self.emit, "state", CallStateDetail(self.client.initial_state)
+        )
+
+    async def start_audio(self):
         self.client.actions.append("bridge")
-        self.devices.append(self.audio_factory())
+        self.devices.append(await self.audio_factory())
+
         if self.client.bridge_error:
             raise RuntimeError("audio bridge failed")
+
         if self.client.answer and not self.client.answer_after_bridge:
-            self.emit("state", SimpleNamespace(state="on-call", reason=None))
+            self.emit("state", CallStateDetail("on-call"))
+
         if self.client.answer and self.client.answer_after_bridge:
             asyncio.get_running_loop().call_later(
                 0.001, self.emit, "state",
-                SimpleNamespace(state="on-call", reason=None),
+                CallStateDetail("on-call"),
             )
+
         if self.client.reconnect:
             self.emit("disconnect", {"permanent": False})
-            self.devices.append(self.audio_factory())
+            await self.devices[-1].close()
+            self.devices.append(await self.audio_factory())
+
         if self.client.remote_hangup:
             asyncio.get_running_loop().call_later(
                 0.01, self.emit, "state",
-                SimpleNamespace(state="idle", reason="hangup"),
+                CallStateDetail("idle", "hangup"),
             )
 
     async def close(self):
+        for audio in self.devices:
+            await audio.close()
+
         self.closed = True
+
+
+class CallStateDetail:
+    def __init__(self, state, reason=None):
+        self.state = state
+        self.reason = reason
 
 
 class FakeClient:
@@ -90,32 +143,25 @@ class FakeClient:
     answer = True
     remote_hangup = True
     bridge_error = False
+    open_error = False
     reconnect = False
     answer_after_bridge = False
     instances = []
 
-    def __init__(self, options):
+    def __init__(self, id_instance, api_token_instance, *, host):
+        self.voip = self
         self.calls = FakeCalls(self)
         self.actions = []
         self.instances.append(self)
 
-    def connectCalls(self, *, audio_device_factory):
-        self.calls.audio_factory = audio_device_factory
-
-        loop = asyncio.get_running_loop()
-
-        loop.call_soon(self.calls.emit, "connect")
-
-        loop.call_soon(
-            self.calls.emit, "state",
-            SimpleNamespace(state=self.initial_state, reason=None),
-        )
+    def connect(self, *, audio_factory):
+        self.calls.audio_factory = audio_factory
         return self.calls
 
     async def dial(self, target):
         self.actions.append(("dial", target))
 
-    async def hangUp(self):
+    async def hang_up(self):
         self.actions.append("hangup")
 
 
@@ -123,7 +169,7 @@ class CallServiceTest(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         for name, value in {
             "initial_state": "idle", "answer": True, "remote_hangup": True,
-            "bridge_error": False, "reconnect": False,
+            "bridge_error": False, "open_error": False, "reconnect": False,
             "answer_after_bridge": False,
         }.items():
             setattr(FakeClient, name, value)
@@ -134,7 +180,7 @@ class CallServiceTest(unittest.IsolatedAsyncioTestCase):
         FakeVoice.fail_greeting = False
 
         for target, fake in (
-            ("internal.calls.service.GreenApiVoipClient", FakeClient),
+            ("internal.calls.service.GreenAPI", FakeClient),
             ("internal.calls.service.VoiceBotSession", FakeVoice),
         ):
             patcher = patch(target, fake)
@@ -168,12 +214,14 @@ class CallServiceTest(unittest.IsolatedAsyncioTestCase):
         client = FakeClient.instances[0]
         voice = FakeVoice.instances[0]
 
-        self.assertEqual(client.actions, [("dial", "sender@c.us"), "bridge"])
+        self.assertEqual(client.actions, ["open", ("dial", "sender@c.us"), "bridge"])
         self.assertEqual(session.state, CallState.REMOTE_ENDED)
         self.assertEqual(session.end_reason, CallEndReason.REMOTE_HANGUP)
         self.assertEqual(voice.greetings, 1)
         self.assertTrue(voice.closed)
         self.assertTrue(client.calls.closed)
+        self.assertTrue(voice.tracks[0].stopped)
+        self.assertTrue(voice.sinks[0].closed)
 
     async def test_reconnect_keeps_one_conversation_and_greeting(self):
         FakeClient.reconnect = True
@@ -183,6 +231,9 @@ class CallServiceTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(FakeVoice.instances), 1)
         self.assertEqual(FakeVoice.instances[0].greetings, 1)
         self.assertEqual(len(FakeClient.instances[0].calls.devices), 2)
+        self.assertEqual(len(FakeVoice.instances[0].tracks), 2)
+        self.assertTrue(all(track.stopped for track in FakeVoice.instances[0].tracks))
+        self.assertTrue(all(sink.closed for sink in FakeVoice.instances[0].sinks))
 
     async def test_bridge_before_answer_greets_only_after_answer(self):
         FakeClient.answer_after_bridge = True
@@ -229,7 +280,17 @@ class CallServiceTest(unittest.IsolatedAsyncioTestCase):
 
         await self.make_service().execute(session, transition)
         self.assertEqual(session.state, CallState.FAILED)
-        self.assertEqual(FakeClient.instances[0].actions, [])
+        self.assertEqual(FakeClient.instances[0].actions, ["open"])
+
+    async def test_socket_open_failure_does_not_dial(self):
+        FakeClient.open_error = True
+        session, transition = self.make_session()
+
+        await self.make_service().execute(session, transition)
+
+        self.assertEqual(session.state, CallState.FAILED)
+        self.assertEqual(FakeClient.instances[0].actions, ["open"])
+        self.assertTrue(FakeClient.instances[0].calls.closed)
 
     async def test_bridge_failure_hangs_up(self):
         FakeClient.bridge_error = True

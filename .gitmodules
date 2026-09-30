@@ -1,3 +1,4 @@
-[submodule "external/greenapi-wa-voip-client-python"]
-	path = external/greenapi-wa-voip-client-python
-	url = https://github.com/kennyromanov/greenapi-wa-voip-client-python.git
+[submodule "external/whatsapp-api-client-python"]
+	path = external/whatsapp-api-client-python
+	url = https://github.com/kennyromanov/whatsapp-api-client-python.git
+	branch = feature/voip

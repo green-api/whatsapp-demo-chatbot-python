@@ -1,6 +1,8 @@
 from __future__ import annotations
 from contextlib import suppress
-from greenapi_wa_voip_client import GreenApiVoipClient, TrackAudioDevice
+# FIXME: Temporary: API Client VoIP comes from external/whatsapp-api-client-python.
+from whatsapp_api_client_python.API import GreenAPI
+from whatsapp_api_client_python.tools.voip import CallAudio
 from .coordinator import TransitionCallback
 from .realtime_voice import VoiceBotSession
 from .recording import CallRecorder
@@ -28,11 +30,9 @@ class WhatsAppCallService:
         talk_timeout_seconds: int,
         logger: logging.Logger,
     ) -> None:
-        self._options = {
-            "apiUrl": api_url,
-            "idInstance": id_instance,
-            "apiTokenInstance": api_token_instance,
-        }
+        self._api_url = api_url
+        self._id_instance = id_instance
+        self._api_token_instance = api_token_instance
 
         self._openai_api_key = openai_api_key
         self._realtime_model = realtime_model
@@ -83,17 +83,27 @@ class WhatsAppCallService:
             recorder=recorder,
         )
 
-        def make_audio_device():
-            return TrackAudioDevice(
-                voice.new_output_track,
-                sink_factory=voice.new_input_sink,
-            )
+        async def make_audio_session() -> CallAudio:
+            track = voice.new_output_track()
+
+            try:
+                sink = voice.new_input_sink()
+            except BaseException:
+                track.stop()
+                raise
+
+            async def close_audio() -> None:
+                try:
+                    await sink.close()
+                finally:
+                    track.stop()
+
+            return CallAudio(track, sink.attach, close_audio)
 
         try:
             await voice.start()
-
-            client = GreenApiVoipClient(self._options)
-            calls = client.connectCalls(audio_device_factory=make_audio_device)
+            api = GreenAPI(self._id_instance, self._api_token_instance, host=self._api_url)
+            calls = api.voip.connect(audio_factory=make_audio_session)
         except Exception:
             await voice.close()
             recorder.finish()
@@ -104,28 +114,24 @@ class WhatsAppCallService:
 
         bridge_task: asyncio.Task[None] | None = None
         dialed = False
-        connected = asyncio.Event()
         initial_state: asyncio.Future[str] = asyncio.get_running_loop().create_future()
         dial_started = False
 
-        def on_state(event) -> None:
-            state = event.detail
-
+        def on_state(state) -> None:
             if not initial_state.done():
                 initial_state.set_result(state.state)
 
             if dial_started:
                 runtime.events.put_nowait(RuntimeEvent.server_state(state.state, state.reason))
 
-        def on_end_call(event) -> None:
-            runtime.events.put_nowait(RuntimeEvent.end_call(event.detail.get("cause")))
+        def on_end_call(detail) -> None:
+            runtime.events.put_nowait(RuntimeEvent.end_call(detail.get("cause")))
 
-        def on_disconnect(event) -> None:
-            permanent = bool(event.detail.get("permanent"))
+        def on_disconnect(detail) -> None:
+            permanent = bool(detail.get("permanent"))
 
             if permanent and not initial_state.done():
                 initial_state.set_exception(RuntimeError("callsRtc connection refused"))
-                connected.set()
 
             runtime.events.put_nowait(RuntimeEvent.disconnect(permanent))
 
@@ -138,20 +144,20 @@ class WhatsAppCallService:
 
             runtime.events.put_nowait(result)
 
-        calls.addEventListener("connect", lambda event: connected.set())
-        calls.addEventListener("state", on_state)
-        calls.addEventListener("end-call", on_end_call)
-        calls.addEventListener("disconnect", on_disconnect)
+        calls.on("state", on_state)
+        calls.on("end_call", on_end_call)
+        calls.on("disconnect", on_disconnect)
 
-        calls.addEventListener(
+        calls.on(
             "error",
-            lambda event: runtime.events.put_nowait(
+            lambda detail: runtime.events.put_nowait(
                 RuntimeEvent.bridge_failed(RuntimeError("callsRtc reported an error"))
             ),
         )
 
         try:
-            await asyncio.wait_for(connected.wait(), timeout=INITIAL_STATE_TIMEOUT_SECONDS)
+            await calls.open(timeout=INITIAL_STATE_TIMEOUT_SECONDS)
+
             state = await asyncio.wait_for(initial_state, timeout=INITIAL_STATE_TIMEOUT_SECONDS)
 
             if state != "idle":
@@ -162,7 +168,7 @@ class WhatsAppCallService:
             else:
                 dial_started = True
 
-                await client.dial(call_session.chat_id)
+                await api.voip.dial(call_session.chat_id)
 
                 dialed = True
 
@@ -171,16 +177,16 @@ class WhatsAppCallService:
 
                 # The library owns signaling and WebRTC; the voice session supplies audio.
                 # Bridge completion confirms the SDP answer, not ICE/DTLS or live audio.
-                bridge_task = asyncio.create_task(calls.startAudioBridge())
+                bridge_task = asyncio.create_task(calls.start_audio())
                 bridge_task.add_done_callback(on_bridge_done)
 
             while call_session.state not in TERMINAL_STATES:
                 event = await runtime.next_event(call_session.state)
 
                 if event is None:
-                    await self._handle_timeout(runtime, client, call_session, transition)
+                    await self._handle_timeout(runtime, api, call_session, transition)
                 else:
-                    await self._handle_event(event, runtime, client, voice, recorder, call_session, transition)
+                    await self._handle_event(event, runtime, api, voice, recorder, call_session, transition)
         except Exception as error:
             self._logger.error(
                 "VoIP execution failed: session=%s error=%s",
@@ -194,7 +200,7 @@ class WhatsAppCallService:
             )
 
             if dialed:
-                await self._safe_hang_up(client)
+                await self._safe_hang_up(api)
         finally:
             with suppress(Exception):
                 await calls.close()
@@ -227,7 +233,7 @@ class WhatsAppCallService:
         self,
         event: RuntimeEvent,
         runtime: CallRuntime,
-        client: GreenApiVoipClient,
+        api: GreenAPI,
         voice: VoiceBotSession,
         recorder: CallRecorder,
         call_session: CallSession,
@@ -266,12 +272,12 @@ class WhatsAppCallService:
             # The library reconnects and rebuilds an active audio bridge.
         elif event.type == RuntimeEventType.SHUTDOWN:
             transition(call_session, CallEvent.SHUTDOWN_REQUESTED, error_code="shutdown")
-            await self._safe_hang_up(client)
+            await self._safe_hang_up(api)
 
     async def _handle_timeout(
         self,
         runtime: CallRuntime,
-        client: GreenApiVoipClient,
+        api: GreenAPI,
         call_session: CallSession,
         transition: TransitionCallback,
     ) -> None:
@@ -279,26 +285,26 @@ class WhatsAppCallService:
 
         if timer == RuntimeTimer.RING:
             transition(call_session, CallEvent.RING_TIMER_EXPIRED)
-            await self._hang_up(client, call_session, transition)
+            await self._hang_up(api, call_session, transition)
         elif timer == RuntimeTimer.TALK:
             transition(call_session, CallEvent.TALK_TIMER_EXPIRED)
-            await self._hang_up(client, call_session, transition)
+            await self._hang_up(api, call_session, transition)
         elif timer == RuntimeTimer.BRIDGE:
             transition(
                 call_session, CallEvent.INTERNAL_ERROR,
                 error_code="bridge_negotiation_timeout",
             )
 
-            await self._safe_hang_up(client)
+            await self._safe_hang_up(api)
 
     @staticmethod
     async def _hang_up(
-        client: GreenApiVoipClient,
+        api: GreenAPI,
         call_session: CallSession,
         transition: TransitionCallback,
     ) -> None:
         try:
-            await client.hangUp()
+            await api.voip.hang_up()
         except Exception as error:
             transition(
                 call_session, CallEvent.INTERNAL_ERROR,
@@ -310,6 +316,6 @@ class WhatsAppCallService:
         transition(call_session, CallEvent.HANGUP_CONFIRMED)
 
     @staticmethod
-    async def _safe_hang_up(client: GreenApiVoipClient) -> None:
+    async def _safe_hang_up(api: GreenAPI) -> None:
         with suppress(Exception):
-            await client.hangUp()
+            await api.voip.hang_up()
