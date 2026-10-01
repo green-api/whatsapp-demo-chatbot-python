@@ -1,4 +1,0 @@
-[submodule "external/whatsapp-api-client-python"]
-	path = external/whatsapp-api-client-python
-	url = https://github.com/kennyromanov/whatsapp-api-client-python.git
-	branch = feature/voip

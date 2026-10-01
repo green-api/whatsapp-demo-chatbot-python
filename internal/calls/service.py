@@ -1,6 +1,5 @@
 from __future__ import annotations
 from contextlib import suppress
-# FIXME: Temporary: API Client VoIP comes from external/whatsapp-api-client-python.
 from whatsapp_api_client_python.API import GreenAPI
 from whatsapp_api_client_python.tools.voip import CallAudio
 from .coordinator import TransitionCallback
@@ -11,8 +10,10 @@ from .runtime import CallRuntime, RuntimeEvent, RuntimeEventType, RuntimeTimer
 import asyncio
 import logging
 
+# Constants
 
 BRIDGE_NEGOTIATION_TIMEOUT_SECONDS = 15
+
 INITIAL_STATE_TIMEOUT_SECONDS = 10
 
 
@@ -33,7 +34,6 @@ class WhatsAppCallService:
         self._api_url = api_url
         self._id_instance = id_instance
         self._api_token_instance = api_token_instance
-
         self._openai_api_key = openai_api_key
         self._realtime_model = realtime_model
         self._realtime_voice = realtime_voice
@@ -68,6 +68,7 @@ class WhatsAppCallService:
             talk_timeout_seconds=self._talk_timeout,
             bridge_timeout_seconds=BRIDGE_NEGOTIATION_TIMEOUT_SECONDS,
         )
+
         self._active_loop = asyncio.get_running_loop()
         self._active_runtime = runtime
 
@@ -84,7 +85,7 @@ class WhatsAppCallService:
         )
 
         async def make_audio_session() -> CallAudio:
-            track = voice.new_output_track()
+            track = await voice.new_output_track()
 
             try:
                 sink = voice.new_input_sink()
@@ -156,7 +157,7 @@ class WhatsAppCallService:
         )
 
         try:
-            await calls.open(timeout=INITIAL_STATE_TIMEOUT_SECONDS)
+            await calls.openAsync(timeout=INITIAL_STATE_TIMEOUT_SECONDS)
 
             state = await asyncio.wait_for(initial_state, timeout=INITIAL_STATE_TIMEOUT_SECONDS)
 
@@ -168,7 +169,7 @@ class WhatsAppCallService:
             else:
                 dial_started = True
 
-                await api.voip.dial(call_session.chat_id)
+                await api.voip.dialAsync(call_session.chat_id)
 
                 dialed = True
 
@@ -177,7 +178,7 @@ class WhatsAppCallService:
 
                 # The library owns signaling and WebRTC; the voice session supplies audio.
                 # Bridge completion confirms the SDP answer, not ICE/DTLS or live audio.
-                bridge_task = asyncio.create_task(calls.start_audio())
+                bridge_task = asyncio.create_task(calls.startAudioAsync())
                 bridge_task.add_done_callback(on_bridge_done)
 
             while call_session.state not in TERMINAL_STATES:
@@ -203,7 +204,7 @@ class WhatsAppCallService:
                 await self._safe_hang_up(api)
         finally:
             with suppress(Exception):
-                await calls.close()
+                await calls.closeAsync()
 
             with suppress(Exception):
                 await voice.close()
@@ -304,7 +305,7 @@ class WhatsAppCallService:
         transition: TransitionCallback,
     ) -> None:
         try:
-            await api.voip.hang_up()
+            await api.voip.hangUpAsync()
         except Exception as error:
             transition(
                 call_session, CallEvent.INTERNAL_ERROR,
@@ -318,4 +319,4 @@ class WhatsAppCallService:
     @staticmethod
     async def _safe_hang_up(api: GreenAPI) -> None:
         with suppress(Exception):
-            await api.voip.hang_up()
+            await api.voip.hangUpAsync()

@@ -1,6 +1,7 @@
 from fractions import Fraction
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import ANY, patch
+from internal.calls.playback_state_machine import PlaybackState
 import asyncio
 import base64
 import unittest
@@ -11,7 +12,10 @@ from internal.calls.realtime_voice import (
     CallerAudioSink,
     VoiceBotSession,
     FRAME_BYTES,
-    MAX_BUFFER_FRAMES,
+    FRAME_DURATION_MS,
+    HARD_PLAYBACK_BUFFER_MS,
+    SOFT_PLAYBACK_BUFFER_MS,
+    RECOVER_PLAYBACK_BUFFER_MS,
 )
 
 
@@ -20,7 +24,7 @@ class FakeConnection:
         self.events = asyncio.Queue()
         self.actions = []
         self.session = SimpleNamespace(update=self.update)
-        self.response = SimpleNamespace(create=self.create)
+        self.response = SimpleNamespace(create=self.create, cancel=self.cancel)
         self.input_audio_buffer = SimpleNamespace(append=self.append)
         self.conversation = SimpleNamespace(item=SimpleNamespace(truncate=self.truncate))
 
@@ -30,6 +34,9 @@ class FakeConnection:
 
     async def create(self, **kwargs):
         self.actions.append(("greet", kwargs))
+
+    async def cancel(self, **kwargs):
+        self.actions.append(("cancel", kwargs))
 
     async def append(self, **kwargs):
         self.actions.append(("append", kwargs))
@@ -146,7 +153,7 @@ class VoiceSessionTest(unittest.IsolatedAsyncioTestCase):
     async def test_audio_frames_are_paced_and_timestamped(self):
         await self.voice.start()
 
-        track = self.voice.new_output_track()
+        track = await self.voice.new_output_track()
 
         self.voice._queue_audio("item-1", bytes([1, 2]) * 480)
 
@@ -162,13 +169,17 @@ class VoiceSessionTest(unittest.IsolatedAsyncioTestCase):
     async def test_barge_in_clears_audio_and_truncates_played_part(self):
         await self.voice.start()
 
-        track = self.voice.new_output_track()
+        track = await self.voice.new_output_track()
 
+        self.voice._active_responses.add("response-1")
+        self.voice._item_response["item-1"] = "response-1"
         self.voice._queue_audio("item-1", bytes(FRAME_BYTES * 3))
         await track.recv()
-        await self.voice._interrupt()
+        await self.voice._interrupt(cancel=True)
         self.assertEqual(len(self.voice._frames), 0)
 
+        self.assertIn(("cancel", {"response_id": "response-1", "event_id": ANY}),
+                      self.client.connection.actions)
         self.assertIn(("truncate", {
             "item_id": "item-1", "content_index": 0, "audio_end_ms": 20,
         }), self.client.connection.actions)
@@ -176,25 +187,184 @@ class VoiceSessionTest(unittest.IsolatedAsyncioTestCase):
         self.voice._queue_audio("item-1", bytes(FRAME_BYTES))
         self.assertEqual(len(self.voice._frames), 0)
 
-    async def test_buffer_limit_reports_failure_and_reconnect_discards_old_track(self):
+    async def test_backlog_recovers_without_cancelling_generation(self):
+        await self.voice.start()
+        track = await self.voice.new_output_track()
+        self.voice._queue_audio("item-1", bytes(
+            FRAME_BYTES * (SOFT_PLAYBACK_BUFFER_MS // FRAME_DURATION_MS)
+        ))
+        self.assertEqual(self.voice.playback_state, PlaybackState.BACKLOG)
+
+        while len(self.voice._frames) * FRAME_DURATION_MS > RECOVER_PLAYBACK_BUFFER_MS:
+            self.voice.take_frame(track._generation)
+
+        self.assertEqual(self.voice.playback_state, PlaybackState.PLAYING)
+        self.assertFalse(any(action == "cancel" for action, _ in self.client.connection.actions))
+
+    async def test_full_buffer_drains_accepted_audio_before_truncating(self):
         await self.voice.start()
 
-        old = self.voice.new_output_track()
+        old = await self.voice.new_output_track()
+        await self.client.connection.events.put(SimpleNamespace(
+            type="response.created", response=SimpleNamespace(id="response-1")
+        ))
+        await self.client.connection.events.put(SimpleNamespace(
+            type="response.output_audio.delta", response_id="response-1",
+            item_id="item-1", content_index=0,
+            delta=base64.b64encode(
+                bytes([1, 2]) * (FRAME_BYTES // 2)
+                * (HARD_PLAYBACK_BUFFER_MS // FRAME_DURATION_MS + 1)
+            ).decode(),
+        ))
 
-        self.voice._queue_audio("item-1", bytes(FRAME_BYTES * MAX_BUFFER_FRAMES))
+        for _ in range(20):
+            if any(action == "cancel" for action, _ in self.client.connection.actions):
+                break
+            await asyncio.sleep(0.01)
 
-        with self.assertRaises(BufferError):
-            self.voice._queue_audio("item-1", bytes(FRAME_BYTES))
+        actions = self.client.connection.actions
+        self.assertEqual(actions[-1][0], "cancel")
+        self.assertEqual(actions[-1][1]["response_id"], "response-1")
+        self.assertEqual(self.voice.playback_state, PlaybackState.DRAINING)
+        self.assertEqual(len(self.voice._frames) * FRAME_DURATION_MS, HARD_PLAYBACK_BUFFER_MS)
+        self.assertEqual(self.failures, [])
 
-        new = self.voice.new_output_track()
+        await self.client.connection.events.put(SimpleNamespace(
+            type="response.output_audio.delta", response_id="response-1",
+            item_id="item-1", content_index=0,
+            delta=base64.b64encode(bytes(FRAME_BYTES)).decode(),
+        ))
+        await asyncio.sleep(0)
+        self.assertEqual(len(self.voice._frames) * FRAME_DURATION_MS, HARD_PLAYBACK_BUFFER_MS)
+
+        for _ in range(HARD_PLAYBACK_BUFFER_MS // FRAME_DURATION_MS):
+            self.assertEqual(self.voice.take_frame(old._generation), bytes([1, 2]) * 480)
+
+        for _ in range(20):
+            if any(action == "truncate" for action, _ in self.client.connection.actions):
+                break
+            await asyncio.sleep(0.01)
+
+        self.assertEqual(self.voice.playback_state, PlaybackState.PLAYING)
+        self.assertEqual(self.client.connection.actions[-1], ("truncate", {
+            "item_id": "item-1", "content_index": 0,
+            "audio_end_ms": HARD_PLAYBACK_BUFFER_MS,
+        }))
+
+        new = await self.voice.new_output_track()
 
         self.assertIsInstance(new, BotOutputTrack)
         self.assertEqual(self.voice.take_frame(old._generation), bytes(FRAME_BYTES))
         self.assertEqual(len(self.voice._frames), 0)
 
+        await self.client.connection.events.put(SimpleNamespace(
+            type="response.created", response=SimpleNamespace(id="response-2")
+        ))
+        await self.client.connection.events.put(SimpleNamespace(
+            type="response.output_audio.delta", response_id="response-2",
+            item_id="item-2", content_index=0,
+            delta=base64.b64encode(bytes([1, 2]) * 480).decode(),
+        ))
+        for _ in range(20):
+            if self.voice._frames:
+                break
+            await asyncio.sleep(0.01)
+        self.assertEqual(bytes((await new.recv()).planes[0])[:FRAME_BYTES], bytes([1, 2]) * 480)
+        self.assertEqual(self.failures, [])
+
+    async def test_barge_in_during_drain_discards_pending_audio(self):
+        await self.voice.start()
+        track = await self.voice.new_output_track()
+        await self.client.connection.events.put(SimpleNamespace(
+            type="response.created", response=SimpleNamespace(id="response-1")
+        ))
+        await self.client.connection.events.put(SimpleNamespace(
+            type="response.output_audio.delta", response_id="response-1",
+            item_id="item-1", content_index=0,
+            delta=base64.b64encode(bytes(
+                FRAME_BYTES * (HARD_PLAYBACK_BUFFER_MS // FRAME_DURATION_MS + 1)
+            )).decode(),
+        ))
+        for _ in range(20):
+            if self.voice.playback_state == PlaybackState.DRAINING:
+                break
+            await asyncio.sleep(0.01)
+
+        self.voice.take_frame(track._generation)
+        await self.client.connection.events.put(SimpleNamespace(
+            type="input_audio_buffer.speech_started"
+        ))
+        for _ in range(20):
+            if any(action == "truncate" for action, _ in self.client.connection.actions):
+                break
+            await asyncio.sleep(0.01)
+
+        self.assertEqual(self.voice.playback_state, PlaybackState.PLAYING)
+        self.assertEqual(len(self.voice._frames), 0)
+        self.assertEqual(self.client.connection.actions[-1][1]["audio_end_ms"], FRAME_DURATION_MS)
+        self.assertEqual(self.failures, [])
+
+    async def test_track_replacement_truncates_old_playback(self):
+        await self.voice.start()
+        old = await self.voice.new_output_track()
+        await self.client.connection.events.put(SimpleNamespace(
+            type="response.created", response=SimpleNamespace(id="response-1")
+        ))
+        await self.client.connection.events.put(SimpleNamespace(
+            type="response.output_audio.delta", response_id="response-1",
+            item_id="item-1", content_index=0,
+            delta=base64.b64encode(bytes(FRAME_BYTES * 3)).decode(),
+        ))
+        for _ in range(20):
+            if self.voice._frames:
+                break
+            await asyncio.sleep(0.01)
+
+        self.voice.take_frame(old._generation)
+        new = await self.voice.new_output_track()
+
+        self.assertEqual(self.voice.take_frame(old._generation), bytes(FRAME_BYTES))
+        self.assertEqual(len(self.voice._frames), 0)
+        self.assertEqual(self.voice.playback_state, PlaybackState.PLAYING)
+        self.assertIn(("truncate", {
+            "item_id": "item-1", "content_index": 0,
+            "audio_end_ms": FRAME_DURATION_MS,
+        }), self.client.connection.actions)
+        self.assertIsInstance(new, BotOutputTrack)
+        self.assertEqual(self.failures, [])
+
+    async def test_stalled_consumer_is_recovered_without_failing_call(self):
+        await self.voice.start()
+        track = await self.voice.new_output_track()
+        await self.client.connection.events.put(SimpleNamespace(
+            type="response.created", response=SimpleNamespace(id="response-1")
+        ))
+        await self.client.connection.events.put(SimpleNamespace(
+            type="response.output_audio.delta", response_id="response-1",
+            item_id="item-1", content_index=0,
+            delta=base64.b64encode(bytes(FRAME_BYTES * 50)).decode(),
+        ))
+
+        # Advance only the playback clock; keep the production watchdog interval intact.
+        for _ in range(20):
+            if self.voice._buffered_since is not None:
+                break
+            await asyncio.sleep(0.01)
+        self.assertIsNotNone(self.voice._buffered_since)
+        self.voice._buffered_since -= SOFT_PLAYBACK_BUFFER_MS / 1000 + 1
+        await asyncio.sleep(0.55)
+
+        self.assertEqual([action for action, _ in self.client.connection.actions[-2:]],
+                         ["cancel", "truncate"])
+        self.assertEqual(len(self.voice._frames), 0)
+        self.assertEqual(self.voice.playback_state, PlaybackState.SUSPENDED)
+        self.assertEqual(self.voice.take_frame(track._generation), bytes(FRAME_BYTES))
+        self.assertEqual(self.voice.playback_state, PlaybackState.PLAYING)
+        self.assertEqual(self.failures, [])
+
     async def test_inbound_audio_is_sent_as_base64_pcm(self):
         await self.voice.start()
-        self.voice.new_output_track()
+        await self.voice.new_output_track()
 
         sink = CallerAudioSink(self.voice, self.voice.generation)
 
@@ -246,7 +416,7 @@ class VoiceSessionTest(unittest.IsolatedAsyncioTestCase):
         try:
             await voice.start()
 
-            old_track = voice.new_output_track()
+            old_track = await voice.new_output_track()
             sink = voice.new_input_sink()
 
             await sink.attach(OneFrameTrack())
@@ -262,7 +432,7 @@ class VoiceSessionTest(unittest.IsolatedAsyncioTestCase):
             await old_track.recv()
             self.assertEqual(recorder.caller, [bytes(FRAME_BYTES)])
             self.assertEqual(recorder.bot, [bytes([1, 2]) * 480])
-            voice.new_output_track()
+            await voice.new_output_track()
             await old_track.recv()
             self.assertEqual(len(recorder.bot), 1)
         finally:

@@ -17,7 +17,7 @@ RATE = 24 * 1000
 
 MAX_PENDING_CHUNKS = 256
 
-MIX_SAMPLES = 24 * 1000  # Encode one second at a time.
+MIX_SAMPLES = 24 * 1000
 
 
 class CallRecorder:

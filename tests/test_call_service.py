@@ -37,7 +37,7 @@ class FakeVoice:
         if self.fail_greeting:
             self.options["on_error"](RuntimeError("OpenAI failed"))
 
-    def new_output_track(self):
+    async def new_output_track(self):
         self.tracks = getattr(self, "tracks", [])
         track = FakeTrack()
 
@@ -88,7 +88,7 @@ class FakeCalls:
         for callback in self.listeners.get(name, []):
             callback(detail)
 
-    async def open(self, *, timeout):
+    async def openAsync(self, *, timeout):
         self.client.actions.append("open")
 
         if self.client.open_error:
@@ -98,7 +98,7 @@ class FakeCalls:
             self.emit, "state", CallStateDetail(self.client.initial_state)
         )
 
-    async def start_audio(self):
+    async def startAudioAsync(self):
         self.client.actions.append("bridge")
         self.devices.append(await self.audio_factory())
 
@@ -125,7 +125,7 @@ class FakeCalls:
                 CallStateDetail("idle", "hangup"),
             )
 
-    async def close(self):
+    async def closeAsync(self):
         for audio in self.devices:
             await audio.close()
 
@@ -158,10 +158,10 @@ class FakeClient:
         self.calls.audio_factory = audio_factory
         return self.calls
 
-    async def dial(self, target):
+    async def dialAsync(self, target):
         self.actions.append(("dial", target))
 
-    async def hang_up(self):
+    async def hangUpAsync(self):
         self.actions.append("hangup")
 
 

@@ -43,7 +43,7 @@ git clone https://github.com/green-api/whatsapp-demo-chatbot-python.git
 
 Перейдите в папку с чатботом в командной строке и установите необходимые библиотеки Python. Убедитесь, что у вас установлен пакетный менеджер [pip](https://pip.pypa.io/en/stable/).
 
-Клонируйте проект с подмодулями (`git clone --recurse-submodules ...`) либо выполните `git submodule update --init --recursive` в уже созданной копии. Перечень необходимых библиотек находится в файле requirements.txt. Выполните следующую команду для их установки:
+Перечень необходимых библиотек находится в файле requirements.txt. Выполните следующую команду для их установки:
 ```
 python -m pip install -r requirements.txt
 ```  

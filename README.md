@@ -36,7 +36,7 @@ The response to the entered query should be the Python version in the following 
 
 Make a copy of the bot chat with ``` git clone https://github.com/green-api/whatsapp-demo-chatbot-python.git ``` or download the archive [whatsapp-demo-chatbot-python](https ://github.com/green-api/whatsapp-demo-chatbot-python).  
 
-Clone with submodules (`git clone --recurse-submodules ...`), or run `git submodule update --init --recursive` in an existing clone. The list of necessary libraries is in the requirements.txt file. Run ``` python -m pip install -r requirements.txt ```. The environment and necessary libraries are installed and ready for running chatbot. You can set up and launch the chatbot on the Whatsapp account.
+The list of necessary libraries is in the requirements.txt file. Run ``` python -m pip install -r requirements.txt ```. The environment and necessary libraries are installed and ready for running chatbot. You can set up and launch the chatbot on the Whatsapp account.
 
 ## Authorization in GREEN-API  
 
