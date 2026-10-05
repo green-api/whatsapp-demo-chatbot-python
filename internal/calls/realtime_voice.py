@@ -42,6 +42,11 @@ LANGUAGE_NAMES = {
 }
 
 
+# Variables
+
+logger = logging.getLogger(__name__)
+
+
 class BotOutputTrack(AudioStreamTrack):
     def __init__(self, voice: VoiceBotSession, generation: int):
         super().__init__()
@@ -252,7 +257,7 @@ class VoiceBotSession:
         self.playback_state = self._playback_fsm.apply(previous, event)
 
         if self.playback_state != previous:
-            logging.getLogger(__name__).info(
+            logger.info(
                 "OpenAI playback state: %s -> %s event=%s queued_ms=%d",
                 previous.value, self.playback_state.value, event.value,
                 len(self._frames) * FRAME_DURATION_MS,
@@ -386,7 +391,7 @@ class VoiceBotSession:
         responses = {self._item_response[item] for item in items if item in self._item_response}
 
         if cancel and (items or self._active_responses):
-            logging.getLogger(__name__).warning(
+            logger.warning(
                 "OpenAI playback interrupted: reason=%s queued_ms=%d pull_age_ms=%d",
                 reason, len(self._frames) * FRAME_DURATION_MS,
                 int((monotonic() - self._last_pull_at) * 1000) if self._last_pull_at else -1,
