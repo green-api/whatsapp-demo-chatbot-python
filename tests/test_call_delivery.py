@@ -15,14 +15,19 @@ class CallDeliveryTest(unittest.TestCase):
         }
 
         notifier = CallNotifier(
-            api_url="https://example.invalid", id_instance="1",
-            api_token_instance="token", answers_data=answers,
+            api_url="https://example.invalid",
+            media_url="https://media.green-api.com",
+            id_instance="1",
+            api_token_instance="token",
+            answers_data=answers,
             logger=logging.getLogger("delivery-test"),
         )
 
-        response = Mock(ok=True)
+        response = Mock(code=200, data={"idMessage": "sent"})
 
-        with patch("internal.calls.delivery.requests.post", return_value=response) as post:
+        with patch("internal.calls.delivery.GreenAPI") as client:
+            client.return_value.sending.sendMessage.return_value = response
+
             for reason, message in (
                 (CallEndReason.REMOTE_HANGUP, "Completed"),
                 (CallEndReason.REMOTE_REJECTED, "Unreachable"),
@@ -35,4 +40,21 @@ class CallDeliveryTest(unittest.TestCase):
                     session.end_reason = reason
 
                     notifier.notify_result(session)
-                    self.assertEqual(post.call_args.kwargs["json"]["message"], message)
+                    client.return_value.sending.sendMessage.assert_called_with(session.chat_id, message)
+
+            self.assertEqual(client.call_args.kwargs["media"], "https://media.green-api.com")
+
+    def test_failed_sdk_response_raises(self) -> None:
+        answers = {"call_failed": {"en": "Failed"}}
+
+        notifier = CallNotifier(
+            api_url="https://example.invalid", media_url="https://media.example.invalid",
+            id_instance="1", api_token_instance="token", answers_data=answers,
+            logger=logging.getLogger("delivery-test"),
+        )
+
+        with patch("internal.calls.delivery.GreenAPI") as client:
+            client.return_value.sending.sendMessage.return_value = Mock(code=500, data=None)
+
+            with self.assertRaises(RuntimeError):
+                notifier.notify_result(CallSession("one@c.us", "one@c.us", "en"))

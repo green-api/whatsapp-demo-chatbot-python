@@ -4,10 +4,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Protocol
 from .models import CallEndReason, CallExecutionResult, CallSession
+from whatsapp_api_client_python.API import GreenAPI
 import asyncio
 import logging
-import aiohttp
-import requests
 
 MESSAGE_KEY_BY_END_REASON = {
     CallEndReason.REMOTE_HANGUP: "call_completed",
@@ -23,14 +22,18 @@ class CallNotifier:
         self,
         *,
         api_url: str,
+        media_url: str,
         id_instance: str,
         api_token_instance: str,
         answers_data: dict[str, Any],
         logger: logging.Logger,
     ) -> None:
-        self._url = (
-            f"{api_url.rstrip('/')}/waInstance{id_instance}/sendMessage/"
-            f"{api_token_instance}"
+        self._api_options = dict(
+            idInstance=id_instance,
+            apiTokenInstance=api_token_instance,
+            host=api_url,
+            media=media_url,
+            host_timeout=20,
         )
 
         self._answers_data = answers_data
@@ -41,20 +44,21 @@ class CallNotifier:
         translations = self._answers_data[key]
         message = translations.get(session.language, translations["en"])
 
-        response = requests.post(
-            self._url,
-            json={"chatId": session.chat_id, "message": message},
-            timeout=20,
-        )
+        api = GreenAPI(**self._api_options)
 
-        if not response.ok:
+        try:
+            response = api.sending.sendMessage(session.chat_id, message)
+        finally:
+            api.session.close()
+
+        if response.code != 200 or not isinstance(response.data, dict) or not response.data.get("idMessage"):
             self._logger.error(
                 "Unable to send VoIP result: session=%s status=%s",
                 session.session_id,
-                response.status_code,
+                response.code,
             )
 
-            response.raise_for_status()
+            raise RuntimeError("VoIP result message was not accepted")
 
 
 UPLOAD_TIMEOUT_SECONDS = 30
@@ -66,34 +70,23 @@ class RecordingUploadError(Exception):
 
 
 class RecordingUploader:
-    def __init__(self, id_instance: str, api_token_instance: str) -> None:
-        self._url = (
-            f"https://media.green-api.com/waInstance{id_instance}/"
-            f"sendFileByUpload/{api_token_instance}"
+    def __init__(self, id_instance: str, api_token_instance: str, media_url: str) -> None:
+        self._api = GreenAPI(
+            id_instance,
+            api_token_instance,
+            media=media_url,
+            media_timeout=UPLOAD_TIMEOUT_SECONDS,
         )
 
     async def send(self, chat_id: str, path: Path) -> None:
-        form = aiohttp.FormData()
-        form.add_field("chatId", chat_id)
-        form.add_field("fileName", RECORDING_FILENAME)
+        response = await self._api.sending.sendFileByUploadAsync(
+            chat_id,
+            str(path),
+            RECORDING_FILENAME,
+        )
 
-        with path.open("rb") as file:
-            form.add_field("file", file, filename=RECORDING_FILENAME, content_type="audio/mpeg")
-
-            timeout = aiohttp.ClientTimeout(total=UPLOAD_TIMEOUT_SECONDS)
-
-            async with aiohttp.ClientSession(timeout=timeout) as session:
-                async with session.post(self._url, data=form) as response:
-                    if response.status != 200:
-                        raise RecordingUploadError(f"upload HTTP {response.status}")
-
-                    try:
-                        body = await response.json()
-                    except (aiohttp.ContentTypeError, ValueError) as error:
-                        raise RecordingUploadError("invalid upload response") from error
-
-                    if not isinstance(body, dict) or not body.get("idMessage"):
-                        raise RecordingUploadError("upload response has no idMessage")
+        if response.code != 200 or not isinstance(response.data, dict) or not response.data.get("idMessage"):
+            raise RecordingUploadError("recording was not accepted")
 
 
 class CallResultNotifier(Protocol):

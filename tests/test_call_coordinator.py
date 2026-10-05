@@ -50,6 +50,33 @@ class CallCoordinatorTest(unittest.TestCase):
 
         return logger
 
+    def test_stop_returns_when_call_worker_is_stuck(self) -> None:
+        started = Event()
+        release = Event()
+
+        class StuckExecutor(FakeExecutor):
+            async def execute(self, session, transition):
+                started.set()
+
+                while not release.is_set():
+                    await asyncio.sleep(0.001)
+
+                transition(session, CallEvent.INTERNAL_ERROR)
+
+        coordinator = CallCoordinator(StuckExecutor(), FakeNotifier(), self.logger())
+
+        coordinator.enqueue("one@c.us", "one@c.us", "en")
+        coordinator.start()
+
+        self.assertTrue(started.wait(1))
+
+        try:
+            coordinator.stop(timeout=0.01)
+            self.assertTrue(coordinator._worker.is_alive())
+        finally:
+            release.set()
+            coordinator._worker.join(timeout=1)
+
     def test_fifo_and_duplicate_protection(self) -> None:
         executor = FakeExecutor()
         notifier = FakeNotifier()

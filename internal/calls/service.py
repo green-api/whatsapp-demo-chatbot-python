@@ -29,6 +29,7 @@ class WhatsAppCallService:
         realtime_voice: str,
         ring_timeout_seconds: int,
         talk_timeout_seconds: int,
+        shutdown_timeout_seconds: int,
         logger: logging.Logger,
     ) -> None:
         self._api_url = api_url
@@ -39,6 +40,7 @@ class WhatsAppCallService:
         self._realtime_voice = realtime_voice
         self._ring_timeout = ring_timeout_seconds
         self._talk_timeout = talk_timeout_seconds
+        self._shutdown_timeout = shutdown_timeout_seconds
         self._logger = logger
         self._active_loop: asyncio.AbstractEventLoop | None = None
         self._active_runtime: CallRuntime | None = None
@@ -126,7 +128,9 @@ class WhatsAppCallService:
                 runtime.events.put_nowait(RuntimeEvent.server_state(state.state, state.reason))
 
         def on_end_call(detail) -> None:
-            runtime.events.put_nowait(RuntimeEvent.end_call(detail.get("cause")))
+            # NOTE: If the server returned the reason, it is a handled case.
+            #   Otherwise it falls into the error handler.
+            runtime.events.put_nowait(RuntimeEvent.end_call(detail.get("cause", None)))
 
         def on_disconnect(detail) -> None:
             permanent = bool(detail.get("permanent"))
@@ -204,16 +208,20 @@ class WhatsAppCallService:
                 await self._safe_hang_up(api)
         finally:
             with suppress(Exception):
-                await calls.closeAsync()
+                await asyncio.wait_for(calls.closeAsync(), timeout=self._shutdown_timeout)
 
             with suppress(Exception):
-                await voice.close()
+                await asyncio.wait_for(voice.close(), timeout=self._shutdown_timeout)
 
             if bridge_task is not None:
                 if not bridge_task.done():
                     bridge_task.cancel()
 
-                await asyncio.gather(bridge_task, return_exceptions=True)
+                with suppress(Exception):
+                    await asyncio.wait_for(
+                        asyncio.gather(bridge_task, return_exceptions=True),
+                        timeout=self._shutdown_timeout,
+                    )
 
             self._active_runtime = None
             self._active_loop = None

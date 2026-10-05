@@ -36,13 +36,15 @@ class Envs(BaseSettings):
     link_preview: bool = Field(True, env="LINK_PREVIEW")
 
     # Common GREEN-API host assigned to the instance.
-    api_url: str
+    api_url: str = "https://api.green-api.com"
+    media_url: str = "https://media.green-api.com"
 
     # Outgoing WhatsApp call demo.
     call_ring_timeout_seconds: int = Field(default=30, ge=1)
     call_talk_timeout_seconds: int = Field(default=180, ge=1)
     call_realtime_model: str = "gpt-realtime-2.1"
     call_realtime_voice: str = "marin"
+    call_shutdown_timeout_seconds: int = Field(default=30, ge=1)
 
     @model_validator(mode="after")
     def debug_mode_validator(self):
@@ -58,8 +60,9 @@ class Envs(BaseSettings):
                 "DEBUG_USER_ID and DEBUG_API_TOKEN_ID envs"
             )
 
-        if not self.api_url.startswith(("http://", "https://")):
-            raise ValueError("API_URL must start with http:// or https://")
+        for name, url in (("API_URL", self.api_url), ("MEDIA_URL", self.media_url)):
+            if not url.startswith(("http://", "https://")):
+                raise ValueError(f"{name} must start with http:// or https://")
 
         if self.debug and not all(
                 (

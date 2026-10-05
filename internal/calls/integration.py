@@ -6,6 +6,7 @@ from .coordinator import CallCoordinator
 from .delivery import CallNotifier, RecordingUploader
 from .models import ACTIVE_STATES, CallState, TERMINAL_STATES
 from .service import WhatsAppCallService
+from internal.utils import LAST_INTERACTION_KEY
 import logging
 
 if TYPE_CHECKING:
@@ -27,18 +28,20 @@ def create_call_coordinator(
         realtime_voice=config.call_realtime_voice,
         ring_timeout_seconds=config.call_ring_timeout_seconds,
         talk_timeout_seconds=config.call_talk_timeout_seconds,
+        shutdown_timeout_seconds=config.call_shutdown_timeout_seconds,
         logger=logger,
     )
 
     notifier = CallNotifier(
         api_url=config.api_url,
+        media_url=config.media_url,
         id_instance=config.user_id,
         api_token_instance=config.api_token_id,
         answers_data=answers_data,
         logger=logger,
     )
 
-    uploader = RecordingUploader(config.user_id, config.api_token_id)
+    uploader = RecordingUploader(config.user_id, config.api_token_id, config.media_url)
     coordinator = CallCoordinator(service, notifier, logger, uploader=uploader)
 
     register_call_filters(coordinator)
@@ -83,6 +86,25 @@ def handle_call_message(coordinator: CallCoordinator, sender_id: str | None, tex
         return CallChatAction("call_queued", language)
 
     return CallChatAction("call_in_progress", language)
+
+
+def update_call_activity(coordinator: CallCoordinator, notification: Notification) -> bool:
+    data = notification.state_manager.get_state_data(notification.sender)
+
+    if data is None:
+        return False
+
+    timestamp = coordinator.activity_timestamp(notification.sender)
+
+    if timestamp is None:
+        return False
+
+    notification.state_manager.update_state_data(
+        notification.sender,
+        {LAST_INTERACTION_KEY: max(data.get(LAST_INTERACTION_KEY, 0), timestamp)},
+    )
+
+    return True
 
 
 def register_call_filters(coordinator: CallCoordinator) -> None:

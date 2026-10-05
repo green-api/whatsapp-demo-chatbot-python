@@ -126,6 +126,9 @@ class FakeCalls:
             )
 
     async def closeAsync(self):
+        if self.client.close_hangs:
+            await asyncio.Event().wait()
+
         for audio in self.devices:
             await audio.close()
 
@@ -146,6 +149,7 @@ class FakeClient:
     open_error = False
     reconnect = False
     answer_after_bridge = False
+    close_hangs = False
     instances = []
 
     def __init__(self, id_instance, api_token_instance, *, host):
@@ -168,9 +172,14 @@ class FakeClient:
 class CallServiceTest(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         for name, value in {
-            "initial_state": "idle", "answer": True, "remote_hangup": True,
-            "bridge_error": False, "open_error": False, "reconnect": False,
+            "initial_state": "idle",
+            "answer": True,
+            "remote_hangup": True,
+            "bridge_error": False,
+            "open_error": False,
+            "reconnect": False,
             "answer_after_bridge": False,
+            "close_hangs": False,
         }.items():
             setattr(FakeClient, name, value)
 
@@ -196,14 +205,15 @@ class CallServiceTest(unittest.IsolatedAsyncioTestCase):
 
         return session, fsm.apply
 
-    def make_service(self, ring=1, talk=1):
+    def make_service(self, ring=1, talk=1, shutdown=10):
         logger = logging.getLogger("call-service-test")
         logger.disabled = True
         return WhatsAppCallService(
             api_url="https://example.invalid", id_instance="1",
             api_token_instance="token", openai_api_key="test-key",
             realtime_model="gpt-realtime-2.1", realtime_voice="marin",
-            ring_timeout_seconds=ring, talk_timeout_seconds=talk, logger=logger,
+            ring_timeout_seconds=ring, talk_timeout_seconds=talk,
+            shutdown_timeout_seconds=shutdown, logger=logger,
         )
 
     async def test_dial_voice_bridge_and_remote_hangup(self):
@@ -291,6 +301,13 @@ class CallServiceTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(session.state, CallState.FAILED)
         self.assertEqual(FakeClient.instances[0].actions, ["open"])
         self.assertTrue(FakeClient.instances[0].calls.closed)
+
+    async def test_hung_connection_close_has_deadline(self):
+        FakeClient.close_hangs = True
+        session, transition = self.make_session()
+
+        await asyncio.wait_for(self.make_service(shutdown=0.01).execute(session, transition), timeout=1)
+        self.assertEqual(session.state, CallState.REMOTE_ENDED)
 
     async def test_bridge_failure_hangs_up(self):
         FakeClient.bridge_error = True

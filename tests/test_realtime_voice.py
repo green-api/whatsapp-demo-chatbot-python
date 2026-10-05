@@ -342,7 +342,7 @@ class VoiceSessionTest(unittest.IsolatedAsyncioTestCase):
         await self.client.connection.events.put(SimpleNamespace(
             type="response.output_audio.delta", response_id="response-1",
             item_id="item-1", content_index=0,
-            delta=base64.b64encode(bytes(FRAME_BYTES * 50)).decode(),
+            delta=base64.b64encode(bytes(FRAME_BYTES * 200)).decode(),
         ))
 
         # Advance only the playback clock; keep the production watchdog interval intact.

@@ -28,10 +28,12 @@ class ServerConfig:
         link_video_en: str,
         link_preview: bool,
         api_url: str,
+        media_url: str,
         call_ring_timeout_seconds: int,
         call_talk_timeout_seconds: int,
         call_realtime_model: str,
         call_realtime_voice: str,
+        call_shutdown_timeout_seconds: int,
         openai_api_key: str = ""
     ):
         self.user_id = user_id
@@ -47,10 +49,12 @@ class ServerConfig:
         self.link_video_en = link_video_en
         self.link_preview = link_preview
         self.api_url = api_url.rstrip("/")
+        self.media_url = media_url.rstrip("/")
         self.call_ring_timeout_seconds = call_ring_timeout_seconds
         self.call_talk_timeout_seconds = call_talk_timeout_seconds
         self.call_realtime_model = call_realtime_model
         self.call_realtime_voice = call_realtime_voice
+        self.call_shutdown_timeout_seconds = call_shutdown_timeout_seconds
         self.openai_api_key = openai_api_key
 
 
@@ -74,10 +78,12 @@ def init_config(envs: Envs, logger: logging.Logger):
             link_video_en=envs.debug_link_video_en,
             link_preview=envs.link_preview,
             api_url=envs.api_url,
+            media_url=envs.media_url,
             call_ring_timeout_seconds=envs.call_ring_timeout_seconds,
             call_talk_timeout_seconds=envs.call_talk_timeout_seconds,
             call_realtime_model=envs.call_realtime_model,
             call_realtime_voice=envs.call_realtime_voice,
+            call_shutdown_timeout_seconds=envs.call_shutdown_timeout_seconds,
             openai_api_key=envs.openai_api_key
         )
 
@@ -108,10 +114,12 @@ def init_config(envs: Envs, logger: logging.Logger):
             link_video_en=str(config_result.get("link_video_en")),
             link_preview=False if config_result.get("link_preview") and (str(config_result.get("link_preview")).lower()) == "false" else True,
             api_url=envs.api_url,
+            media_url=envs.media_url,
             call_ring_timeout_seconds=envs.call_ring_timeout_seconds,
             call_talk_timeout_seconds=envs.call_talk_timeout_seconds,
             call_realtime_model=envs.call_realtime_model,
             call_realtime_voice=envs.call_realtime_voice,
+            call_shutdown_timeout_seconds=envs.call_shutdown_timeout_seconds,
             openai_api_key=str(config_result.get("openai_api_key") or envs.openai_api_key)
         )
 
@@ -128,6 +136,7 @@ def init_config(envs: Envs, logger: logging.Logger):
     logger.debug(f"EN Video url: {server_config.link_video_en}")
     logger.debug(f"LinkPreview: {server_config.link_preview}")
     logger.debug(f"API URL: {server_config.api_url}")
+    logger.debug(f"Media URL: {server_config.media_url}")
     logger.debug(f"Call ring timeout: {server_config.call_ring_timeout_seconds}s")
     logger.debug(f"Call talk timeout: {server_config.call_talk_timeout_seconds}s")
     logger.debug(f"Call Realtime model: {server_config.call_realtime_model}")

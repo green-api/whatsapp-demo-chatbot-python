@@ -3,6 +3,8 @@ from concurrent.futures import ThreadPoolExecutor
 from queue import Queue
 from threading import Event, RLock, Semaphore, Thread
 from typing import Protocol
+from time import time
+from internal.utils import MAX_INACTIVITY_TIME_SECONDS
 from .delivery import CallDeliveryService, CallRecordingUploader, CallResultNotifier
 from .state_machine import CallStateMachine
 import asyncio
@@ -87,6 +89,7 @@ class CallCoordinator:
         self._worker: Thread | None = None
         self._closed = False
         self._active_session: CallSession | None = None
+        self._finished_at: dict[str, int] = {}
         self._deliveries = ThreadPoolExecutor(max_workers=MAX_CONCURRENT_DELIVERIES, thread_name_prefix="voip-delivery")
         self._delivery_slots = Semaphore(MAX_CONCURRENT_DELIVERIES)
 
@@ -119,6 +122,16 @@ class CallCoordinator:
 
     def has_session(self, sender_id: str | None) -> bool:
         return self.get_session(sender_id) is not None
+
+    def activity_timestamp(self, sender_id: str | None) -> int | None:
+        if sender_id is None:
+            return None
+
+        with self._lock:
+            if self._store.get_by_sender(sender_id) is not None:
+                return int(time())
+
+            return self._finished_at.pop(sender_id, None)
 
     def dialog_status(self, sender_id: str | None) -> tuple[CallState, str] | None:
         """Return a stable call state and language for chat routing."""
@@ -178,7 +191,7 @@ class CallCoordinator:
             self._worker = Thread(target=self._worker_loop, name="voip-call-worker", daemon=True)
             self._worker.start()
 
-    def stop(self) -> None:
+    def stop(self, timeout: float | None = None) -> None:
         """Close once, then wait for the active call and accepted deliveries."""
         # The event prevents another queued call from starting. The sentinel wakes
         # an idle worker blocked in Queue.get(). Both are needed for prompt shutdown.
@@ -200,9 +213,14 @@ class CallCoordinator:
         worker = self._worker
 
         if worker and worker.is_alive():
-            worker.join()
+            worker.join(timeout=timeout)
 
-        self._deliveries.shutdown(wait=True)
+        worker_stopped = worker is None or not worker.is_alive()
+
+        if not worker_stopped:
+            self._logger.warning("VoIP call worker did not stop within the shutdown timeout")
+
+        self._deliveries.shutdown(wait=worker_stopped)
 
     def _worker_loop(self) -> None:
         while not self._stop_event.is_set():
@@ -275,6 +293,15 @@ class CallCoordinator:
             # A terminal call still owns the dialog until result delivery ends.
             with self._lock:
                 if self._store.get_by_sender(session.sender_id) is session:
+                    finished_at = int(time())
+
+                    self._finished_at = dict(filter(
+                        lambda item: finished_at - item[1] <= MAX_INACTIVITY_TIME_SECONDS,
+                        self._finished_at.items(),
+                    ))
+
+                    self._finished_at[session.sender_id] = finished_at
+
                     self._store.remove(session.sender_id)
 
             if release_slot:

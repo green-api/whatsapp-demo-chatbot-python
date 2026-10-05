@@ -138,9 +138,11 @@ python bot.py
 DEBUG=True
 DEBUG_USER_ID=<Your Instance ID>
 DEBUG_API_TOKEN_ID=<Your Api token ID>
-API_URL=<API URL Вашего инстанса, например https://1234.api.green-api.com>
+API_URL=<Необязательный API URL инстанса; по умолчанию https://api.green-api.com>
+MEDIA_URL=<Необязательный media URL инстанса; по умолчанию https://media.green-api.com>
 CALL_RING_TIMEOUT_SECONDS=30
 CALL_TALK_TIMEOUT_SECONDS=180
+CALL_SHUTDOWN_TIMEOUT_SECONDS=30
 OPENAI_API_KEY=<Ваш API-ключ OpenAI>
 CALL_REALTIME_MODEL=gpt-realtime-2.1
 CALL_REALTIME_VOICE=marin
