@@ -6,7 +6,7 @@ import logging
 import unittest
 
 from internal.calls.models import CallEndReason, CallEvent, CallSession, CallState
-from internal.calls.service import WhatsAppCallService
+from whatsapp_chatbot_python.calls.service import WhatsAppCallService
 from internal.calls.state_machine import CallStateMachine
 
 
@@ -189,8 +189,8 @@ class CallServiceTest(unittest.IsolatedAsyncioTestCase):
         FakeVoice.fail_greeting = False
 
         for target, fake in (
-            ("internal.calls.service.GreenAPI", FakeClient),
-            ("internal.calls.service.VoiceBotSession", FakeVoice),
+            ("whatsapp_chatbot_python.calls.service.GreenAPI", FakeClient),
+            ("whatsapp_chatbot_python.calls.service.VoiceBotSession", FakeVoice),
         ):
             patcher = patch(target, fake)
             patcher.start()
@@ -355,7 +355,7 @@ class CallServiceTest(unittest.IsolatedAsyncioTestCase):
             def finish(self):
                 return path
 
-        with patch("internal.calls.service.CallRecorder", FakeRecorder):
+        with patch("whatsapp_chatbot_python.calls.service.CallRecorder", FakeRecorder):
             result = await self.make_service().execute(session, transition)
 
         self.assertEqual(session.end_reason, CallEndReason.ERROR)

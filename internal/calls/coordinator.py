@@ -2,9 +2,9 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 from queue import Queue
 from threading import Event, RLock, Semaphore, Thread
-from typing import Protocol
 from time import time
 from internal.utils import MAX_INACTIVITY_TIME_SECONDS
+from whatsapp_chatbot_python.calls.contracts import CallExecutor
 from .delivery import CallDeliveryService, CallRecordingUploader, CallResultNotifier
 from .state_machine import CallStateMachine
 import asyncio
@@ -46,23 +46,6 @@ class InMemoryCallSessionStore:
 
     def values(self) -> tuple[CallSession, ...]:
         return tuple(self._by_sender.values())
-
-
-class CallExecutor(Protocol):
-    async def execute(self, session: CallSession, transition: "TransitionCallback") -> CallExecutionResult: ...
-
-    def request_stop(self) -> None: ...
-
-
-class TransitionCallback(Protocol):
-    def __call__(
-        self,
-        session: CallSession,
-        event: CallEvent,
-        *,
-        remote_reason: str | None = None,
-        error_code: str | None = None,
-    ) -> StateTransition: ...
 
 
 class CallCoordinator:

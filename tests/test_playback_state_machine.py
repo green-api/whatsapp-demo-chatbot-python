@@ -1,6 +1,6 @@
 import unittest
 
-from internal.calls.playback_state_machine import (
+from whatsapp_chatbot_python.calls.playback_state_machine import (
     PlaybackEvent,
     PlaybackState,
     PlaybackStateMachine,

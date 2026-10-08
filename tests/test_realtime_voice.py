@@ -1,13 +1,13 @@
 from fractions import Fraction
 from types import SimpleNamespace
 from unittest.mock import ANY, patch
-from internal.calls.playback_state_machine import PlaybackState
+from whatsapp_chatbot_python.calls.playback_state_machine import PlaybackState
 import asyncio
 import base64
 import unittest
 import av
 
-from internal.calls.realtime_voice import (
+from whatsapp_chatbot_python.calls.realtime_voice import (
     BotOutputTrack,
     CallerAudioSink,
     VoiceBotSession,
@@ -104,7 +104,7 @@ class VoiceSessionTest(unittest.IsolatedAsyncioTestCase):
             self.client = FakeOpenAI(**kwargs)
             return self.client
 
-        patcher = patch("internal.calls.realtime_voice.AsyncOpenAI", make_client)
+        patcher = patch("whatsapp_chatbot_python.calls.realtime_voice.AsyncOpenAI", make_client)
 
         patcher.start()
         self.addCleanup(patcher.stop)

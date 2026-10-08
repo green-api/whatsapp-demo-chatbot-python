@@ -2,10 +2,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 from whatsapp_chatbot_python.filters import AbstractFilter, filters
+from whatsapp_chatbot_python.calls.service import WhatsAppCallService
 from .coordinator import CallCoordinator
 from .delivery import CallNotifier, RecordingUploader
 from .models import ACTIVE_STATES, CallState, TERMINAL_STATES
-from .service import WhatsAppCallService
 from internal.utils import LAST_INTERACTION_KEY
 import logging
 

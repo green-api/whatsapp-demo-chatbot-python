@@ -2,7 +2,7 @@ from array import array
 from fractions import Fraction
 from unittest.mock import patch
 from queue import Full
-from internal.calls.recording import CallRecorder, RATE
+from whatsapp_chatbot_python.calls.recording import CallRecorder, RATE
 import logging
 import unittest
 import av
@@ -17,7 +17,7 @@ class CallRecordingTest(unittest.TestCase):
         clock = [0.0]
         recorder = CallRecorder(logging.getLogger("recording-test"))
 
-        with patch("internal.calls.recording.monotonic", side_effect=lambda: clock[0]):
+        with patch("whatsapp_chatbot_python.calls.recording.monotonic", side_effect=lambda: clock[0]):
             recorder.set_generation(1)
             recorder.start()
 

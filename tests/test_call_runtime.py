@@ -1,5 +1,5 @@
 from internal.calls.models import CallState
-from internal.calls.runtime import CallRuntime, RuntimeEvent, RuntimeEventType
+from whatsapp_chatbot_python.calls.runtime import CallRuntime, RuntimeEvent, RuntimeEventType
 import unittest
 
 
