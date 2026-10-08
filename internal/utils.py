@@ -27,6 +27,7 @@ AVAILABLE_LANGUAGES = {
 
 LANGUAGE_CODE_KEY = "language_code"
 LAST_INTERACTION_KEY = "last_interaction_ts"
+MAX_INACTIVITY_TIME_SECONDS = 300
 
 
 def api_token_log_hider(token: str | None) -> str:
@@ -102,8 +103,6 @@ def sender_state_data_updater(notification: Notification) -> bool:
     Helper for checking & updating sender's state.
     Must return `True`, if state was reset, otherwise - `False`
     """
-
-    MAX_INACTIVITY_TIME_SECONDS = 300
 
     sender = notification.sender
     now_ts = int(time())

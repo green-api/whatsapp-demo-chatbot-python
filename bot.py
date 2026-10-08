@@ -5,17 +5,24 @@ from whatsapp_chatbot_python import GreenAPIBot, Notification
 from whatsapp_chatbot_python.filters import TEXT_TYPES
 from whatsapp_chatgpt_python import WhatsappGptBot
 from yaml import safe_load
-
+from internal.calls.models import EnqueueResult
 from internal.config import init_config
 from internal.envs import init_envs
 from internal.logger import init_logger
+
+from internal.calls.integration import (
+    create_call_coordinator,
+    handle_call_message,
+    update_call_activity,
+)
+
 from internal.utils import (
     AVAILABLE_LANGUAGES,
     LANGUAGE_CODE_KEY,
     States,
     debug_profiler,
     get_main_menu_image_by_lang_code,
-    sender_state_data_updater,
+    sender_state_data_updater as _sender_state_data_updater,
     sender_state_reset,
 )
 
@@ -32,6 +39,7 @@ gpt_bot = WhatsappGptBot(
     id_instance=config.user_id,
     api_token_instance=config.api_token_id,
     openai_api_key=config.openai_api_key,
+    host=config.api_url,
     model="gpt-4o",
     system_message="You are a helpful assistant in a WhatsApp chat. Be concise and accurate in your responses.",
     max_history_length=10,
@@ -41,6 +49,8 @@ gpt_bot = WhatsappGptBot(
 bot = GreenAPIBot(
     config.user_id,
     config.api_token_id,
+    host=config.api_url,
+    media=config.media_url,
     settings={
         "webhookUrl": "",
         "webhookUrlToken": "",
@@ -51,6 +61,35 @@ bot = GreenAPIBot(
         "pollMessageWebhook": "yes",
     },
 )
+
+call_coordinator = create_call_coordinator(config, answers_data, logger)
+
+
+def sender_state_data_updater(notification: Notification) -> bool:
+    update_call_activity(call_coordinator, notification)
+    return _sender_state_data_updater(notification)
+
+
+@bot.router.message(
+    type_message=TEXT_TYPES,
+    active_call_session=True,
+)
+@debug_profiler(logger=logger)
+def call_in_progress_handler(notification: Notification) -> None:
+    """Intercept chat commands while this sender has a queued or active call."""
+    update_call_activity(call_coordinator, notification)
+    action = handle_call_message(
+        call_coordinator, notification.sender, notification.message_text,
+    )
+
+    if action.message_key is None:
+        return
+
+    translations = answers_data[action.message_key]
+    notification.answer(translations.get(action.language, translations["en"]))
+
+    if action.show_menu:
+        send_main_menu(notification, action.language)
 
 
 @bot.router.message(type_message=TEXT_TYPES, state=None)
@@ -864,6 +903,62 @@ def main_menu_option_17_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
+
+@bot.router.message(
+    type_message=TEXT_TYPES,
+    state=States.MENU.value,
+    regexp=r"^\s*18\s*$",
+)
+@debug_profiler(logger=logger)
+def main_menu_option_18_handler(notification: Notification) -> None:
+    """
+    Queue an outgoing WhatsApp voice call to the current private chat.
+    """
+
+    if sender_state_data_updater(notification):
+        return initial_handler(notification)
+
+    if notification.chat is None or notification.sender is None:
+        return
+
+    sender_state_data = notification.state_manager.get_state_data(notification.sender)
+    sender_lang_code = (sender_state_data or {}).get(LANGUAGE_CODE_KEY) or "en"
+
+    if notification.chat.endswith("@g.us"):
+        notification.answer(
+            answers_data["call_private_chat_only"].get(
+                sender_lang_code,
+                answers_data["call_private_chat_only"]["en"],
+            )
+        )
+
+        return
+
+    if not config.openai_api_key:
+        notification.answer(answers_data["call_failed"].get(
+            sender_lang_code,
+            answers_data["call_failed"]["en"],
+        ))
+
+        return
+
+    result = call_coordinator.enqueue(
+        sender_id=notification.sender,
+        chat_id=notification.chat,
+        language=sender_lang_code,
+    )
+
+    message_key = "call_queued" if result == EnqueueResult.CREATED else (
+        handle_call_message(call_coordinator, notification.sender, "18").message_key
+        or "call_queued"
+    )
+
+    notification.answer(
+        answers_data[message_key].get(sender_lang_code,
+        answers_data[message_key]["en"]),
+    )
+
+
 @bot.router.message(
     type_message=TEXT_TYPES,
     state=States.MENU.value,
@@ -917,18 +1012,19 @@ def main_menu_menu_handler(notification: Notification) -> None:
 
     try:
         sender_lang_code = sender_state_data[LANGUAGE_CODE_KEY]
-        answer_text = f'{answers_data["menu"][sender_lang_code]}'.lstrip()
     except KeyError as e:
         logger.exception(e)
         return
 
-    # Get main menu image based on chosen language
-    menu_image_path, menu_image_name = get_main_menu_image_by_lang_code(
-        sender_lang_code
-    )
+    send_main_menu(notification, sender_lang_code)
 
+
+def send_main_menu(notification: Notification, language: str) -> None:
+    # Shared by the menu command and queued-call cancellation.
+    answer_text = f'{answers_data["menu"][language]}'.lstrip()
     link = config.link_greenapi_en
-    if sender_lang_code == 'ru':
+
+    if language == 'ru':
         link = config.link_greenapi_ru
     notification.api.sending.sendFileByUrl(
         notification.chat,
@@ -1210,7 +1306,7 @@ def set_language_incorrect_message_handler(notification: Notification) -> None:
 @bot.router.message(
     type_message=TEXT_TYPES,
     state=States.MENU.value,
-    regexp=(r"^(?!\s*(?:1[0-4]|[0-9]|stop|стоп|menu|меню)\s*$).*$", IGNORECASE),
+    regexp=(r"^(?!\s*(?:1[0-8]|[0-9]|stop|стоп|menu|меню)\s*$).*$", IGNORECASE),
 )
 @debug_profiler(logger=logger)
 def main_menu_incorrect_message_handler(notification: Notification) -> None:
@@ -1265,5 +1361,9 @@ def group_creation_incorrect_message_handler(notification: Notification) -> None
 
 if __name__ == "__main__":
     logger.info("Starting WhatsApp Demo Chatbot")
-    bot.run_forever()
-    
+    call_coordinator.start()
+
+    try:
+        bot.run_forever()
+    finally:
+        call_coordinator.stop(timeout=config.call_shutdown_timeout_seconds)
