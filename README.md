@@ -7,6 +7,8 @@
 Demo version of Whatsapp chatbot based on API service [GREEN-API](https://green-api.com/en).
 Using API, the chatbot sends text messages, files, images, music, videos, contacts, geolocation, surveys, requests an avatar, sends links, creates a group with the bot, quotes a message, and places a demo voice call.
 
+The voice demo supports menu option *18* (the bot calls you) and incoming calls to the bot. Install dependencies from `requirements.txt`, including `whatsapp-chatbot-python[voip]==1.1.0`. Each call starts with a localized greeting; recorded MP3 audio is uploaded and sent as a download link. Both use one call queue. For an incoming call, the bot answers when the call reaches the front of the queue while it is still ringing. The incoming wait limit defaults to 60 seconds (`DEBUG_CALL_INCOMING_RING_TIMEOUT_SECONDS` in debug mode, `call_incoming_ring_timeout_seconds` in server configuration); it is separate from the outgoing ring limit. Offers with missing or expired timestamps are rejected when the live call can be matched by its caller and call ID. Startup fails with a clear log message when the OpenAI API key is missing. After a recorded conversation, the bot sends a download link instead of attaching the audio file. Incoming calls require VoIP access and `incomingCallWebhook` notifications on the GREEN-API instance.
+
 ## Features  
 
 You could build an AI WhatsApp chatbot powered by the OpenAI GPT model and the WhatsApp API by GREEN-API. Try our demo, or build your one with [WhatsApp GPT Bot Library for Python](https://github.com/green-api/whatsapp-chatgpt-python).
@@ -127,14 +129,15 @@ To run the bot locally, use the environment variable `DEBUG=True`. All other nec
 DEBUG=True
 DEBUG_USER_ID=<Your Instance ID>
 DEBUG_API_TOKEN_ID=<Your Api token ID>
-API_URL=<Optional instance API URL; default https://api.green-api.com>
-MEDIA_URL=<Optional instance media URL; default https://media.green-api.com>
-CALL_RING_TIMEOUT_SECONDS=30
-CALL_TALK_TIMEOUT_SECONDS=180
-CALL_SHUTDOWN_TIMEOUT_SECONDS=30
+DEBUG_API_URL=<Optional instance API URL; default https://api.green-api.com>
+DEBUG_MEDIA_URL=<Optional instance media URL; default https://media.green-api.com>
+DEBUG_CALL_RING_TIMEOUT_SECONDS=30
+DEBUG_CALL_INCOMING_RING_TIMEOUT_SECONDS=60
+DEBUG_CALL_TALK_TIMEOUT_SECONDS=180
+DEBUG_CALL_SHUTDOWN_TIMEOUT_SECONDS=30
 OPENAI_API_KEY=<Your OpenAI API key>
-CALL_REALTIME_MODEL=gpt-realtime-2.1
-CALL_REALTIME_VOICE=marin
+DEBUG_CALL_REALTIME_MODEL=gpt-realtime-2.1
+DEBUG_CALL_REALTIME_VOICE=marin
 DEBUG_LINK_PDF=<Full URL string for .pdf file>
 DEBUG_LINK_JPG=<Full URL string for .jpg file>
 DEBUG_LINK_AUDIO_RU=<Full URL string for .mp3 file (RU)>

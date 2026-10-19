@@ -1,5 +1,5 @@
-"""Compatibility import for the call state machine supplied by the library."""
+"""Use the library FSM for incoming and outgoing calls."""
 
-from whatsapp_chatbot_python.calls.state_machine import CallStateMachine
+from whatsapp_chatbot_python.calls import CallStateMachine
 
 __all__ = ["CallStateMachine"]

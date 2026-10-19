@@ -7,6 +7,8 @@
 Демонстрационная версия Whatsapp чатбота основанного на API сервиса [GREEN-API](https://green-api.com). 
 При помощи API чатбот отправляет текстовые сообщения, файлы, изображения, музыку, видео, контакты, геолокацию, проводит опросы, запрашивает аватар, отправляет ссылки, создает группу с ботом, цитирует сообщение и выполняет демонстрационный голосовой звонок.
 
+Голосовое демо поддерживает пункт меню *18* (бот звонит вам) и входящие звонки. Устанавливайте зависимости из `requirements.txt`, включая `whatsapp-chatbot-python[voip]==1.1.0`. В начале каждого звонка звучит приветствие на языке пользователя, а MP3-запись загружается и отправляется ссылкой. Оба направления используют одну очередь. На входящий вызов бот отвечает, когда до него доходит очередь, если звонящий ещё ожидает. Лимит ожидания входящего вызова — 60 секунд по умолчанию (`DEBUG_CALL_INCOMING_RING_TIMEOUT_SECONDS` в debug-режиме, `call_incoming_ring_timeout_seconds` в серверной конфигурации); он не меняет время исходящего дозвона. Вызовы с отсутствующим или просроченным временем события отклоняются, если текущий вызов можно сопоставить по звонящему и ID. При отсутствии ключа OpenAI запуск завершается с понятным сообщением в журнале. После разговора с записью бот отправляет ссылку для скачивания вместо аудиофайла. Для входящих звонков нужны доступ к VoIP и уведомления `incomingCallWebhook` на инстансе GREEN-API.
+
 ## Содержание
 * [Установка среды для запуска чатбота](#установка-среды-для-запуска-чатбота)  
 * [Авторизация в GREEN-API](#авторизация-в-green-api)  
@@ -138,14 +140,15 @@ python bot.py
 DEBUG=True
 DEBUG_USER_ID=<Your Instance ID>
 DEBUG_API_TOKEN_ID=<Your Api token ID>
-API_URL=<Необязательный API URL инстанса; по умолчанию https://api.green-api.com>
-MEDIA_URL=<Необязательный media URL инстанса; по умолчанию https://media.green-api.com>
-CALL_RING_TIMEOUT_SECONDS=30
-CALL_TALK_TIMEOUT_SECONDS=180
-CALL_SHUTDOWN_TIMEOUT_SECONDS=30
+DEBUG_API_URL=<Необязательный API URL инстанса; по умолчанию https://api.green-api.com>
+DEBUG_MEDIA_URL=<Необязательный media URL инстанса; по умолчанию https://media.green-api.com>
+DEBUG_CALL_RING_TIMEOUT_SECONDS=30
+DEBUG_CALL_INCOMING_RING_TIMEOUT_SECONDS=60
+DEBUG_CALL_TALK_TIMEOUT_SECONDS=180
+DEBUG_CALL_SHUTDOWN_TIMEOUT_SECONDS=30
 OPENAI_API_KEY=<Ваш API-ключ OpenAI>
-CALL_REALTIME_MODEL=gpt-realtime-2.1
-CALL_REALTIME_VOICE=marin
+DEBUG_CALL_REALTIME_MODEL=gpt-realtime-2.1
+DEBUG_CALL_REALTIME_VOICE=marin
 DEBUG_LINK_PDF=<Full URL string for .pdf file>
 DEBUG_LINK_JPG=<Full URL string for .jpg file>
 DEBUG_LINK_AUDIO_RU=<Full URL string for .mp3 file (RU)>

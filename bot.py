@@ -1,7 +1,7 @@
 from os.path import basename
 from re import IGNORECASE
 from urllib.parse import urlparse
-from whatsapp_chatbot_python import GreenAPIBot, Notification
+from whatsapp_chatbot_python import GreenAPIBot, IncomingCallNotification, Notification
 from whatsapp_chatbot_python.filters import TEXT_TYPES
 from whatsapp_chatgpt_python import WhatsappGptBot
 from yaml import safe_load
@@ -12,6 +12,7 @@ from internal.logger import init_logger
 
 from internal.calls.integration import (
     create_call_coordinator,
+    handle_incoming_call,
     handle_call_message,
     update_call_activity,
 )
@@ -31,6 +32,10 @@ YAML_DATA_RELATIVE_PATH = "config/data.yml"
 envs = init_envs()
 logger = init_logger(debug=envs.debug)
 config = init_config(envs=envs, logger=logger)
+
+if not config.openai_api_key or not config.openai_api_key.strip():
+    logger.error("Bot cannot start: configure OPENAI_API_KEY or openai_api_key")
+    raise ValueError("OpenAI API key is required for the demo chatbot")
 
 with open(YAML_DATA_RELATIVE_PATH, encoding="utf8") as f:
     answers_data = safe_load(f)
@@ -57,12 +62,22 @@ bot = GreenAPIBot(
         "delaySendMessagesMilliseconds": 500,
         "markIncomingMessagesReaded": "yes",
         "incomingWebhook": "yes",
+        "incomingCallWebhook": "yes",
         "keepOnlineStatus": "yes",
         "pollMessageWebhook": "yes",
     },
 )
 
 call_coordinator = create_call_coordinator(config, answers_data, logger)
+
+
+@bot.router.incoming_call()
+def incoming_call_handler(notification: IncomingCallNotification) -> None:
+    handle_incoming_call(
+        call_coordinator, notification.call,
+        notification.state_manager,
+        config.call_incoming_ring_timeout_seconds,
+    )
 
 
 def sender_state_data_updater(notification: Notification) -> bool:

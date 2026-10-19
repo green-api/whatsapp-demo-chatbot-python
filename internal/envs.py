@@ -35,16 +35,17 @@ class Envs(BaseSettings):
     spring_cloud_config_uri: str = Field("", env="SPRING_CLOUD_CONFIG_URI")
     link_preview: bool = Field(True, env="LINK_PREVIEW")
 
-    # Common GREEN-API host assigned to the instance.
-    api_url: str = "https://api.green-api.com"
-    media_url: str = "https://media.green-api.com"
+    # Common GREEN-API host assigned to the instance (DEBUG mode only).
+    debug_api_url: str = "https://api.green-api.com"
+    debug_media_url: str = "https://media.green-api.com"
 
-    # Outgoing WhatsApp call demo.
-    call_ring_timeout_seconds: int = Field(default=30, ge=1)
-    call_talk_timeout_seconds: int = Field(default=180, ge=1)
-    call_realtime_model: str = "gpt-realtime-2.1"
-    call_realtime_voice: str = "marin"
-    call_shutdown_timeout_seconds: int = Field(default=30, ge=1)
+    # Outgoing WhatsApp call demo (DEBUG mode only).
+    debug_call_ring_timeout_seconds: int = Field(default=30, ge=1)
+    debug_call_incoming_ring_timeout_seconds: int = Field(default=60, ge=1)
+    debug_call_talk_timeout_seconds: int = Field(default=180, ge=1)
+    debug_call_realtime_model: str = "gpt-realtime-2.1"
+    debug_call_realtime_voice: str = "marin"
+    debug_call_shutdown_timeout_seconds: int = Field(default=30, ge=1)
 
     @model_validator(mode="after")
     def debug_mode_validator(self):
@@ -60,7 +61,7 @@ class Envs(BaseSettings):
                 "DEBUG_USER_ID and DEBUG_API_TOKEN_ID envs"
             )
 
-        for name, url in (("API_URL", self.api_url), ("MEDIA_URL", self.media_url)):
+        for name, url in (("DEBUG_API_URL", self.debug_api_url), ("DEBUG_MEDIA_URL", self.debug_media_url)):
             if not url.startswith(("http://", "https://")):
                 raise ValueError(f"{name} must start with http:// or https://")
 

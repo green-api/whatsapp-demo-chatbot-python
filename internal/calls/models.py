@@ -1,4 +1,4 @@
-"""Call types supplied by the external library; queue results belong to this demo."""
+"""Call types supplied by the local library; queue results belong to this demo."""
 
 from enum import StrEnum
 
@@ -6,13 +6,13 @@ from whatsapp_chatbot_python.calls.models import (
     ACTIVE_STATES,
     TERMINAL_STATES,
     WAITING_STATES,
+    CallDirection,
     CallEndReason,
     CallEvent,
     CallExecutionResult,
     CallSession,
     CallState,
     StateTransition,
-    TransitionOutcome,
     utc_now,
 )
 
@@ -23,7 +23,6 @@ class EnqueueResult(StrEnum):
 
 
 __all__ = [
-    "ACTIVE_STATES", "TERMINAL_STATES", "WAITING_STATES", "CallEndReason",
-    "CallEvent", "CallExecutionResult", "CallSession", "CallState",
-    "StateTransition", "TransitionOutcome", "utc_now", "EnqueueResult",
+    "ACTIVE_STATES", "TERMINAL_STATES", "WAITING_STATES", "CallDirection", "CallEndReason", "CallEvent",
+    "CallExecutionResult", "CallSession", "CallState", "StateTransition", "utc_now", "EnqueueResult",
 ]
