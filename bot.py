@@ -24,7 +24,6 @@ from internal.utils import (
     States,
     debug_profiler,
     get_main_menu_image_by_lang_code,
-    render_main_menu,
     sender_state_data_updater as _sender_state_data_updater,
     sender_state_reset,
 )
@@ -184,7 +183,7 @@ def set_language_handler(notification: Notification) -> None:
         answer_text = (
             f'{answers_data["welcome_message"][chosen_language_code]}'
             f'*{notification.event["senderData"]["senderName"]}*!'
-            f'{render_main_menu(answers_data, chosen_language_code, openai_enabled)}'
+            f'{answers_data["menu"][chosen_language_code]}'
         )
     except KeyError as e:
         logger.exception(e)
@@ -948,9 +947,6 @@ def main_menu_option_18_handler(notification: Notification) -> None:
     Queue an outgoing WhatsApp voice call to the current private chat.
     """
 
-    if not openai_enabled:
-        return main_menu_incorrect_message_handler(notification)
-
     if sender_state_data_updater(notification):
         return initial_handler(notification)
 
@@ -959,6 +955,13 @@ def main_menu_option_18_handler(notification: Notification) -> None:
 
     sender_state_data = notification.state_manager.get_state_data(notification.sender)
     sender_lang_code = (sender_state_data or {}).get(LANGUAGE_CODE_KEY) or "en"
+
+    if not openai_enabled:
+        logger.error("Outgoing demo call unavailable: OPENAI_API_KEY is not configured")
+        notification.answer(answers_data["call_failed"].get(
+            sender_lang_code, answers_data["call_failed"]["en"],
+        ))
+        return
 
     if notification.chat.endswith("@g.us"):
         notification.answer(
@@ -1049,7 +1052,7 @@ def main_menu_menu_handler(notification: Notification) -> None:
 
 def send_main_menu(notification: Notification, language: str) -> None:
     # Shared by the menu command and queued-call cancellation.
-    answer_text = render_main_menu(answers_data, language, openai_enabled).lstrip()
+    answer_text = f'{answers_data["menu"][language]}'.lstrip()
     link = config.link_greenapi_en
 
     if language == 'ru':

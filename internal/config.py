@@ -120,14 +120,14 @@ def init_config(envs: Envs, logger: logging.Logger):
             link_audio_en=str(config_result.get("link_audio_en")),
             link_video_en=str(config_result.get("link_video_en")),
             link_preview=False if config_result.get("link_preview") and (str(config_result.get("link_preview")).lower()) == "false" else True,
-            api_url=str(config_result.get("api_url")),
-            media_url=str(config_result.get("media_url")),
+            api_url=str(sapi_or_fallback("api_url", envs.debug_api_url)),
+            media_url=str(sapi_or_fallback("media_url", envs.debug_media_url)),
             call_ring_timeout_seconds=int(sapi_or_fallback("call_ring_timeout_seconds", envs.debug_call_ring_timeout_seconds)),
             call_incoming_ring_timeout_seconds=int(sapi_or_fallback("call_incoming_ring_timeout_seconds", envs.debug_call_incoming_ring_timeout_seconds)),
             call_talk_timeout_seconds=int(sapi_or_fallback("call_talk_timeout_seconds", envs.debug_call_talk_timeout_seconds)),
             call_realtime_model=str(sapi_or_fallback("call_realtime_model", envs.debug_call_realtime_model)),
             call_realtime_voice=str(sapi_or_fallback("call_realtime_voice", envs.debug_call_realtime_voice)),
-            call_shutdown_timeout_seconds=int(config_result.get("call_shutdown_timeout_seconds")),
+            call_shutdown_timeout_seconds=int(sapi_or_fallback("call_shutdown_timeout_seconds", envs.debug_call_shutdown_timeout_seconds)),
             openai_api_key=str(config_result.get("openai_api_key") or envs.openai_api_key)
         )
 

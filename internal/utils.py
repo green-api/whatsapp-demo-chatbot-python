@@ -72,12 +72,6 @@ def get_main_menu_image_by_lang_code(lang_code: str) -> Tuple[str, str]:
     return image_path, image_name
 
 
-def render_main_menu(answers_data: dict, language: str, openai_enabled: bool) -> str:
-    menu = answers_data["menu"][language]
-    item = answers_data["menu_item_18"][language] if openai_enabled else ""
-    return menu.replace("{menu_item_18}", item)
-
-
 def sender_state_reset(
     notification: Notification, reset_to_zero_state: bool = False
 ) -> bool:
