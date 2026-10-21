@@ -7,7 +7,11 @@ from internal.calls.delivery import RecordingUploader, RecordingUploadError
 
 class RecordingUploaderTest(TestCase):
     def test_sdk_upload_uses_media_host_and_deadline(self):
-        with patch("internal.calls.delivery.GreenAPI") as client:
+        with patch("internal.calls.delivery.GreenAPI") as client, patch(
+            "internal.calls.delivery.datetime"
+        ) as clock:
+            clock.now.return_value.strftime.return_value = "2026-10-21-15-52-09.mp3"
+
             client.return_value.sending.uploadFile.return_value = Mock(
                 code=200, data={"urlFile": "https://media.invalid/recording.mp3"},
             )
@@ -19,7 +23,12 @@ class RecordingUploaderTest(TestCase):
 
                 client.return_value.sending.uploadFile.assert_called_once_with(file.name)
 
-            self.assertEqual(url, "https://media.invalid/recording.mp3")
+            self.assertEqual(
+                url,
+                "https://media.invalid/recording.mp3?response-content-disposition="
+                "attachment%3B%20filename%3D%222026-10-21-15-52-09.mp3%22",
+            )
+
             self.assertEqual(client.call_args.kwargs["media"], "https://pool.media.invalid")
             self.assertEqual(client.call_args.kwargs["media_timeout"], 30)
             client.return_value.session.close.assert_called_once()

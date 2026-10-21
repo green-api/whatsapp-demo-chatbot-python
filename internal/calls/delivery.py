@@ -1,8 +1,10 @@
 """Post-call result text, recording upload, and temporary-file ownership."""
 
 from __future__ import annotations
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Protocol
+from urllib.parse import parse_qsl, quote, urlencode, urlsplit, urlunsplit
 from .models import CallDirection, CallEndReason, CallExecutionResult, CallSession
 from whatsapp_api_client_python.API import GreenAPI
 import logging
@@ -98,7 +100,19 @@ class RecordingUploader:
         if response.code != 200 or not isinstance(url, str) or not url.startswith("https://"):
             raise RecordingUploadError("recording upload did not return a file URL")
 
-        return url
+        filename = datetime.now().strftime("%Y-%m-%d-%H-%M-%S.mp3")
+        parts = urlsplit(url)
+        query = dict(parse_qsl(parts.query, keep_blank_values=True))
+
+        query["response-content-disposition"] = f'attachment; filename="{filename}"'
+
+        return urlunsplit((
+            parts.scheme,
+            parts.netloc,
+            parts.path,
+            urlencode(query, quote_via=quote),
+            parts.fragment,
+        ))
 
 
 class CallResultNotifier(Protocol):

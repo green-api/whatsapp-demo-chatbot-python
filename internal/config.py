@@ -103,6 +103,10 @@ def init_config(envs: Envs, logger: logging.Logger):
         client = SpringConfigClient(client_config)
         config_result: dict = client.get_config()
 
+        def sapi_or_fallback(name: str, fallback):
+            value = config_result.get(name)
+            return fallback if value is None or value == "" else value
+
         server_config = ServerConfig(
             user_id=str(config_result.get("user_id")),
             api_token_id=str(config_result.get("api_token_id")),
@@ -118,11 +122,11 @@ def init_config(envs: Envs, logger: logging.Logger):
             link_preview=False if config_result.get("link_preview") and (str(config_result.get("link_preview")).lower()) == "false" else True,
             api_url=str(config_result.get("api_url")),
             media_url=str(config_result.get("media_url")),
-            call_ring_timeout_seconds=int(config_result.get("call_ring_timeout_seconds")),
-            call_incoming_ring_timeout_seconds=int(config_result.get("call_incoming_ring_timeout_seconds") or 60),
-            call_talk_timeout_seconds=int(config_result.get("call_talk_timeout_seconds")),
-            call_realtime_model=str(config_result.get("call_realtime_model")),
-            call_realtime_voice=str(config_result.get("call_realtime_voice")),
+            call_ring_timeout_seconds=int(sapi_or_fallback("call_ring_timeout_seconds", envs.debug_call_ring_timeout_seconds)),
+            call_incoming_ring_timeout_seconds=int(sapi_or_fallback("call_incoming_ring_timeout_seconds", envs.debug_call_incoming_ring_timeout_seconds)),
+            call_talk_timeout_seconds=int(sapi_or_fallback("call_talk_timeout_seconds", envs.debug_call_talk_timeout_seconds)),
+            call_realtime_model=str(sapi_or_fallback("call_realtime_model", envs.debug_call_realtime_model)),
+            call_realtime_voice=str(sapi_or_fallback("call_realtime_voice", envs.debug_call_realtime_voice)),
             call_shutdown_timeout_seconds=int(config_result.get("call_shutdown_timeout_seconds")),
             openai_api_key=str(config_result.get("openai_api_key") or envs.openai_api_key)
         )

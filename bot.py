@@ -14,6 +14,7 @@ from internal.calls.integration import (
     create_call_coordinator,
     handle_incoming_call,
     handle_call_message,
+    register_call_filters,
     update_call_activity,
 )
 
@@ -23,6 +24,7 @@ from internal.utils import (
     States,
     debug_profiler,
     get_main_menu_image_by_lang_code,
+    render_main_menu,
     sender_state_data_updater as _sender_state_data_updater,
     sender_state_reset,
 )
@@ -32,24 +34,26 @@ YAML_DATA_RELATIVE_PATH = "config/data.yml"
 envs = init_envs()
 logger = init_logger(debug=envs.debug)
 config = init_config(envs=envs, logger=logger)
-
-if not config.openai_api_key or not config.openai_api_key.strip():
-    logger.error("Bot cannot start: configure OPENAI_API_KEY or openai_api_key")
-    raise ValueError("OpenAI API key is required for the demo chatbot")
+openai_enabled = bool(config.openai_api_key and config.openai_api_key.strip())
 
 with open(YAML_DATA_RELATIVE_PATH, encoding="utf8") as f:
     answers_data = safe_load(f)
 
-gpt_bot = WhatsappGptBot(
-    id_instance=config.user_id,
-    api_token_instance=config.api_token_id,
-    openai_api_key=config.openai_api_key,
-    host=config.api_url,
-    model="gpt-4o",
-    system_message="You are a helpful assistant in a WhatsApp chat. Be concise and accurate in your responses.",
-    max_history_length=10,
-    temperature=0.7
-)
+gpt_bot = None
+
+if openai_enabled:
+    gpt_bot = WhatsappGptBot(
+        id_instance=config.user_id,
+        api_token_instance=config.api_token_id,
+        openai_api_key=config.openai_api_key,
+        host=config.api_url,
+        model="gpt-4o",
+        system_message="You are a helpful assistant in a WhatsApp chat. Be concise and accurate in your responses.",
+        max_history_length=10,
+        temperature=0.7
+    )
+else:
+    logger.warning("OPENAI_API_KEY is not set; ChatGPT and calls are unavailable")
 
 bot = GreenAPIBot(
     config.user_id,
@@ -68,11 +72,18 @@ bot = GreenAPIBot(
     },
 )
 
-call_coordinator = create_call_coordinator(config, answers_data, logger)
+call_coordinator = create_call_coordinator(config, answers_data, logger) if openai_enabled else None
+
+if call_coordinator is None:
+    register_call_filters(None)
 
 
 @bot.router.incoming_call()
 def incoming_call_handler(notification: IncomingCallNotification) -> None:
+    if call_coordinator is None:
+        logger.debug("[incoming_call_handler] OPENAI_API_KEY is not set; ChatGPT and calls are unavailable")
+        return
+
     handle_incoming_call(
         call_coordinator, notification.call,
         notification.state_manager,
@@ -81,7 +92,9 @@ def incoming_call_handler(notification: IncomingCallNotification) -> None:
 
 
 def sender_state_data_updater(notification: Notification) -> bool:
-    update_call_activity(call_coordinator, notification)
+    if call_coordinator is not None:
+        update_call_activity(call_coordinator, notification)
+
     return _sender_state_data_updater(notification)
 
 
@@ -92,6 +105,11 @@ def sender_state_data_updater(notification: Notification) -> bool:
 @debug_profiler(logger=logger)
 def call_in_progress_handler(notification: Notification) -> None:
     """Intercept chat commands while this sender has a queued or active call."""
+
+    if call_coordinator is None:
+        logger.debug("[call_in_progress_handler] OPENAI_API_KEY is not set; ChatGPT and calls are unavailable")
+        return
+
     update_call_activity(call_coordinator, notification)
     action = handle_call_message(
         call_coordinator, notification.sender, notification.message_text,
@@ -166,7 +184,7 @@ def set_language_handler(notification: Notification) -> None:
         answer_text = (
             f'{answers_data["welcome_message"][chosen_language_code]}'
             f'*{notification.event["senderData"]["senderName"]}*!'
-            f'{answers_data["menu"][chosen_language_code]}'
+            f'{render_main_menu(answers_data, chosen_language_code, openai_enabled)}'
         )
     except KeyError as e:
         logger.exception(e)
@@ -727,7 +745,7 @@ def main_menu_option_14_handler(notification: Notification) -> None:
         logger.exception(e)
         return
 
-    if not config.openai_api_key:
+    if not openai_enabled:
         try:
             error_message = answers_data["chat_gpt_error"][sender_lang_code]
             notification.answer(error_message)
@@ -930,6 +948,9 @@ def main_menu_option_18_handler(notification: Notification) -> None:
     Queue an outgoing WhatsApp voice call to the current private chat.
     """
 
+    if not openai_enabled:
+        return main_menu_incorrect_message_handler(notification)
+
     if sender_state_data_updater(notification):
         return initial_handler(notification)
 
@@ -946,14 +967,6 @@ def main_menu_option_18_handler(notification: Notification) -> None:
                 answers_data["call_private_chat_only"]["en"],
             )
         )
-
-        return
-
-    if not config.openai_api_key:
-        notification.answer(answers_data["call_failed"].get(
-            sender_lang_code,
-            answers_data["call_failed"]["en"],
-        ))
 
         return
 
@@ -1036,7 +1049,7 @@ def main_menu_menu_handler(notification: Notification) -> None:
 
 def send_main_menu(notification: Notification, language: str) -> None:
     # Shared by the menu command and queued-call cancellation.
-    answer_text = f'{answers_data["menu"][language]}'.lstrip()
+    answer_text = render_main_menu(answers_data, language, openai_enabled).lstrip()
     link = config.link_greenapi_en
 
     if language == 'ru':
@@ -1376,9 +1389,12 @@ def group_creation_incorrect_message_handler(notification: Notification) -> None
 
 if __name__ == "__main__":
     logger.info("Starting WhatsApp Demo Chatbot")
-    call_coordinator.start()
+
+    if call_coordinator is not None:
+        call_coordinator.start()
 
     try:
         bot.run_forever()
     finally:
-        call_coordinator.stop(timeout=config.call_shutdown_timeout_seconds)
+        if call_coordinator is not None:
+            call_coordinator.stop(timeout=config.call_shutdown_timeout_seconds)

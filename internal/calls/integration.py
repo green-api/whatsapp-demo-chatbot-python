@@ -174,12 +174,12 @@ def update_call_activity(coordinator: CallCoordinator, notification: Notificatio
     return True
 
 
-def register_call_filters(coordinator: CallCoordinator) -> None:
+def register_call_filters(coordinator: CallCoordinator | None) -> None:
     class ActiveCallSessionFilter(AbstractFilter):
         def __init__(self, enabled: bool) -> None:
             self._enabled = enabled
 
         def check_event(self, notification: Notification) -> bool:
-            return self._enabled and coordinator.has_session(notification.sender)
+            return self._enabled and coordinator is not None and coordinator.has_session(notification.sender)
 
     filters["active_call_session"] = ActiveCallSessionFilter
