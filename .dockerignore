@@ -1,0 +1,14 @@
+/tests/
+.github/
+.git/
+.dockerignore
+.gitignore
+Dockerfile
+.agents/
+.codex/
+.idea/
+**/__pycache__/
+.pytest_cache/
+.venv/
+.codex
+**/*.py[cod]

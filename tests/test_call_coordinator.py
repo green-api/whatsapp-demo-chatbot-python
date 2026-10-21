@@ -171,7 +171,7 @@ class CallCoordinatorTest(unittest.TestCase):
         queued = coordinator.get_session("two@c.us")
 
         coordinator.stop()
-        self.assertEqual(queued.state, CallState.FAILED)
+        self.assertEqual(queued.state, CallState.CANCELLED)
         self.assertEqual(queued.end_reason, CallEndReason.SHUTDOWN)
         self.assertIsNone(coordinator.get_session("one@c.us"))
         self.assertIsNone(coordinator.get_session("two@c.us"))
@@ -275,7 +275,7 @@ class CallCoordinatorTest(unittest.TestCase):
                 sent_text.append(session.state)
 
         class Uploader:
-            async def send(self, chat_id, path):
+            def upload(self, path):
                 raise TimeoutError("upload deadline")
 
         class SignallingLogger:
@@ -314,8 +314,8 @@ class CallCoordinatorTest(unittest.TestCase):
                 raise OSError("send failed")
 
         class Uploader:
-            async def send(self, chat_id, path):
-                uploaded.append(chat_id)
+            def upload(self, path):
+                uploaded.append(path)
 
         class Logger:
             def info(self, *args):
@@ -358,13 +358,18 @@ class CallCoordinatorTest(unittest.TestCase):
                 actions.append(("text", session.sender_id))
                 super().notify_result(session)
 
+            def notify_recording_link(self, session, url):
+                actions.append(("link", session.sender_id, url))
+
         class Uploader:
-            async def send(self, chat_id, path):
-                actions.append(("upload", chat_id))
+            def upload(self, path):
+                actions.append(("upload", str(path)))
                 upload_started.set()
 
                 while not upload_release.is_set():
-                    await asyncio.sleep(0.001)
+                    upload_release.wait(0.001)
+
+                return "https://media.invalid/recording.mp3"
 
         executor = RecordingExecutor()
         notifier = Notifier()
@@ -374,7 +379,8 @@ class CallCoordinatorTest(unittest.TestCase):
         coordinator.enqueue("two@c.us", "two@c.us", "en")
         coordinator.start()
         self.assertTrue(upload_started.wait(2))
-        self.assertEqual(actions[:2], [("text", "one@c.us"), ("upload", "one@c.us")])
+        self.assertEqual(actions[0], ("text", "one@c.us"))
+        self.assertEqual(actions[1][0], "upload")
 
         self.assertEqual(
             handle_call_message(coordinator, "one@c.us", "hello").message_key,
@@ -386,6 +392,7 @@ class CallCoordinatorTest(unittest.TestCase):
         self.assertEqual(executor.order, ["one@c.us", "two@c.us"])
         upload_release.set()
         coordinator.stop()
+        self.assertIn(("link", "one@c.us", "https://media.invalid/recording.mp3"), actions)
         self.assertIsNone(coordinator.get_session("one@c.us"))
         self.assertFalse(paths[0].exists())
 

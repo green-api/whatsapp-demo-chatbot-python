@@ -30,6 +30,7 @@ class ServerConfig:
         api_url: str,
         media_url: str,
         call_ring_timeout_seconds: int,
+        call_incoming_ring_timeout_seconds: int,
         call_talk_timeout_seconds: int,
         call_realtime_model: str,
         call_realtime_voice: str,
@@ -51,6 +52,7 @@ class ServerConfig:
         self.api_url = api_url.rstrip("/")
         self.media_url = media_url.rstrip("/")
         self.call_ring_timeout_seconds = call_ring_timeout_seconds
+        self.call_incoming_ring_timeout_seconds = call_incoming_ring_timeout_seconds
         self.call_talk_timeout_seconds = call_talk_timeout_seconds
         self.call_realtime_model = call_realtime_model
         self.call_realtime_voice = call_realtime_voice
@@ -77,13 +79,14 @@ def init_config(envs: Envs, logger: logging.Logger):
             link_audio_en=envs.debug_link_audio_en,
             link_video_en=envs.debug_link_video_en,
             link_preview=envs.link_preview,
-            api_url=envs.api_url,
-            media_url=envs.media_url,
-            call_ring_timeout_seconds=envs.call_ring_timeout_seconds,
-            call_talk_timeout_seconds=envs.call_talk_timeout_seconds,
-            call_realtime_model=envs.call_realtime_model,
-            call_realtime_voice=envs.call_realtime_voice,
-            call_shutdown_timeout_seconds=envs.call_shutdown_timeout_seconds,
+            api_url=envs.debug_api_url,
+            media_url=envs.debug_media_url,
+            call_ring_timeout_seconds=envs.debug_call_ring_timeout_seconds,
+            call_incoming_ring_timeout_seconds=envs.debug_call_incoming_ring_timeout_seconds,
+            call_talk_timeout_seconds=envs.debug_call_talk_timeout_seconds,
+            call_realtime_model=envs.debug_call_realtime_model,
+            call_realtime_voice=envs.debug_call_realtime_voice,
+            call_shutdown_timeout_seconds=envs.debug_call_shutdown_timeout_seconds,
             openai_api_key=envs.openai_api_key
         )
 
@@ -100,6 +103,10 @@ def init_config(envs: Envs, logger: logging.Logger):
         client = SpringConfigClient(client_config)
         config_result: dict = client.get_config()
 
+        def sapi_or_fallback(name: str, fallback):
+            value = config_result.get(name)
+            return fallback if value is None or value == "" else value
+
         server_config = ServerConfig(
             user_id=str(config_result.get("user_id")),
             api_token_id=str(config_result.get("api_token_id")),
@@ -113,13 +120,14 @@ def init_config(envs: Envs, logger: logging.Logger):
             link_audio_en=str(config_result.get("link_audio_en")),
             link_video_en=str(config_result.get("link_video_en")),
             link_preview=False if config_result.get("link_preview") and (str(config_result.get("link_preview")).lower()) == "false" else True,
-            api_url=envs.api_url,
-            media_url=envs.media_url,
-            call_ring_timeout_seconds=envs.call_ring_timeout_seconds,
-            call_talk_timeout_seconds=envs.call_talk_timeout_seconds,
-            call_realtime_model=envs.call_realtime_model,
-            call_realtime_voice=envs.call_realtime_voice,
-            call_shutdown_timeout_seconds=envs.call_shutdown_timeout_seconds,
+            api_url=str(sapi_or_fallback("api_url", envs.debug_api_url)),
+            media_url=str(sapi_or_fallback("media_url", envs.debug_media_url)),
+            call_ring_timeout_seconds=int(sapi_or_fallback("call_ring_timeout_seconds", envs.debug_call_ring_timeout_seconds)),
+            call_incoming_ring_timeout_seconds=int(sapi_or_fallback("call_incoming_ring_timeout_seconds", envs.debug_call_incoming_ring_timeout_seconds)),
+            call_talk_timeout_seconds=int(sapi_or_fallback("call_talk_timeout_seconds", envs.debug_call_talk_timeout_seconds)),
+            call_realtime_model=str(sapi_or_fallback("call_realtime_model", envs.debug_call_realtime_model)),
+            call_realtime_voice=str(sapi_or_fallback("call_realtime_voice", envs.debug_call_realtime_voice)),
+            call_shutdown_timeout_seconds=int(sapi_or_fallback("call_shutdown_timeout_seconds", envs.debug_call_shutdown_timeout_seconds)),
             openai_api_key=str(config_result.get("openai_api_key") or envs.openai_api_key)
         )
 
@@ -138,6 +146,7 @@ def init_config(envs: Envs, logger: logging.Logger):
     logger.debug(f"API URL: {server_config.api_url}")
     logger.debug(f"Media URL: {server_config.media_url}")
     logger.debug(f"Call ring timeout: {server_config.call_ring_timeout_seconds}s")
+    logger.debug(f"Incoming call ring timeout: {server_config.call_incoming_ring_timeout_seconds}s")
     logger.debug(f"Call talk timeout: {server_config.call_talk_timeout_seconds}s")
     logger.debug(f"Call Realtime model: {server_config.call_realtime_model}")
     logger.debug(f"Call Realtime voice: {server_config.call_realtime_voice}")

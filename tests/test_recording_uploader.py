@@ -1,40 +1,46 @@
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from unittest import IsolatedAsyncioTestCase
-from unittest.mock import AsyncMock, Mock, patch
+from unittest import TestCase
+from unittest.mock import Mock, patch
 from internal.calls.delivery import RecordingUploader, RecordingUploadError
 
 
-class RecordingUploaderTest(IsolatedAsyncioTestCase):
-    async def test_sdk_upload_uses_media_host_and_deadline(self):
-        with patch("internal.calls.delivery.GreenAPI") as client:
-            client.return_value.sending.sendFileByUploadAsync = AsyncMock(
-                return_value=Mock(code=200, data={"idMessage": "accepted"}),
+class RecordingUploaderTest(TestCase):
+    def test_sdk_upload_uses_media_host_and_deadline(self):
+        with patch("internal.calls.delivery.GreenAPI") as client, patch(
+            "internal.calls.delivery.datetime"
+        ) as clock:
+            clock.now.return_value.strftime.return_value = "2026-10-21-15-52-09.mp3"
+
+            client.return_value.sending.uploadFile.return_value = Mock(
+                code=200, data={"urlFile": "https://media.invalid/recording.mp3"},
             )
 
             uploader = RecordingUploader("1", "token", "https://pool.media.invalid")
 
             with NamedTemporaryFile(suffix=".mp3") as file:
-                await uploader.send("123@c.us", Path(file.name))
+                url = uploader.upload(Path(file.name))
 
-                client.return_value.sending.sendFileByUploadAsync.assert_awaited_once_with(
-                    "123@c.us",
-                    file.name,
-                    "call-recording.mp3",
-                )
+                client.return_value.sending.uploadFile.assert_called_once_with(file.name)
+
+            self.assertEqual(
+                url,
+                "https://media.invalid/recording.mp3?response-content-disposition="
+                "attachment%3B%20filename%3D%222026-10-21-15-52-09.mp3%22",
+            )
 
             self.assertEqual(client.call_args.kwargs["media"], "https://pool.media.invalid")
             self.assertEqual(client.call_args.kwargs["media_timeout"], 30)
+            client.return_value.session.close.assert_called_once()
 
-    async def test_failed_or_incomplete_response_is_rejected(self):
+    def test_failed_or_incomplete_response_is_rejected(self):
         with patch("internal.calls.delivery.GreenAPI") as client:
             uploader = RecordingUploader("1", "token", "https://pool.media.invalid")
 
-            client.return_value.sending.sendFileByUploadAsync = AsyncMock()
-
             with NamedTemporaryFile(suffix=".mp3") as file:
-                for response in (Mock(code=500, data=None), Mock(code=200, data={})):
-                    client.return_value.sending.sendFileByUploadAsync.return_value = response
+                for response in (Mock(code=500, data=None), Mock(code=200, data={}),
+                                 Mock(code=200, data={"urlFile": "invalid"})):
+                    client.return_value.sending.uploadFile.return_value = response
 
                     with self.assertRaises(RecordingUploadError):
-                        await uploader.send("123@c.us", Path(file.name))
+                        uploader.upload(Path(file.name))

@@ -108,7 +108,7 @@ class CallStateMachineTest(unittest.TestCase):
         self.assertEqual(self.apply(CallEvent.REMOTE_IDLE), CallState.REMOTE_ENDED)
         self.assertEqual(self.session.end_reason, CallEndReason.REMOTE_HANGUP)
 
-    def test_remote_idle_confirms_pending_timeout(self) -> None:
+    def test_hangup_confirms_pending_timeout(self) -> None:
         for event in (
             CallEvent.ENQUEUED,
             CallEvent.DEQUEUED,
@@ -117,7 +117,8 @@ class CallStateMachineTest(unittest.TestCase):
         ):
             self.apply(event)
 
-        self.assertEqual(self.apply(CallEvent.REMOTE_IDLE), CallState.RING_TIMEOUT)
+        self.assertEqual(self.apply(CallEvent.REMOTE_IDLE), CallState.ENDING)
+        self.assertEqual(self.apply(CallEvent.HANGUP_CONFIRMED), CallState.RING_TIMEOUT)
 
     def test_late_event_cannot_change_terminal_state(self) -> None:
         self.test_remote_idle_is_rejected_before_answer()
@@ -156,7 +157,7 @@ class CallStateMachineTest(unittest.TestCase):
             error_code="shutdown",
         )
         self.assertTrue(result.applied)
-        self.assertEqual(self.session.state, CallState.FAILED)
+        self.assertEqual(self.session.state, CallState.CANCELLED)
         self.assertEqual(self.session.end_reason, CallEndReason.SHUTDOWN)
 
     def test_all_terminal_states_ignore_late_events(self) -> None:
