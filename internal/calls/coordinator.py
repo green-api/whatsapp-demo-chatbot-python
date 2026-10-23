@@ -61,7 +61,7 @@ class CallCoordinator:
         logger: logging.Logger,
         store: InMemoryCallSessionStore | None = None,
         uploader: CallRecordingUploader | None = None,
-        greetings: dict[str, str] | None = None,
+        prompts: dict[str, str] | None = None,
         incoming_timeout_seconds: int = 60,
     ) -> None:
         self._executor = executor
@@ -75,7 +75,7 @@ class CallCoordinator:
         self._worker: Thread | None = None
         self._closed = False
         self._active_session: CallSession | None = None
-        self._greetings = greetings or {}
+        self._prompts = prompts or {}
         self._incoming_timeout_seconds = incoming_timeout_seconds
         self._ended_incoming: dict[tuple[str, str], float] = {}
         self._finished_at: dict[str, int] = {}
@@ -93,7 +93,7 @@ class CallCoordinator:
             if self._store.get_by_sender(sender_id) is not None:
                 return EnqueueResult.ALREADY_EXISTS
 
-            greeting_text = self._greetings.get(language, self._greetings.get("en"))
+            prompt = self._prompts.get(language, self._prompts.get("en"))
 
             if direction == CallDirection.INCOMING:
                 if call_id is None or incoming_deadline is None:
@@ -110,12 +110,12 @@ class CallCoordinator:
                 session = CallSession.incoming(
                     sender_id=sender_id, chat_id=chat_id, call_id=call_id,
                     language=language, incoming_deadline=incoming_deadline,
-                    greeting_text=greeting_text,
+                    prompt=prompt,
                 )
             else:
                 session = CallSession(
                     sender_id=sender_id, chat_id=chat_id, language=language,
-                    greeting_text=greeting_text,
+                    prompt=prompt,
                 )
             self._store.add(session)
             self._transition_unlocked(session, CallEvent.ENQUEUED)

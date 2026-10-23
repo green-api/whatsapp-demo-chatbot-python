@@ -42,7 +42,7 @@ class IncomingQueueTest(unittest.TestCase):
         self.executor = WaitingExecutor()
         self.coordinator = CallCoordinator(
             self.executor, None, logging.getLogger("incoming-test"),
-            greetings={"en": "Hello!", "ru": "Здравствуйте!"},
+            prompts={"en": "Greet the user: Hello!", "ru": "Поздоровайся: Здравствуйте!"},
             incoming_timeout_seconds=60,
         )
         self.states = StateManager()
@@ -69,7 +69,7 @@ class IncomingQueueTest(unittest.TestCase):
         self.assertEqual(self.offer(), EnqueueResult.ALREADY_EXISTS)
         session = self.coordinator.get_session("caller@c.us")
         self.assertEqual(
-            (session.language, session.direction, session.call_id, session.greeting_text),
+            (session.language, session.direction, session.call_id, session.prompt),
             ("ru", CallDirection.INCOMING, "call-1", "Здравствуйте!"),
         )
         self.offer(status="declined", call_id="older")
@@ -171,7 +171,7 @@ class IncomingQueueTest(unittest.TestCase):
     def test_library_fsm_uses_common_dequeued_and_answer_events(self):
         session = CallSession.incoming(
             sender_id="caller@c.us", call_id="call-1", language="en",
-            incoming_deadline=monotonic() + 60, greeting_text="Hello!",
+            incoming_deadline=monotonic() + 60, prompt="Greet the user: Hello!",
         )
         fsm = CallStateMachine()
         fsm.apply(session, CallEvent.ENQUEUED)
@@ -234,7 +234,7 @@ class IncomingQueueTest(unittest.TestCase):
     def test_outgoing_session_keeps_localized_greeting(self):
         self.coordinator.enqueue("caller@c.us", "caller@c.us", "ru")
         session = self.coordinator.get_session("caller@c.us")
-        self.assertEqual((session.direction, session.greeting_text),
+        self.assertEqual((session.direction, session.prompt),
                          (CallDirection.OUTGOING, "Здравствуйте!"))
 
     def test_factory_uses_library_executor_with_explicit_config(self):
@@ -249,12 +249,12 @@ class IncomingQueueTest(unittest.TestCase):
         coordinator = None
         try:
             coordinator = create_call_coordinator(
-                config, {"call_greeting": {"en": "Hello!"}},
+                config, {"call_prompts": {"en": "Greet the user: Hello!"}},
                 logging.getLogger("incoming-factory-test"),
             )
             self.assertIsInstance(coordinator._executor, WhatsAppCallService)
             self.assertEqual(coordinator._incoming_timeout_seconds, 60)
-            self.assertEqual(coordinator._greetings["en"], "Hello!")
+            self.assertEqual(coordinator._prompts["en"], "Greet the user: Hello!")
         finally:
             if coordinator is not None:
                 coordinator.stop()

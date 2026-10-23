@@ -7,27 +7,18 @@ from internal.calls.delivery import RecordingUploader, RecordingUploadError
 
 class RecordingUploaderTest(TestCase):
     def test_sdk_upload_uses_media_host_and_deadline(self):
-        with patch("internal.calls.delivery.GreenAPI") as client, patch(
-            "internal.calls.delivery.datetime"
-        ) as clock:
-            clock.now.return_value.strftime.return_value = "2026-10-21-15-52-09.mp3"
-
-            client.return_value.sending.uploadFile.return_value = Mock(
-                code=200, data={"urlFile": "https://media.invalid/recording.mp3"},
+        with patch("internal.calls.delivery.GreenAPI") as client:
+            client.return_value.sending.sendFileByUpload.return_value = Mock(
+                code=200, data={"idMessage": "sent"},
             )
 
             uploader = RecordingUploader("1", "token", "https://pool.media.invalid")
 
             with NamedTemporaryFile(suffix=".mp3") as file:
-                url = uploader.upload(Path(file.name))
-
-                client.return_value.sending.uploadFile.assert_called_once_with(file.name)
-
-            self.assertEqual(
-                url,
-                "https://media.invalid/recording.mp3?response-content-disposition="
-                "attachment%3B%20filename%3D%222026-10-21-15-52-09.mp3%22",
-            )
+                uploader.send("one@c.us", Path(file.name))
+                client.return_value.sending.sendFileByUpload.assert_called_once_with(
+                    "one@c.us", file.name, "call-recording.mp3",
+                )
 
             self.assertEqual(client.call_args.kwargs["media"], "https://pool.media.invalid")
             self.assertEqual(client.call_args.kwargs["media_timeout"], 30)
@@ -39,8 +30,8 @@ class RecordingUploaderTest(TestCase):
 
             with NamedTemporaryFile(suffix=".mp3") as file:
                 for response in (Mock(code=500, data=None), Mock(code=200, data={}),
-                                 Mock(code=200, data={"urlFile": "invalid"})):
-                    client.return_value.sending.uploadFile.return_value = response
+                                 Mock(code=200, data={"idMessage": ""})):
+                    client.return_value.sending.sendFileByUpload.return_value = response
 
                     with self.assertRaises(RecordingUploadError):
-                        uploader.upload(Path(file.name))
+                        uploader.send("one@c.us", Path(file.name))
