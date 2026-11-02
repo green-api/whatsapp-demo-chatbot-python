@@ -61,21 +61,16 @@ class CallDeliveryTest(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 notifier.notify_result(CallSession("one@c.us", "one@c.us", "en"))
 
-    def test_recording_link_is_localized_and_unanswered_incoming_is_silent(self) -> None:
+    def test_unanswered_incoming_is_silent(self) -> None:
         notifier = CallNotifier(
             api_url="https://example.invalid", media_url="https://media.example.invalid",
             id_instance="1", api_token_instance="token",
-            answers_data={"call_recording_link": {"en": "Download link:", "ru": "Ссылка:"}},
+            answers_data={},
             logger=logging.getLogger("delivery-test"),
         )
 
         session = CallSession("one@c.us", "one@c.us", "ru", direction=CallDirection.INCOMING)
 
         with patch("internal.calls.delivery.GreenAPI") as client:
-            client.return_value.sending.sendMessage.return_value = Mock(code=200, data={"idMessage": "sent"})
             notifier.notify_result(session)
             client.assert_not_called()
-            notifier.notify_recording_link(session, "https://media.invalid/a.mp3")
-            client.return_value.sending.sendMessage.assert_called_once_with(
-                "one@c.us", "Ссылка: https://media.invalid/a.mp3",
-            )

@@ -275,7 +275,7 @@ class CallCoordinatorTest(unittest.TestCase):
                 sent_text.append(session.state)
 
         class Uploader:
-            def upload(self, path):
+            def send(self, chat_id, path):
                 raise TimeoutError("upload deadline")
 
         class SignallingLogger:
@@ -314,7 +314,7 @@ class CallCoordinatorTest(unittest.TestCase):
                 raise OSError("send failed")
 
         class Uploader:
-            def upload(self, path):
+            def send(self, chat_id, path):
                 uploaded.append(path)
 
         class Logger:
@@ -358,18 +358,13 @@ class CallCoordinatorTest(unittest.TestCase):
                 actions.append(("text", session.sender_id))
                 super().notify_result(session)
 
-            def notify_recording_link(self, session, url):
-                actions.append(("link", session.sender_id, url))
-
         class Uploader:
-            def upload(self, path):
-                actions.append(("upload", str(path)))
+            def send(self, chat_id, path):
+                actions.append(("upload", chat_id, str(path)))
                 upload_started.set()
 
                 while not upload_release.is_set():
                     upload_release.wait(0.001)
-
-                return "https://media.invalid/recording.mp3"
 
         executor = RecordingExecutor()
         notifier = Notifier()
@@ -392,7 +387,7 @@ class CallCoordinatorTest(unittest.TestCase):
         self.assertEqual(executor.order, ["one@c.us", "two@c.us"])
         upload_release.set()
         coordinator.stop()
-        self.assertIn(("link", "one@c.us", "https://media.invalid/recording.mp3"), actions)
+        self.assertIn(("upload", "one@c.us", str(paths[0])), actions)
         self.assertIsNone(coordinator.get_session("one@c.us"))
         self.assertFalse(paths[0].exists())
 

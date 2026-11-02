@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 from whatsapp_chatbot_python import IncomingCall
 from whatsapp_chatbot_python.filters import AbstractFilter, filters
-from whatsapp_chatbot_python.calls import WhatsAppCallService
+from whatsapp_chatbot_python.calls import CallOptions, VadOptions, WhatsAppCallService
 from .coordinator import CallCoordinator
 from .delivery import CallNotifier, RecordingUploader
 from .models import ACTIVE_STATES, CallDirection, CallState, EnqueueResult, TERMINAL_STATES
@@ -33,9 +33,17 @@ def create_call_coordinator(
         openai_api_key=config.openai_api_key,
         realtime_model=config.call_realtime_model,
         realtime_voice=config.call_realtime_voice,
-        ring_timeout_seconds=config.call_ring_timeout_seconds,
-        talk_timeout_seconds=config.call_talk_timeout_seconds,
-        shutdown_timeout_seconds=config.call_shutdown_timeout_seconds,
+        options=CallOptions(
+            ring_seconds=config.call_ring_timeout_seconds,
+            talk_seconds=config.call_talk_timeout_seconds,
+            shutdown_seconds=config.call_shutdown_timeout_seconds,
+            vad=VadOptions(
+                threshold=0.70,
+                prefix_padding_ms=400,
+                silence_duration_ms=800,
+                noise_reduction="near_field",
+            ),
+        ),
     )
 
     notifier = CallNotifier(
@@ -51,7 +59,7 @@ def create_call_coordinator(
 
     coordinator = CallCoordinator(
         service, notifier, logger, uploader=uploader,
-        greetings=answers_data["call_greeting"],
+        prompts=answers_data["call_prompts"],
         incoming_timeout_seconds=config.call_incoming_ring_timeout_seconds,
     )
 

@@ -993,6 +993,34 @@ def main_menu_option_18_handler(notification: Notification) -> None:
 @bot.router.message(
     type_message=TEXT_TYPES,
     state=States.MENU.value,
+    regexp=r"^\s*19\s*$",
+)
+@debug_profiler(logger=logger)
+def main_menu_option_19_handler(notification: Notification) -> None:
+    """Show how to place an incoming WhatsApp call."""
+    if sender_state_data_updater(notification):
+        return initial_handler(notification)
+
+    if notification.chat is None or notification.sender is None:
+        return
+
+    sender_state_data = notification.state_manager.get_state_data(notification.sender)
+    sender_lang_code = (sender_state_data or {}).get(LANGUAGE_CODE_KEY) or "en"
+
+    caption = answers_data["call_incoming_instruction"].get(
+        sender_lang_code, answers_data["call_incoming_instruction"]["en"],
+    )
+
+    notification.api.sending.sendFileByUpload(
+        notification.chat,
+        "media/incoming_call.png",
+        caption=caption,
+    )
+
+
+@bot.router.message(
+    type_message=TEXT_TYPES,
+    state=States.MENU.value,
     regexp=(r"^(?:0|stop|стоп)$", IGNORECASE),
 )
 @debug_profiler(logger=logger)

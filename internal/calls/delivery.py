@@ -1,10 +1,8 @@
 """Post-call result text, recording upload, and temporary-file ownership."""
 
 from __future__ import annotations
-from datetime import datetime
 from pathlib import Path
 from typing import Any, Protocol
-from urllib.parse import parse_qsl, quote, urlencode, urlsplit, urlunsplit
 from .models import CallDirection, CallEndReason, CallExecutionResult, CallSession
 from whatsapp_api_client_python.API import GreenAPI
 import logging
@@ -52,11 +50,6 @@ class CallNotifier:
 
         self._send_message(session, message)
 
-    def notify_recording_link(self, session: CallSession, url: str) -> None:
-        translations = self._answers_data["call_recording_link"]
-        label = translations.get(session.language, translations["en"])
-        self._send_message(session, f"{label} {url}")
-
     def _send_message(self, session: CallSession, message: str) -> None:
         api = GreenAPI(**self._api_options)
 
@@ -76,6 +69,7 @@ class CallNotifier:
 
 
 UPLOAD_TIMEOUT_SECONDS = 30
+RECORDING_FILENAME = "call-recording.mp3"
 
 
 class RecordingUploadError(Exception):
@@ -87,41 +81,28 @@ class RecordingUploader:
         self._api_options = dict(idInstance=id_instance, apiTokenInstance=api_token_instance,
                                  media=media_url, media_timeout=UPLOAD_TIMEOUT_SECONDS)
 
-    def upload(self, path: Path) -> str:
+    def send(self, chat_id: str, path: Path) -> None:
         api = GreenAPI(**self._api_options)
 
         try:
-            response = api.sending.uploadFile(str(path))
+            response = api.sending.sendFileByUpload(
+                chat_id,
+                str(path),
+                RECORDING_FILENAME,
+            )
         finally:
             api.session.close()
 
-        url = response.data.get("urlFile") if isinstance(response.data, dict) else None
-
-        if response.code != 200 or not isinstance(url, str) or not url.startswith("https://"):
-            raise RecordingUploadError("recording upload did not return a file URL")
-
-        filename = datetime.now().strftime("%Y-%m-%d-%H-%M-%S.mp3")
-        parts = urlsplit(url)
-        query = dict(parse_qsl(parts.query, keep_blank_values=True))
-
-        query["response-content-disposition"] = f'attachment; filename="{filename}"'
-
-        return urlunsplit((
-            parts.scheme,
-            parts.netloc,
-            parts.path,
-            urlencode(query, quote_via=quote),
-            parts.fragment,
-        ))
+        if response.code != 200 or not isinstance(response.data, dict) or not response.data.get("idMessage"):
+            raise RecordingUploadError("recording was not accepted")
 
 
 class CallResultNotifier(Protocol):
     def notify_result(self, session: CallSession) -> None: ...
-    def notify_recording_link(self, session: CallSession, url: str) -> None: ...
 
 
 class CallRecordingUploader(Protocol):
-    def upload(self, path: Path) -> str: ...
+    def send(self, chat_id: str, path: Path) -> None: ...
 
 
 class CallDeliveryService:
@@ -141,12 +122,11 @@ class CallDeliveryService:
             if session.end_reason == CallEndReason.SHUTDOWN:
                 return
 
-            # Upload only after the result text succeeds, preserving visible order.
+            # Send the recording after the result text, preserving visible order.
             self._notifier.notify_result(session)
 
             if result.recording_path is not None and self._uploader is not None:
-                url = self._uploader.upload(result.recording_path)
-                self._notifier.notify_recording_link(session, url)
+                self._uploader.send(session.chat_id, result.recording_path)
         except Exception as error:
             self._logger.warning(
                 "Unable to deliver VoIP result or recording: session=%s error=%s",
