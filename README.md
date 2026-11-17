@@ -1,6 +1,6 @@
 # whatsapp-demo-chatbot-python  
 
-![](https://img.shields.io/badge/license-CC%20BY--ND%204.0-green)  
+[![MIT License](https://img.shields.io/badge/license-MIT-green)](LICENCE)
 
 - [Документация на русском языке](https://github.com/green-api/whatsapp-demo-chatbot-python/blob/main/README_RU.md).  
 
@@ -8,6 +8,8 @@ Demo version of Whatsapp chatbot based on API service [GREEN-API](https://green-
 Using API, the chatbot sends text messages, files, images, music, videos, contacts, geolocation, surveys, requests an avatar, sends links, creates a group with the bot, quotes a message, and places a demo voice call.
 
 The voice demo supports menu option *18* (the bot calls you) and incoming calls to the bot. Install dependencies from `requirements.txt`, including `whatsapp-chatbot-python[voip]==1.1.0`. Each call starts with a localized greeting; recorded MP3 audio is uploaded and sent as a download link. Both use one call queue. For an incoming call, the bot answers when the call reaches the front of the queue while it is still ringing. The incoming wait limit defaults to 60 seconds (`DEBUG_CALL_INCOMING_RING_TIMEOUT_SECONDS` in debug mode, `call_incoming_ring_timeout_seconds` in server configuration); it is separate from the outgoing ring limit. Offers with missing or expired timestamps are rejected when the live call can be matched by its caller and call ID. Startup fails with a clear log message when the OpenAI API key is missing. After a recorded conversation, the bot sends a download link instead of attaching the audio file. Incoming calls require VoIP access and `incomingCallWebhook` notifications on the GREEN-API instance.
+
+AI agents working with this repository should read [AGENTS.md](AGENTS.md) before changing code.
 
 ## Features  
 
@@ -450,6 +452,6 @@ To exit the ChatGPT conversation and return to the main menu, users can type one
 
 ## License
 
-Licensed under [Creative Commons Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)](https://creativecommons.org/licenses/by-nd/4.0/).
+Licensed under [MIT License](LICENCE).
 
-Please see file [LICENSE](https://github.com/green-api/whatsapp-demo-chatbot-python/blob/main/LICENCE).
+Please see file [LICENCE](LICENCE).
